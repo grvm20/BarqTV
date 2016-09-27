@@ -1,47 +1,31 @@
 'use strict';
 
+const _ = require('underscore');
+
 console.log('Loading function');
 
-const doc = require('dynamodb-doc');
+const CustomersController = require('app/controllers/customers-controller');
 
-const dynamo = new doc.DynamoDB();
+exports.customersControllerHandler = (event, context, callback) => {
+  console.log('Received event:', JSON.stringify(event, null, 2));
 
+  var operation = event.operation;
+  var params = _.omit(event, 'operation');
 
-/**
- * Demonstrates a simple HTTP endpoint using API Gateway. You have full
- * access to the request and response payload, including headers and
- * status code.
- *
- * To scan a DynamoDB table, make a GET request with the TableName as a
- * query string parameter. To put, update, or delete an item, make a POST,
- * PUT, or DELETE request respectively, passing in the payload to the
- * DynamoDB API as a JSON body.
- */
- exports.handler = (event, context, callback) => {
-    //console.log('Received event:', JSON.stringify(event, null, 2));
+  const sendResponse = (err, res) => callback(null, {
+    statusCode: err ? '400' : '200',
+    body: err ? err.message : JSON.stringify(res),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-    const done = (err, res) => callback(null, {
-      statusCode: err ? '400' : '200',
-      body: err ? err.message : JSON.stringify(res),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    switch (event.httpMethod) {
-      case 'DELETE':
-      dynamo.deleteItem(JSON.parse(event.body), done);
+  switch (operation) {
+    case 'fetchAll':
+    case 'fetch':
+      CustomersController.show(params, sendResponse)
       break;
-      case 'GET':
-      dynamo.scan({ TableName: event.queryStringParameters.TableName }, done);
-      break;
-      case 'POST':
-      dynamo.putItem(JSON.parse(event.body), done);
-      break;
-      case 'PUT':
-      dynamo.updateItem(JSON.parse(event.body), done);
-      break;
-      default:
-      done(new Error(`Unsupported method "${event.httpMethod}"`));
-    }
-  };
+    default:
+      // Unsopported operation.
+  }
+};

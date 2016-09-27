@@ -1,31 +1,44 @@
 'use strict';
 
-// Comment these two lines to execute tests.
-// TODO: Get database connection out of here.
-const doc = require('dynamodb-doc');
-const dynamo = new doc.DynamoDB();
+const _ = require('underscore');
 
-module.exports = class Customer {
-  constructor(email, first_name, last_name, address_ref, phone_number) {
+const TABLE_NAME = 'customers';
+const REQUIRED_CUSTOMER_PARAMS = ["email", "first_name", "last_name",
+  "phone_number", "city", "street", "number", "zip_code"];
+
+const Dao = require('../../services/dao');
+const Address = require('./addresses-model');
+
+const dao = new Dao(TABLE_NAME);
+
+function containsRequiredParams(paramsKeys) {
+  _.each(paramsKeys, (element, index) => {
+    //this.REQUIRED_CUSTOMER_PARAMS;
+  });
+}
+
+
+class Customer {
+  constructor(email, first_name, last_name, address, phone_number) {
     this.email = email;
     this.first_name = first_name;
     this.last_name = last_name;
-    this.address_ref = address_ref;
+    this.address = address;
     this.phone_number = phone_number;
   }
 
-  // If no params are given, it will return all customers.
-  static findBy(params, callback) {
-    dynamo.scan(
-      {TableName: "customers"}, 
-      (err, res) => {
-        if (err) {
-          // Something went wrong. Throw exception.
-          callback(err);
-        } else {
-          callback(null, res);
-        }
-      }
-    );
+  static all(callback) {
+    dao.fetch(null, callback);
+  }
+
+  static find(email, callback) {
+    var isValidEmail = _.isString(email)
+    if (isValidEmail) {
+      dao.fetch(email, callback);
+    } else {
+      // Raise error.
+    }
   }
 }
+
+module.exports = Customer;
