@@ -60,7 +60,7 @@ module.exports = class Dao {
                     console.error("Dynamo failed to fetch data " + err);
                     callback(err, null);
                 } else {
-                    console.log("Successfully feth record from dynamo: " + JSON.stringify(data));
+                    console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
                     callback(null, data);
                 }
             });
@@ -70,7 +70,7 @@ module.exports = class Dao {
                     console.error("Dynamo failed to fetch data " + err);
                     callback(err, null);
                 } else {
-                    console.log("Successfully feth record from dynamo: " + JSON.stringify(data));
+                    console.log("Successfully fetched records from dynamo: " + JSON.stringify(data));
                     callback(null, data);
                 }
             });
