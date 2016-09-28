@@ -2,14 +2,18 @@
 
 const _ = require('underscore');
 
-const Customer = require('../models/customer');
-
 module.exports = class CustomerSerializer {
   constructor() {}
 
   static render(customers, callback) {
     function renderSingleCustomer(customer) {
-      return JSON.stringify(customer);
+      return JSON.stringify({
+        email: customer.email,
+        first_name: customer.firstName,
+        last_name: customer.lastName,
+        address_ref: customer.addressRef,
+        phone_number: customer.phoneNumber
+      });
     }
 
     if (_.isArray(customers)) {
