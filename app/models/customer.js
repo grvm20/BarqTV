@@ -19,22 +19,34 @@ function containsRequiredParams(paramsKeys) {
 
 
 class Customer {
-  constructor(email, first_name, last_name, address, phone_number) {
-    this.email = email;
-    this.first_name = first_name;
-    this.last_name = last_name;
-    this.address = address;
-    this.phone_number = phone_number;
+  constructor(attributes) {
+    this.id = attributes.id;
+    this.first_name = attributes.first_name;
+    this.last_name = attributes.last_name;
+    this.address_ref = attributes.address_ref;
+    this.phone_number = attributes.phone_number;
+  }
+
+  get email() {
+    return this.id;
   }
 
   static all(callback) {
-    dao.fetch(null, callback);
+    dao.fetch(null, (err, items) => {
+      var customers = _.map(items, (e)=> new this(e))
+      console.log("Successfully fetched a Customer array: " + JSON.stringify(customers));
+      callback(err, customers);
+    });
   }
 
   static find(email, callback) {
     var isValidEmail = _.isString(email)
     if (isValidEmail) {
-      dao.fetch(email, callback);
+      var queryResult = dao.fetch({id: email}, (err, item) => {
+        var customer = new this(item);
+        console.log("Successfully fetched a Customer: " + JSON.stringify(customer));
+        callback(err, customer);
+      });
     } else {
       // Raise error.
     }

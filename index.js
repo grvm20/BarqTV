@@ -12,18 +12,10 @@ exports.customersControllerHandler = (event, context, callback) => {
   var operation = event.operation;
   var params = _.omit(event, 'operation');
 
-  const sendResponse = (err, res) => callback(null, {
-    statusCode: err ? '400' : '200',
-    body: err ? err.message : JSON.stringify(res),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
   switch (operation) {
     case 'fetchAll':
     case 'fetch':
-      CustomersController.show(params, sendResponse)
+      CustomersController.show(params, callback)
       break;
     default:
       // Unsopported operation.

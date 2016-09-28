@@ -12,70 +12,68 @@ const dynamoDocClient = new AWS.DynamoDB.DocumentClient();
  ***/
 module.exports = class Dao {
 
-    constructor(tableName) {
-        this.tableName = tableName;
-    }
+  constructor(tableName) {
+    this.tableName = tableName;
+  }
 
-    /**
-     * Persists object into DB
-     * @item - Record to be persisted into DB
-     * @callback - Callback function to which either error or data is passed back. 
-     * Argument to callback expected of the form(error, data)
-     **/
-    persist(item, callback) {
+  /**
+   * Persists object into DB
+   * @item - Record to be persisted into DB
+   * @callback - Callback function to which either error or data is passed back. 
+   * Argument to callback expected of the form(error, data)
+   **/
+  persist(item, callback) {
 
-        var params = {
-            TableName: this.tableName,
-            Item: item
-        };
+    var params = {
+      TableName: this.tableName,
+      Item: item
+    };
 
-        dynamoDocClient.put(params, function(err, data) {
-            if (err) {
-                console.error("Dynamo failed to persist data " + err);
-                callback(err, null);
-            } else {
-                console.log("Successfully inserted record into dynamo: " + JSON.stringify(item));
-                callback(null, JSON.stringify(item));
-            }
-        });
-    }
+    dynamoDocClient.put(params, function(err, data) {
+      if (err) {
+        console.error("Dynamo failed to persist data " + err);
+        callback(err, null);
+      } else {
+        console.log("Successfully inserted record into dynamo: " + JSON.stringify(item));
+        callback(null, JSON.stringify(item));
+      }
+    });
+  }
 
 
-    /**
-     * Fetches object from DB
-     * @key - Key on which record needs to be fetched from DB
-     * @callback - Callback function to which either error or data is passed back. 
-     * Argument to callback expected of the form(error, data)
-     **/
-    fetch(key, callback) {
+  /**
+   * Fetches object from DB
+   * @key - Key on which record needs to be fetched from DB
+   * @callback - Callback function to which either error or data is passed back. 
+   * Argument to callback expected of the form(error, data)
+   **/
+  fetch(key, callback) {
 
-        var params = {
-            TableName: this.tableName
-        };
-        if (key != null && key != "") {
-            params.Key = key;
+    var params = {
+      TableName: this.tableName
+    };
+    if (key != null && key != "") {
+      params.Key = key;
 
-            dynamoDocClient.get(params, function(err, data) {
-                if (err) {
-                    console.error("Dynamo failed to fetch data " + err);
-                    callback(err, null);
-                } else {
-                    console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
-                    callback(null, data);
-                }
-            });
+      dynamoDocClient.get(params, function(err, data) {
+        if (err) {
+          console.error("Dynamo failed to fetch data " + err);
+          callback(err, null);
         } else {
-            dynamoDocClient.scan(params, function(err, data) {
-                if (err) {
-                    console.error("Dynamo failed to fetch data " + err);
-                    callback(err, null);
-                } else {
-                    console.log("Successfully fetched records from dynamo: " + JSON.stringify(data));
-                    callback(null, data);
-                }
-            });
+          console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
+          callback(null, data["Item"]);
         }
-
-
+      });
+    } else {
+      dynamoDocClient.scan(params, function(err, data) {
+        if (err) {
+          console.error("Dynamo failed to fetch data " + err);
+          callback(err, null);
+        } else {
+          console.log("Successfully fetched records from dynamo: " + JSON.stringify(data));
+          callback(null, data["Items"]);
+        }
+      });
     }
+  }
 };
