@@ -25,7 +25,7 @@ module.exports = class Dao {
   persist(item, callback) {
 
     // New customer is always active by default
-    item.is_active = true;
+    item.deleted = false;
     var params = {
       TableName: this.tableName,
       Item: item
@@ -66,7 +66,7 @@ module.exports = class Dao {
           var item = data.Item;
           // This is necessary because we dont have a GSI on is_active field.
           // So we have to manually filter out the result
-          if (item && item.is_active == false) {
+          if (item && item.is_active == true) {
             item = {}
           }
           callback(null, item);
@@ -75,8 +75,8 @@ module.exports = class Dao {
 
     } else {
 
-      params.FilterExpression = "is_active = :value";
-      params.ExpressionAttributeValues = { ":value": true };
+      params.FilterExpression = "deleted = :value";
+      params.ExpressionAttributeValues = { ":value": false };
 
       dynamoDocClient.scan(params, function(err, data) {
         if (err) {
@@ -111,7 +111,7 @@ module.exports = class Dao {
         console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
 
         var item = data.Item;
-        item.is_active = false;
+        item.deleted = true;
         params.Item = item;
 
         dynamoDocClient.put(params, function(err, data) {
