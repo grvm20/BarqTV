@@ -139,11 +139,13 @@ module.exports = class Dao {
       information = info;
     //else
     //information = JSON.parse(info);
-    updateExpression = "";
+    updateExpression = "SET ";
 
-    for (var in information) {
-      updateExpression = updateExpression + "SET " + var + " = " + information[var] + ";";
+    for (infoKey in information) {
+      updateExpression = updateExpression +  infoKey + " = " + information[infoKey] + ", ";
     }
+
+    updateExpression = updateExpression.slice(0, -2); 
 
     var params = {
       TableName: this.tableName,
@@ -161,8 +163,3 @@ module.exports = class Dao {
       });
   }
 };
-
-//Input: URL -> id/ - Put request : Body columnX1 - new data/columnX2 - new data...column XK - new data
-// Step 1: Process column values for dynamodb -> JSON Data - obtain list of keys (columns)
-// Step 2: For list of keys obtained & for the particular id (given in Request) update dynamodb with new changes
-// Step 3: Return
