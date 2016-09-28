@@ -2,9 +2,6 @@
 
 const _ = require('underscore');
 
-const Customer = require('../models/customer');
-const CustomerSerializer = require('../views/customer-serializer');
-
 function sendHttpResponse(callback) {
   return (err, body) => {
     callback(null, {
@@ -17,23 +14,30 @@ function sendHttpResponse(callback) {
   };
 }
 
+function areValidParams(params) {
+  return _.isObject(params)
+}
+
 module.exports = class CustomersController {
+  constructor(customerService, CustomerSerializer) {
+    this.customerService = customerService;
+    this.CustomerSerializer = CustomerSerializer;
+  }
+
 
   static show(params, callback) {
-    var areValidParams = _.isObject(params);
-    
-    if (areValidParams) {
+    if (areValidParams(params)) {
       var containsEmail = _.isString(params.email);
 
       if (containsEmail) {
         var email = params.email;
-        Customer.find(email, (err, customer) => {
-          CustomerSerializer.render(customer, sendHttpResponse(callback));
+        this.customerService.fetch(email, (err, customer) => {
+          this.CustomerSerializer.render(customer, sendHttpResponse(callback));
         });
       } else {
         // Return all customers.
-        Customer.all((err, customers) => {
-          CustomerSerializer.render(customers, sendHttpResponse(callback));
+        this.customerService.fetch(null, (err, customers) => {
+          this.CustomerSerializer.render(customers, sendHttpResponse(callback));
         });
       }
     } else {
@@ -42,6 +46,15 @@ module.exports = class CustomersController {
     }
   }
 
-  static create(attributes, callback) {
+  static create(params, callback) {
+    // TODO
+  }
+
+  static update(params, callback) {
+    // TODO
+  }
+
+  static delete(params, callback) {
+    // TODO
   }
 };

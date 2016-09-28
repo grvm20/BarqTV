@@ -18,14 +18,13 @@ module.exports = class AddressModel {
    **/
   static createAddress(address, callback) {
 
+    // TODO - Rework method once we move to id per addres
     validateAddress(address);
-
     console.log("Validated address: " + JSON.stringify(address));
 
     var addressDbModel = createDBModel(address);
 
     daoObject.persist(addressDbModel, callback);
-
   }
 
   /**
@@ -37,13 +36,34 @@ module.exports = class AddressModel {
   static fetchAddress(id, callback) {
     var key;
     if (id) {
-      key = {
-        "id": id
-      };
+      key = createAddressKey(id);
     }
     daoObject.fetch(key, callback);
   }
+
+  /**
+   * Deletes data from db.
+   * @id - Id corresponding to row that needs to be deleted.
+   * If nothing is provided then it returns all the records in the tables
+   * @callback - callback function
+   **/
+  static deleteAddress(id, callback) {
+    if (!isEmpty(id)) {
+      var key = createAddressKey(id);
+      daoObject.delete(key, callback);
+    } else {
+      throw new InputValidationException('id');
+    }
+  }
 };
+
+function createAddressKey(id) {
+
+  var key = {
+    "id": id
+  };
+  return key;
+}
 
 /**
  * Generates necessary DB model as understood by DAO
@@ -69,6 +89,7 @@ function createDBModel(address) {
 
   return item;
 }
+
 
 function isEmpty(value) {
   return value === null || value === "";
