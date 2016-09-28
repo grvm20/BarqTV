@@ -5,6 +5,7 @@ const _ = require('underscore');
 const Customer = require('../models/customer');
 
 module.exports = class CustomerSerializer {
+   //Change here add url 
   constructor() {}
 
   static render(customers, callback) {
