@@ -1,149 +1,107 @@
 'use strict';
 
-const Dao = require("../../services/dao");
-const daoObject = new Dao("addresses");
+const InputValidationException = require("../exceptions/invalid-input-exception")
+const Utils = require("../utilities/utils")
 
+var containsDigitRegex = /.*[0-9].*/
+var zipCodeRegex = /[0-9]{5,}$/
 /***
- * This class deal with all db interactions of address data
+ * Model class for Address
  ***/
 module.exports = class AddressModel {
 
-  // TODO - Debate between using constructor init vs static reference
-  constructor() {}
-
-  /**
-   * Persists data into db. Responsible for validation of incoming data
-   * @address - Address to be persisted into DB
-   * @callback - callback function
-   **/
-  static createAddress(address, callback) {
-
-    // TODO - Rework method once we move to id per addres
-    validateAddress(address);
-    console.log("Validated address: " + JSON.stringify(address));
-
-    var addressDbModel = createDBModel(address);
-
-    daoObject.persist(addressDbModel, callback);
+  constructor(id, city, state, apt, number, street, zipCode) {
+    this.id = id;
+    this.city = city;
+    this.state = state ;
+    this.apt = apt;
+    this.number = number;
+    this.street = street;
+    this.zipCode = zipCode;
   }
 
-  /**
-   * Fetches data from db.
-   * @id - Id corresponding to row that needs to be fetched. 
-   * If nothing is provided then it returns all the records in the tabls
-   * @callback - callback function
-   **/
-  static fetchAddress(id, callback) {
-    var key;
-    if (id) {
-      key = createAddressKey(id);
-    }
-    daoObject.fetch(key, callback);
-  }
-
-  /**
-   * Deletes data from db.
-   * @id - Id corresponding to row that needs to be deleted.
-   * If nothing is provided then it returns all the records in the tables
-   * @callback - callback function
-   **/
-  static deleteAddress(id, callback) {
-    if (!isEmpty(id)) {
-      var key = createAddressKey(id);
-      daoObject.delete(key, callback);
-    } else {
-      throw new InputValidationException('id');
+  set id(id){
+    if(!Utils.isEmpty(id)){
+      this._id = id;
+    }else{
+      throw new InputValidationException("id")
     }
   }
-};
 
-function createAddressKey(id) {
-
-  var key = {
-    "id": id
-  };
-  return key;
-}
-
-/**
- * Generates necessary DB model as understood by DAO
- **/
-function createDBModel(address) {
-
-  // This is pseudo GUID. No clean way of getting GUID in JS
-  var id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0,
-      v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-
-  var item = {
-    "id": id,
-    "city": address.city,
-    "state": address.state,
-    "apt": address.apt,
-    "number": address.number,
-    "street": address.street,
-    "zipcode": address.zipcode
-  };
-
-  return item;
-}
-
-
-function isEmpty(value) {
-  return value === null || value === "";
-}
-
-/**
- * Validates address data
- * @throws InputValidationException if data passed is not valid
- **/
-function validateAddress(address) {
-
-  var city = address.city;
-  var state = address.state;
-  var apt = address.apt;
-  var number = address.number;
-  var street = address.street;
-  var zipcode = address.zipcode;
-
-  var containsDigitRegex = /.*[0-9].*/
-  var zipcodeRegex = /![0-9]{5,}$/
-
-  if (isEmpty(city) || containsDigitRegex.test(city)) {
-    throw new InputValidationException('city');
+  set city(city){
+    if(!(Utils.isEmpty(city) || containsDigitRegex.test(city))){
+      this._city = city;
+    }else{
+      throw new InputValidationException("city")
+    }
   }
 
-  if (isEmpty(state) || containsDigitRegex.test(state)) {
-    throw new InputValidationException('state');
+  set state(state){
+    if(!(Utils.isEmpty(state) || containsDigitRegex.test(state))){
+      this._state = state;
+    }else{
+      throw new InputValidationException("state")
+    }
   }
 
-  if (isEmpty(apt)) {
-    throw new InputValidationException('apt');
+  set apt(apt){
+    if(!Utils.isEmpty(apt)){
+      this._apt = apt;
+    }else{
+      throw new InputValidationException("apt")
+    }
   }
 
-  if (isEmpty(number)) {
-    throw new InputValidationException('number');
+  set number(number){
+    if(!Utils.isEmpty(number)){
+      this._number = number;
+    }else{
+      throw new InputValidationException("number")
+    }
   }
 
-  if (isEmpty(street)) {
-    throw new InputValidationException('street');
+  set street(street){
+    if(!Utils.isEmpty(street)){
+      this._street = street;
+    }else{
+      throw new InputValidationException("street")
+    }
   }
 
-  if (zipcode === null || zipcodeRegex.test(zipcode)) {
-    throw new InputValidationException('zipcode');
+  set zipCode(zipCode){
+    if(!Utils.isEmpty(zipCode) && zipCodeRegex.test(zipCode)){
+      this._zipCode = zipCode;
+    }else{
+      throw new InputValidationException("zipCode")
+    }
   }
-}
 
-/**
- * Function which encapsulates Input Validation Errors
- **/
-function InputValidationException(value) {
+  get id(){
+    return this._id;
+  }
 
-  this.value = value;
+  get apt(){
+    return this._apt;
+  }
 
-  this.toString = function() {
-    return "Invalid " + this.value;
-  };
+  get city(){
+    return this._city;
+  }
+
+  get state(){
+    return this._state;
+  }
+
+  get number(){
+    return this._number;
+  }
+
+  get street(){
+    return this._street;
+  }
+
+  get zipCode(){
+    return this._zipCode;
+  }
+
 }
