@@ -126,4 +126,43 @@ module.exports = class Dao {
       }
     });
   }
+
+  /**
+   * Updates object from DB
+   * @key - Key on which record needs to be updated in DB
+   * @info - Information to be updated in DB - contains list of key-value pairs that need to be updated - has to include PrimaryID
+   * @callback - Callback function to which either error or data is passed back.
+   * Argument to callback expected of the form(error, data)
+   **/
+  update(key, info, callback) {
+    //If string is JSON
+      information = info;
+    //else
+    //information = JSON.parse(info);
+    updateExpression = "";
+
+    for (var in information) {
+      updateExpression = updateExpression + "SET " + var + " = " + information[var] + ";";
+    }
+
+    var params = {
+      TableName: this.tableName,
+      Key: key
+      UpdateExpression: updateExpression
+    };
+
+    dynamoDocClient.update(params, function(err, data) {
+        if (err) {
+          console.error("Dynamo failed to Update data " + err);
+          callback(err, null);
+        } else {
+          console.log("Successfully updated record from dynamo: " + JSON.stringify(data));
+        }
+      });
+  }
 };
+
+//Input: URL -> id/ - Put request : Body columnX1 - new data/columnX2 - new data...column XK - new data
+// Step 1: Process column values for dynamodb -> JSON Data - obtain list of keys (columns)
+// Step 2: For list of keys obtained & for the particular id (given in Request) update dynamodb with new changes
+// Step 3: Return
