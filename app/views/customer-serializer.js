@@ -3,16 +3,15 @@
 const _ = require('underscore');
 
 module.exports = class CustomerSerializer {
-   //Change here add url 
   constructor() {}
 
-  static render(customers, callback) {
+  static render(customers, callback, urlprefix) {
     function renderSingleCustomer(customer) {
       return JSON.stringify({
         email: customer.email,
         first_name: customer.firstName,
         last_name: customer.lastName,
-        address_ref: customer.addressRef,
+        address_ref: urlprefix + '/' + "address" + '/' + customer.addressRef,
         phone_number: customer.phoneNumber
       });
     }

@@ -32,12 +32,12 @@ module.exports = class CustomersController {
       if (containsEmail) {
         var email = params.email;
         this.customerService.fetch(email, (err, customer) => {
-          this.CustomerSerializer.render(customer, sendHttpResponse(callback));
+          this.CustomerSerializer.render(customer, sendHttpResponse(callback),params.urlprefix);
         });
       } else {
         // Return all customers.
         this.customerService.fetch(null, (err, customers) => {
-          this.CustomerSerializer.render(customers, sendHttpResponse(callback));
+          this.CustomerSerializer.render(customers, sendHttpResponse(callback),params.urlprefix);
         });
       }
     } else {
