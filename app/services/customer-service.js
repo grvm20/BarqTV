@@ -90,9 +90,27 @@ module.exports = class CustomerService {
 
   delete(customer, callback) {
     console.log(sprintf("Proceeding to delete Customer %s.", customer.id));
-    // this.dao.delete(customer.id, ()
+    this.dao.delete({id: customer.id}, (err, customerDbObject) => {
+      // TODO: refactor this part to be DRY, as it is shared.
+      var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
+      var addressId = customerAttributes.addressRef;
+      this.addressService.fetch(addressId, (err, address) => {
+        if (err) {
+          callback(err);
+        } else {
+          customerAttributes.address = address;
 
-    // );
+          try {
+            var customer = this.create(customerAttributes);
+          } catch(err) {
+            callback(err);
+          }
+          
+          console.log("Successfully fetched Customer with id: " + customer.id);
+          callback(null, customer);
+        }
+      });
+    });
   }
 
   update(customer, callback) {

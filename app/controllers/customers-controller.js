@@ -98,7 +98,24 @@ module.exports = class CustomersController {
   }
 
   delete(params, callback) {
-    // TODO
+    if (areValidParams(params)) {
+      this.buildCustomerFromParams(params, (err, customer) => {
+        if (err) {
+          callback(err);
+        } else {
+          this.customerService.delete(customer, (err, deletedCustomer) => {
+            if (err) {
+                callback(err);
+              } else {
+                this.customerSerializer.render(deletedCustomer, sendHttpResponse(callback));
+              }
+          });
+        }
+      });
+    } else {
+      // Invalid params.
+      // Raise error.
+    }
   }
 
   buildCustomerFromParams(params, callback) {

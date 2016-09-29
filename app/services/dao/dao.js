@@ -124,7 +124,7 @@ module.exports = class Dao {
             callback(err, null);
           } else {
             console.log("Successfully deleted record from dynamo: " + JSON.stringify(item));
-            callback(null, JSON.stringify(item));
+            callback(null, item);
           }
         });
       }
