@@ -1,6 +1,12 @@
 'use strict';
 
 const _ = require('underscore');
+const InputValidationException = require("../exceptions/invalid-input-exception");
+const Utils = require("../utilities/utils")
+
+var containsDigitRegex = /.*[0-9].*/
+
+var emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
 module.exports = class Customer {
   constructor(attributes) {
@@ -14,22 +20,35 @@ module.exports = class Customer {
     this.deleted = attributes.deleted || false;
   }
 
-  set id(id) {
-    this._id = id;
-  }
+ set id(id){
+    if(!Utils.isEmpty(id) && emailRegex.test(id)){
+      this._id = id;
+    }else{
+      throw new InputValidationException("id")
+    }
+}
   get id() {
     return this._id;
   }
 
   set firstName(firstName) {
-    this._firstName = firstName;
-  }
+    if(!Utils.isEmpty(firstName) && !containsDigitRegex.test(firstName)){
+      this._firstName = firstName;
+    }else{
+      throw new InputValidationException("firstName")
+    }
+    }
   get firstName() {
     return this._firstName;
   }
 
   set lastName(lastName) {
-    this._lastName = lastName;
+    if(!Utils.isEmpty(lastName) && !containsDigitRegex.test(lastName)){
+      this._lastName = lastName;
+    }else{
+      throw new InputValidationException("lastName")
+    }
+    
   }
   get lastName() {
     return this._lastName;
@@ -47,7 +66,12 @@ module.exports = class Customer {
   }
 
   set phoneNumber(phoneNumber) {
-    this._phoneNumber = phoneNumber;
+    if(!Utils.isEmpty(phoneNumber) && containsDigitRegex.test(phoneNumber)){
+      this._phoneNumber = phoneNumber;
+    }else{
+      throw new InputValidationException("PhoneNumber")
+    }
+    
   }
   get phoneNumber() {
     return this._phoneNumber;
@@ -62,7 +86,12 @@ module.exports = class Customer {
 
   // Id aliases.
   set email(email) {
-    this.id = email
+    if(!Utils.isEmpty(id) && emailRegex.test(id)){
+      this._id = email;
+    }else{
+      throw new InputValidationException("email")
+    }
+    
   }
   get email() {
     return this.id;
