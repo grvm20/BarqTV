@@ -19,89 +19,98 @@ module.exports = class Address {
     this.number = attributes.number;
     this.street = attributes.street;
     this.zipCode = attributes.zipCode;
+    this.deleted = attributes.deleted || false;
   }
 
-  set id(id){
-    if(!Utils.isEmpty(id)){
+  set id(id) {
+    if (!Utils.isEmpty(id)) {
       this._id = id;
-    }else{
+    } else {
       throw new InputValidationException("id")
     }
   }
 
-  set city(city){
-    if(!(Utils.isEmpty(city) || containsDigitRegex.test(city))){
+  set city(city) {
+    if (!(Utils.isEmpty(city) || containsDigitRegex.test(city))) {
       this._city = city;
-    }else{
+    } else {
       throw new InputValidationException("city")
     }
   }
 
-  set state(state){
-    if(!(Utils.isEmpty(state) || containsDigitRegex.test(state))){
+  set state(state) {
+    if (!(Utils.isEmpty(state) || containsDigitRegex.test(state))) {
       this._state = state;
-    }else{
+    } else {
       throw new InputValidationException("state")
     }
   }
 
-  set apt(apt){
-    if(!Utils.isEmpty(apt)){
+  set apt(apt) {
+    if (!Utils.isEmpty(apt)) {
       this._apt = apt;
-    }else{
+    } else {
       throw new InputValidationException("apt")
     }
   }
 
-  set number(number){
-    if(!Utils.isEmpty(number)){
+  set number(number) {
+    if (!Utils.isEmpty(number)) {
       this._number = number;
-    }else{
+    } else {
       throw new InputValidationException("number")
     }
   }
 
-  set street(street){
-    if(!Utils.isEmpty(street)){
+  set street(street) {
+    if (!Utils.isEmpty(street)) {
       this._street = street;
-    }else{
+    } else {
       throw new InputValidationException("street")
     }
   }
 
-  set zipCode(zipCode){
-    if(!Utils.isEmpty(zipCode) && zipCodeRegex.test(zipCode)){
+  set zipCode(zipCode) {
+    if (!Utils.isEmpty(zipCode) && zipCodeRegex.test(zipCode)) {
       this._zipCode = zipCode;
-    }else{
+    } else {
       throw new InputValidationException("zipCode")
     }
   }
 
-  get id(){
+  set deleted(deleted) {
+    this._deleted = deleted;
+  }
+
+  get deleted() {
+    return this._deleted;
+  }
+
+  get id() {
     return this._id;
   }
 
-  get apt(){
+  get apt() {
     return this._apt;
   }
 
-  get city(){
+  get city() {
     return this._city;
   }
 
-  get state(){
+  get state() {
     return this._state;
   }
 
-  get number(){
+  get number() {
     return this._number;
   }
 
-  get street(){
+  get street() {
     return this._street;
   }
 
-  get zipCode(){
+  get zipCode() {
     return this._zipCode;
   }
 

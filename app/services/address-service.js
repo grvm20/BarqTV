@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('underscore');
+
 const InputValidationException = require("../exceptions/invalid-input-exception")
 const Address = require('../models/address');
 const Utils = require("../utilities/utils");
@@ -20,122 +22,6 @@ function mapDbObjectToAddressAttributes(dbObject) {
   };
 }
 
-module.exports = class AddressService {
-
-  constructor(dao) {
-    this.dao = dao;
-  }
-
-  set dao(dao) {
-    if (dao) {
-      this._dao = dao
-    }
-  }
-
-  save(addressAttributes, callback) {
-
-    // TODO - Rework method once we move to id per addres
-    var id = generateGUID()
-    addressAttributes.id = id;
-
-    var address = new Address(addressAttributes);
-    var addressDbModel = mapAddressToDbObject(address);
-
-    this._dao.persist(addressDbModel, (err, persistedObject) => {
-      if (err) {
-        callback(err);
-      } else {
-        var addressAttributes = mapDbObjectToAddressAttributes(JSON.parse(persistedObject));
-        try {
-          var address = new Address(addressAttributes);
-        } catch (err) {
-          callback(err);
-        }
-        callback(null, address);
-      }
-    });
-  }
-
-  /**
-   * Fetches data from db.
-   * @id - Id corresponding to row that needs to be fetched. 
-   * If nothing is provided then it returns all the records in the tabls
-   * @callback - callback function
-   **/
-  fetch(id, callback) {
-    var key;
-    if (id) {
-      key = createAddressKey(id);
-    }
-
-    this._dao.fetch(key, (err, fetchedAddress) => {
-      if (err) {
-        callback(err);
-      } else {
-
-        if (Object.prototype.toString.call(fetchedAddress) === '[object Array]') {
-          var addresses = [];
-          fetchedAddress.forEach(function(addressDbObject) {
-
-            var addressAttributes = mapDbObjectToAddressAttributes(addressDbObject);
-
-            try {
-              var address = new Address(addressAttributes);
-            } catch (err) {
-              callback(err);
-            }
-
-            addresses.push(address)
-          });
-
-          callback(null, addresses);
-
-        } else {
-          if (!(Object.keys(fetchedAddress).length === 0)) {
-            var addressAttributes = mapDbObjectToAddressAttributes(fetchedAddress);
-
-            try {
-              var address = new Address(addressAttributes);
-            } catch (err) {
-              callback(err);
-            }
-          } else {
-            callback(null, fetchedAddress);
-          }
-
-        }
-        callback(null, address);
-      }
-    });
-  }
-
-  /**
-   * Deletes data from db.
-   * @id - Id corresponding to row that needs to be deleted. 
-   * If nothing is provided then it returns all the records in the tables
-   * @callback - callback function
-   **/
-  delete(id, callback) {
-    if (!Utils.isEmpty(id)) {
-      var key = createAddressKey(id);
-      this._dao.delete(key, (err, persistedObject) => {
-        if (err) {
-          callback(err);
-        } else {
-          var addressAttributes = mapDbObjectToAddressAttributes(JSON.parse(persistedObject));
-          try {
-            var address = new Address(addressAttributes);
-          } catch (err) {
-            callback(err);
-          }
-          callback(null, address);
-        }
-      });
-    } else {
-      throw new InputValidationException('id');
-    }
-  }
-}
 
 function generateGUID() {
   // This is pseudo GUID. No clean way of getting GUID in JS
@@ -168,8 +54,127 @@ function mapAddressToDbObject(address) {
     "apt": address.apt,
     "number": address.number,
     "street": address.street,
-    "zip_code": address.zipCode
+    "zip_code": address.zipCode,
+    "deleted": address.deleted
   };
 
   return item;
+}
+
+module.exports = class AddressService {
+
+  constructor(dao) {
+    this.dao = dao;
+  }
+
+  set dao(dao) {
+    if (dao) {
+      this._dao = dao
+    }
+  }
+
+  save(addressAttributes, callback) {
+
+    // TODO - Rework method once we move to id per addres
+    var id = generateGUID()
+    addressAttributes.id = id;
+
+    var address = new Address(addressAttributes);
+
+    var addressDbModel = mapAddressToDbObject(address);
+    this._dao.persist(addressDbModel, (err, addressAttributes) => {
+      if (err) {
+        console.log("Error while trying to save data: " + JSON.stringify(address));
+        callback(err);
+      } else {
+        callback(null, address);
+      }
+    });
+  }
+
+  /**
+   * Fetches data from db.
+   * @id - Id corresponding to row that needs to be fetched. 
+   * If nothing is provided then it returns all the records in the tabls
+   * @callback - callback function
+   **/
+  fetch(id, callback) {
+    var key;
+    if (id) {
+      key = createAddressKey(id);
+    }
+
+    this._dao.fetch(key, (err, fetchedAddress) => {
+      if (err) {
+        console.log("Error while trying to fetch data: " + id);
+        callback(err);
+      } else {
+
+        if (_.isArray(fetchedAddress)) {
+          var addresses = [];
+          fetchedAddress.forEach(function(addressDbObject) {
+
+            var addressAttributes = mapDbObjectToAddressAttributes(addressDbObject);
+
+            try {
+              var address = new Address(addressAttributes);
+            } catch (err) {
+              console.log("Error while trying to fetch data: " + id);
+              callback(err);
+            }
+
+            addresses.push(address)
+          });
+
+          callback(null, addresses);
+
+        } else {
+          if (!(Object.keys(fetchedAddress).length === 0)) {
+            var addressAttributes = mapDbObjectToAddressAttributes(fetchedAddress);
+
+            try {
+              var address = new Address(addressAttributes);
+            } catch (err) {
+              console.log("Error while trying to fetch data: " + id);
+              callback(err);
+            }
+
+            callback(null, address);
+          } else {
+            callback(null, fetchedAddress);
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Deletes data from db.
+   * @id - Id corresponding to row that needs to be deleted. 
+   * If nothing is provided then it returns all the records in the tables
+   * @callback - callback function
+   **/
+  delete(id, callback) {
+    if (!Utils.isEmpty(id)) {
+      var key = createAddressKey(id);
+      this._dao.delete(key, (err, deletedAddress) => {
+        if (err) {
+          callback(err);
+        } else {
+
+          var addressAttributes = mapDbObjectToAddressAttributes(deletedAddress);
+
+          try {
+            var address = new Address(addressAttributes);
+          } catch (err) {
+            console.log("Error while trying to delete data: " + id);
+            callback(err);
+          }
+          callback(null, address);
+        }
+      });
+    } else {
+      throw new InputValidationException('id');
+    }
+  }
 }

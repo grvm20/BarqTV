@@ -37,11 +37,10 @@ module.exports = class Dao {
         callback(err, null);
       } else {
         console.log("Successfully persited record into dynamo: " + JSON.stringify(item));
-        callback(null, JSON.stringify(item));
+        callback(null, item);
       }
     });
   }
-
 
   /**
    * Fetches object from DB
@@ -66,7 +65,7 @@ module.exports = class Dao {
           var item = data.Item;
           // This is necessary because we dont have a GSI on is_active field.
           // So we have to manually filter out the result
-          if (item && item.deleted) {
+          if (!item || (item && item.deleted == true)) {
             item = {}
           }
           callback(null, item);
@@ -120,7 +119,7 @@ module.exports = class Dao {
             callback(err, null);
           } else {
             console.log("Successfully deleted record from dynamo: " + JSON.stringify(item));
-            callback(null, JSON.stringify(item));
+            callback(null, item);
           }
         });
       }
@@ -136,16 +135,16 @@ module.exports = class Dao {
    **/
   update(key, info, callback) {
     //If string is JSON
-      information = info;
+    information = info;
     //else
     //information = JSON.parse(info);
     updateExpression = "SET ";
 
     for (infoKey in information) {
-      updateExpression = updateExpression +  infoKey + " = " + information[infoKey] + ", ";
+      updateExpression = updateExpression + infoKey + " = " + information[infoKey] + ", ";
     }
 
-    updateExpression = updateExpression.slice(0, -2); 
+    updateExpression = updateExpression.slice(0, -2);
 
     var params = {
       TableName: this.tableName,
@@ -154,12 +153,12 @@ module.exports = class Dao {
     };
 
     dynamoDocClient.update(params, function(err, data) {
-        if (err) {
-          console.error("Dynamo failed to Update data " + err);
-          callback(err, null);
-        } else {
-          console.log("Successfully updated record from dynamo: " + JSON.stringify(data));
-        }
-      });
+      if (err) {
+        console.error("Dynamo failed to Update data " + err);
+        callback(err, null);
+      } else {
+        console.log("Successfully updated record from dynamo: " + data);
+      }
+    });
   }
 };
