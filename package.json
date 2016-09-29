@@ -1,0 +1,37 @@
+{
+  "name": "coms-6998",
+  "version": "0.1.0",
+  "description": "Project for course COMS 6998 - Modern Serverless Cloud Apps (Fall 2016)",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "dependencies": {
+    "async": "^2.0.1",
+    "chai": "^3.5.0",
+    "sprintf": "^0.1.5",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "mocha": "^3.0.2"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/josruice/COMS6998.git"
+  },
+  "keywords": [
+    "serverless",
+    "aws",
+    "college"
+  ],
+  "author": "Jose Vicente Ruiz Cepeda <josruice@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/josruice/COMS6998/issues"
+  },
+  "homepage": "https://github.com/josruice/COMS6998#readme"
+}

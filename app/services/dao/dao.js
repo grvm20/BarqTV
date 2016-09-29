@@ -149,7 +149,7 @@ module.exports = class Dao {
 
     var params = {
       TableName: this.tableName,
-      Key: key
+      Key: key,
       UpdateExpression: updateExpression
     };
 

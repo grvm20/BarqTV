@@ -7,7 +7,7 @@ module.exports = class Utils {
 
   static isEmpty(val) {
     var isEmpty = true;
-    var val = value;
+    var value = val;
     if (value) {
       val = value.trim();
     }
