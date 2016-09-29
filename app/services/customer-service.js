@@ -23,14 +23,27 @@ function mapDbObjectToCustomerAttributes (dbObject) {
 }
 
 function mapCustomerToDbObject (customer) {
-  return {
-    id: customer.id,
-    first_name: customer.firstName,
-    last_name: customer.lastName,
-    address_ref: customer.addressRef,
-    phone_number: customer.phoneNumber,
-    deleted: customer.deleted
+  var result = {
+    id: customer.id
   }
+
+  if (customer.first_name) {
+    result.first_name = customer.firstName;
+  }
+  if (customer.last_name) {
+    result.last_name = customer.lastName;
+  }
+  if (customer.address_ref) {
+    result.address_ref = customer.addressRef;
+  }
+  if (customer.phone_number) {
+    result.phone_number = customer.phoneNumber;
+  }
+  if (customer.deleted) {
+    result.deleted = customer.deleted;
+  }
+
+  return result;
 }
 
 module.exports = class CustomerService {
@@ -69,6 +82,41 @@ module.exports = class CustomerService {
             callback(null, customer);
           }
         });
+      }
+    });
+  }
+
+  delete(customer, callback) {
+    // TODO
+  }
+
+  update(customer, callback) {
+    console.log(sprintf("Proceeding to update Customer %s.", customer.id));
+    this.addressService.update(customer.address, (err, res) => {
+      if (err) {
+        callback(err);
+      } else {
+        var customerDbObject = mapCustomerToDbObject(customer);
+        var key = customerDbObject.id;
+        var attributesToUpdate = _.omit(customerDbObjects, 'id');
+        console.log(sprintf("Ready to update: %s.", JSON.stringify(customerDbObject)));
+        this.dao.update(key, attributesToUpdate, (err, customerDbObject) => {
+          // WIP
+          if (err) {
+            console.log(sprintf("Error while trying to persist: %s.", JSON.stringify(customerDbObject)));
+            callback(err);
+          } else {
+            var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
+
+            try {
+              var customer = this.create(customerAttributes);
+            } catch(err) {
+              callback(err);
+            }
+
+            callback(null, customer);
+          }
+        })
       }
     });
   }
@@ -136,6 +184,5 @@ module.exports = class CustomerService {
         async.each(customerDbObjects, forEachCustomerDbObject, done);
       });
     }
-    
   }
 }

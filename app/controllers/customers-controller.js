@@ -56,21 +56,15 @@ module.exports = class CustomersController {
 
   create(params, callback) {
     if (areValidParams(params)) {
-      try {
-        var customerAttributes = this.customerSerializer.deserialize(params);
-        var customer = this.customerService.create(customerAttributes);
-      } catch(err) {
-        callback(err);
-      }
-
-      this.customerService.save(customer, (err, customer) => {
-        if (err) {
-            callback(err);
-          } else {
-            this.customerSerializer.render(customer, sendHttpResponse(callback));
-          }
+      this.buildCustomerFromParams(params, (err, customer) => {
+        this.customerService.save(customer, (err, savedCustomer) => {
+          if (err) {
+              callback(err);
+            } else {
+              this.customerSerializer.render(savedCustomer, sendHttpResponse(callback));
+            }
+        });
       });
-      
     } else {
       // Invalid params.
       // Raise error.
@@ -78,10 +72,33 @@ module.exports = class CustomersController {
   }
 
   update(params, callback) {
-    // TODO
+    if (areValidParams(params)) {
+      this.buildCustomerFromParams(params, (err, customer) => {
+        this.customerService.update(customer, (err, updatedCustomer) => {
+          if (err) {
+              callback(err);
+            } else {
+              this.customerSerializer.render(updatedCustomer, sendHttpResponse(callback));
+            }
+        });
+      });
+    } else {
+      // Invalid params.
+      // Raise error.
+    }
   }
 
   delete(params, callback) {
     // TODO
+  }
+
+  buildCustomerFromParams(params, callback) {
+    try {
+      var customerAttributes = this.customerSerializer.deserialize(params);
+      var customer = this.customerService.create(customerAttributes);
+      callback(null, customer);
+    } catch (err) {
+      callback(err);
+    }
   }
 };

@@ -65,6 +65,7 @@ module.exports = class AddressService {
    * @callback - callback function
    **/
   fetch(id, callback) {
+    // TODO: solve also for several addresses returned.
     var key;
     if (id) {
       key = createAddressKey(id);
