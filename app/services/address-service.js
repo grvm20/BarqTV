@@ -8,7 +8,7 @@ const Utils = require("../utilities/utils");
  * TODO: Move this mapping function to a data layer. The service shouldn't 
  * know about them.
  */
-function mapDbObjectToAddressAttributes (dbObject) {
+function mapDbObjectToAddressAttributes(dbObject) {
   return {
     id: dbObject.id,
     city: dbObject.city,
@@ -32,19 +32,14 @@ module.exports = class AddressService {
     }
   }
 
-  save(address, callback) {
+  save(addressAttributes, callback) {
 
   // TODO - Rework method once we move to id per addres
     var id = generateGUID()
-    var city = address.city;
-    var state = address.state;
-    var apt = address.apt;
-    var number = address.number;
-    var street = address.street;
-    var zipCode = address.zipcode;
+    addressAttributes.id = id;
 
-    var address = new Address(id, city, state, apt, number, street, zipCode);
-    var addressDbModel = createDBModel(address);
+    var address = new Address(addressAttributes);
+    var addressDbModel = mapAddressToDbObject(address);
 
     this._dao.persist(addressDbModel, callback);
   }
@@ -60,18 +55,42 @@ module.exports = class AddressService {
     if (id) {
       key = createAddressKey(id);
     }
-    this._dao.fetch(key, (err, addressDbObject) => {
+
+    this._dao.fetch(key, (err, fetchedAddress) => {
       if (err) {
         callback(err);
       } else {
-        var addressAttributes = mapDbObjectToAddressAttributes(addressDbObject);
+        
+        if(Object.prototype.toString.call(fetchedAddress) === '[object Array]'){
+          var addresses = [];
+          fetchedAddress.forEach(function(addressDbObject){
+            
+            var addressAttributes = mapDbObjectToAddressAttributes(addressDbObject);
 
-        try {
-          var address = new Address(addressAttributes);
-        } catch(err) {
-          callback(err);
+            try {
+              var address = new Address(addressAttributes);
+            } catch(err) {
+              callback(err);
+            }
+
+            addresses.push(address)
+          });
+
+          callback(null, addresses);
+
+        }else{
+          if(!(Object.keys(fetchedAddress).length === 0)){
+            var addressAttributes = mapDbObjectToAddressAttributes(fetchedAddress);
+
+            try {
+              var address = new Address(addressAttributes);
+            } catch(err) {
+              callback(err);
+            }
+          }else{
+            callback(null, fetchedAddress);
+          }
         }
-
         callback(null, address);
       }
     });
@@ -115,7 +134,7 @@ function createAddressKey(id) {
 /**
  * Generates necessary DB model as understood by DAO
  **/
-function createDBModel(address) {
+function mapAddressToDbObject(address) {
 
   var item = {
     "id": address.id,
@@ -124,7 +143,7 @@ function createDBModel(address) {
     "apt": address.apt,
     "number": address.number,
     "street": address.street,
-    "zipcode": address.zipCode
+    "zip_code": address.zipCode
   };
 
   return item;
