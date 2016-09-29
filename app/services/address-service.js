@@ -8,7 +8,7 @@ const Utils = require("../utilities/utils");
  * TODO: Move these mapping functions to a data layer. The service shouldn't 
  * know about them.
  */
-function mapDbObjectToAddressAttributes (dbObject) {
+function mapDbObjectToAddressAttributes(dbObject) {
   return {
     id: dbObject.id,
     city: dbObject.city,
@@ -46,16 +46,33 @@ module.exports = class AddressService {
 
   save(address, callback) {
     if ( !(address instanceof Address) ) {
-      var attributes = address;
+      var addressAttributes = address;
+      if (!addressAttributes.id) {
+        var id = Utils.generateGUID();
+        addressAttributes.id = id;
+      }
+      
       try {
-        var address = new Address(attributes);
+        var address = new Address(addressAttributes);
       } catch (err) {
         callback(err);
       }
     }
 
     var addressDbModel = mapAddressToDbObject(address);
-    this._dao.persist(addressDbModel, callback);
+    this._dao.persist(addressDbModel, (err, persistedObject) => {
+      if (err) {
+        callback(err);
+      } else {
+        var addressAttributes = mapDbObjectToAddressAttributes(JSON.parse(persistedObject));
+        try {
+          var address = new Address(addressAttributes);
+        } catch (err) {
+          callback(err);
+        }
+        callback(null, address);
+      }
+    });
   }
 
   /**
@@ -70,18 +87,43 @@ module.exports = class AddressService {
     if (id) {
       key = createAddressKey(id);
     }
-    this._dao.fetch(key, (err, addressDbObject) => {
+
+    this._dao.fetch(key, (err, fetchedAddress) => {
       if (err) {
         callback(err);
       } else {
-        var addressAttributes = mapDbObjectToAddressAttributes(addressDbObject);
 
-        try {
-          var address = new Address(addressAttributes);
-        } catch(err) {
-          callback(err);
+        if (Object.prototype.toString.call(fetchedAddress) === '[object Array]') {
+          var addresses = [];
+          fetchedAddress.forEach(function(addressDbObject) {
+
+            var addressAttributes = mapDbObjectToAddressAttributes(addressDbObject);
+
+            try {
+              var address = new Address(addressAttributes);
+            } catch (err) {
+              callback(err);
+            }
+
+            addresses.push(address)
+          });
+
+          callback(null, addresses);
+
+        } else {
+          if (!(Object.keys(fetchedAddress).length === 0)) {
+            var addressAttributes = mapDbObjectToAddressAttributes(fetchedAddress);
+
+            try {
+              var address = new Address(addressAttributes);
+            } catch (err) {
+              callback(err);
+            }
+          } else {
+            callback(null, fetchedAddress);
+          }
+
         }
-
         callback(null, address);
       }
     });
@@ -95,8 +137,20 @@ module.exports = class AddressService {
    **/
   delete(id, callback) {
     if (!Utils.isEmpty(id)) {
-        var key = createAddressKey(id);
-        this._dao.delete(key, callback);
+      var key = createAddressKey(id);
+      this._dao.delete(key, (err, persistedObject) => {
+        if (err) {
+          callback(err);
+        } else {
+          var addressAttributes = mapDbObjectToAddressAttributes(JSON.parse(persistedObject));
+          try {
+            var address = new Address(addressAttributes);
+          } catch (err) {
+            callback(err);
+          }
+          callback(null, address);
+        }
+      });
     } else {
       throw new InputValidationException('id');
     }
@@ -111,4 +165,3 @@ function createAddressKey(id) {
   };
   return key;
 }
-
