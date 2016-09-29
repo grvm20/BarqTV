@@ -66,7 +66,7 @@ module.exports = class Dao {
           var item = data.Item;
           // This is necessary because we dont have a GSI on is_active field.
           // So we have to manually filter out the result
-          if (item && item.deleted == true) {
+          if (item && item.deleted) {
             item = {}
           }
           callback(null, item);
