@@ -53,7 +53,6 @@ module.exports = class AddressSerializer {
       })
     } else {
       var result = this.serialize(addresses);
-      console.log(result);
     }
     callback(null, result);
   }

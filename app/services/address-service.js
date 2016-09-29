@@ -7,7 +7,7 @@ const Address = require('../models/address');
 const Utils = require("../utilities/utils");
 
 /*
- * TODO: Move this mapping function to a data layer. The service shouldn't 
+ * TODO: Move these mapping functions to a data layer. The service shouldn't 
  * know about them.
  */
 function mapDbObjectToAddressAttributes(dbObject) {
@@ -20,18 +20,6 @@ function mapDbObjectToAddressAttributes(dbObject) {
     street: dbObject.street,
     zipCode: dbObject.zip_code
   };
-}
-
-
-function generateGUID() {
-  // This is pseudo GUID. No clean way of getting GUID in JS
-  var id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0,
-      v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-
-  return id;
 }
 
 function createAddressKey(id) {
@@ -73,16 +61,24 @@ module.exports = class AddressService {
     }
   }
 
-  save(addressAttributes, callback) {
+  save(address, callback) {
+    if (!(address instanceof Address)) {
+      var addressAttributes = address;
+      if (!addressAttributes.id) {
+        var id = Utils.generateGuid();
+        addressAttributes.id = id;
+      }
 
-    // TODO - Rework method once we move to id per addres
-    var id = generateGUID()
-    addressAttributes.id = id;
-
-    var address = new Address(addressAttributes);
+      try {
+        var address = new Address(addressAttributes);
+      } catch (err) {
+        callback(err);
+      }
+    }
 
     var addressDbModel = mapAddressToDbObject(address);
-    this._dao.persist(addressDbModel, (err, addressAttributes) => {
+    this._dao.persist(addressDbModel, (err, persistedObject) => {
+
       if (err) {
         console.log("Error while trying to save data: " + JSON.stringify(address));
         callback(err);
@@ -99,6 +95,7 @@ module.exports = class AddressService {
    * @callback - callback function
    **/
   fetch(id, callback) {
+    // TODO: solve also for several addresses returned.
     var key;
     if (id) {
       key = createAddressKey(id);
