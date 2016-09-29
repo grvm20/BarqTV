@@ -43,7 +43,11 @@ module.exports = class Customer {
   }
 
   get addressRef() {
-    return this._address.id;
+    if (this._address) {
+      return this._address.id;
+    } else {
+      return null;
+    }
   }
 
   set phoneNumber(phoneNumber) {

@@ -1,7 +1,11 @@
 'use strict';
 
 const AWS = require('aws-sdk');
+const _ = require('underscore');
+const sprintf = require('sprintf-js').sprintf;
+
 const dynamoDocClient = new AWS.DynamoDB.DocumentClient();
+
 
 /***
  * DAO class which handles all data access related operations.
@@ -130,36 +134,64 @@ module.exports = class Dao {
   /**
    * Updates object from DB
    * @key - Key on which record needs to be updated in DB
-   * @info - Information to be updated in DB - contains list of key-value pairs that need to be updated - has to include PrimaryID
+   * @newItem - Information to be updated in DB - contains list of key-value pairs that need to be updated - has to include PrimaryID
    * @callback - Callback function to which either error or data is passed back.
    * Argument to callback expected of the form(error, data)
    **/
-  update(key, info, callback) {
-    //If string is JSON
-      information = info;
-    //else
-    //information = JSON.parse(info);
-    updateExpression = "SET ";
-
-    for (infoKey in information) {
-      updateExpression = updateExpression +  infoKey + " = " + information[infoKey] + ", ";
-    }
-
-    updateExpression = updateExpression.slice(0, -2); 
-
-    var params = {
-      TableName: this.tableName,
-      Key: key,
-      UpdateExpression: updateExpression
-    };
-
-    dynamoDocClient.update(params, function(err, data) {
-        if (err) {
-          console.error("Dynamo failed to Update data " + err);
-          callback(err, null);
+  update(key, newItem, callback) {
+    // Get object from Dynamo to compare first.
+    this.fetch(key, (err, currentItem) => {
+      if (err) {
+        callback(err);
+      } else {
+        if (currentItem && _.isEmpty(currentItem)) {
+          var errorMessage = "Unable to update a non-existing item.";
+          console.error(errorMessage);
+          callback(errorMessage);
         } else {
-          console.log("Successfully updated record from dynamo: " + JSON.stringify(data));
+          var i = 0;
+          var updateRequired = false;
+          var expressionAttributeValues = {};
+          var updateAssignments = [];
+
+          _.each(_.keys(newItem), (key) => {
+            if (currentItem[key] !== newItem[key]) {
+              var attributeId = ":val"+i;
+              updateAssignments.push(sprintf("%s = %s", key, attributeId));
+              expressionAttributeValues[attributeId] = newItem[key];
+              updateRequired = true;
+              i++;
+            }
+          });
+          
+          var updateExpression = sprintf("SET %s", updateAssignments.join(', '));
+
+          if(!updateRequired) {
+            console.log("No new value given to any field. Nothing to update.");
+            callback(null, currentItem);
+            return;
+          }
+
+          console.log(sprintf("Using update expression: %s.", updateExpression));
+          var params = {
+            TableName: this.tableName,
+            Key: key,
+            UpdateExpression: updateExpression,
+            ExpressionAttributeValues: expressionAttributeValues,
+            ReturnValues: "ALL_NEW"
+          };
+
+          dynamoDocClient.update(params, function(err, data) {
+            if (err) {
+              console.error("Dynamo failed to Update data " + err);
+              callback(err, null);
+            } else {
+              console.log("Successfully updated record from dynamo: " + JSON.stringify(data));
+              callback(null, data.Attributes);
+            }
+          });
         }
-      });
+      }      
+    });
   }
 };

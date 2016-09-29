@@ -52,6 +52,6 @@ module.exports = class CustomerSerializer {
       var result = this.serialize(customers);
     }
 
-    callback(null, JSON.stringify(result));
+    callback(null, result);
   }
 }

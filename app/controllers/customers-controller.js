@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('underscore');
+const sprintf = require('sprintf-js').sprintf;
 
 function sendHttpResponse(callback) {
   return (err, body) => {
@@ -57,13 +58,17 @@ module.exports = class CustomersController {
   create(params, callback) {
     if (areValidParams(params)) {
       this.buildCustomerFromParams(params, (err, customer) => {
-        this.customerService.save(customer, (err, savedCustomer) => {
-          if (err) {
-              callback(err);
-            } else {
-              this.customerSerializer.render(savedCustomer, sendHttpResponse(callback));
-            }
-        });
+        if (err) {
+          callback(err);
+        } else {
+          this.customerService.save(customer, (err, savedCustomer) => {
+            if (err) {
+                callback(err);
+              } else {
+                this.customerSerializer.render(savedCustomer, sendHttpResponse(callback));
+              }
+          });
+        }
       });
     } else {
       // Invalid params.
@@ -74,13 +79,17 @@ module.exports = class CustomersController {
   update(params, callback) {
     if (areValidParams(params)) {
       this.buildCustomerFromParams(params, (err, customer) => {
-        this.customerService.update(customer, (err, updatedCustomer) => {
-          if (err) {
-              callback(err);
-            } else {
-              this.customerSerializer.render(updatedCustomer, sendHttpResponse(callback));
-            }
-        });
+        if (err) {
+          callback(err);
+        } else {
+          this.customerService.update(customer, (err, updatedCustomer) => {
+            if (err) {
+                callback(err);
+              } else {
+                this.customerSerializer.render(updatedCustomer, sendHttpResponse(callback));
+              }
+          });
+        }
       });
     } else {
       // Invalid params.
@@ -93,12 +102,17 @@ module.exports = class CustomersController {
   }
 
   buildCustomerFromParams(params, callback) {
+    var customerAttributes = this.customerSerializer.deserialize(params);
+
+    console.log(sprintf("Customer attributes received %s.", JSON.stringify(customerAttributes)));
+
     try {
-      var customerAttributes = this.customerSerializer.deserialize(params);
       var customer = this.customerService.create(customerAttributes);
-      callback(null, customer);
     } catch (err) {
       callback(err);
     }
+
+    console.log(sprintf("Customer object created %s.", JSON.stringify(customer)));
+    callback(null, customer);
   }
 };

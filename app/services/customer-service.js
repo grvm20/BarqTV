@@ -27,16 +27,16 @@ function mapCustomerToDbObject (customer) {
     id: customer.id
   }
 
-  if (customer.first_name) {
+  if (customer.firstName) {
     result.first_name = customer.firstName;
   }
-  if (customer.last_name) {
+  if (customer.lastName) {
     result.last_name = customer.lastName;
   }
-  if (customer.address_ref) {
+  if (customer.addressRef) {
     result.address_ref = customer.addressRef;
   }
-  if (customer.phone_number) {
+  if (customer.phoneNumber) {
     result.phone_number = customer.phoneNumber;
   }
   if (customer.deleted) {
@@ -58,9 +58,11 @@ module.exports = class CustomerService {
       return input;
     } else {
       var attributes = input;
-      var addressData = attributes.address;
-      var newAddress = new Address(addressData);
-      attributes.address = newAddress;
+      if (attributes.address) {
+        var addressData = attributes.address;
+        var newAddress = new Address(addressData);
+        attributes.address = newAddress;
+      }
       var newCustomer = new Customer(attributes);
       return newCustomer;
     }
@@ -87,38 +89,68 @@ module.exports = class CustomerService {
   }
 
   delete(customer, callback) {
-    // TODO
+    console.log(sprintf("Proceeding to delete Customer %s.", customer.id));
+    // this.dao.delete(customer.id, ()
+
+    // );
   }
 
   update(customer, callback) {
     console.log(sprintf("Proceeding to update Customer %s.", customer.id));
-    this.addressService.update(customer.address, (err, res) => {
-      if (err) {
+
+    var returnCustomer = (customerAttributes, callback) => {
+      try {
+        var customer = this.create(customerAttributes);
+      } catch(err) {
         callback(err);
-      } else {
-        var customerDbObject = mapCustomerToDbObject(customer);
-        var key = customerDbObject.id;
-        var attributesToUpdate = _.omit(customerDbObjects, 'id');
-        console.log(sprintf("Ready to update: %s.", JSON.stringify(customerDbObject)));
-        this.dao.update(key, attributesToUpdate, (err, customerDbObject) => {
-          // WIP
-          if (err) {
-            console.log(sprintf("Error while trying to persist: %s.", JSON.stringify(customerDbObject)));
-            callback(err);
-          } else {
-            var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
-
-            try {
-              var customer = this.create(customerAttributes);
-            } catch(err) {
-              callback(err);
-            }
-
-            callback(null, customer);
-          }
-        })
       }
-    });
+      
+      console.log("Successfully updated Customer with id: " + customer.id);
+      callback(null, customer);
+    };
+
+    var updateCustomer = (customer, updatedAddress, callback) => {
+      var customerDbObject = mapCustomerToDbObject(customer);
+      var key = customerDbObject.id;
+      var attributesToUpdate = _.omit(customerDbObject, 'id');
+      console.log(sprintf("Ready to update: %s.", JSON.stringify(customerDbObject)));
+      this.dao.update({id: key}, attributesToUpdate, (err, customerDbObject) => {
+        if (err) {
+          console.log(sprintf("Error while trying to update: %s.", JSON.stringify(customerDbObject)));
+          callback(err);
+        } else {
+          var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
+
+          if (!updatedAddress) {
+            var addressId = customerAttributes.addressRef;
+            this.addressService.fetch(addressId, (err, address) => {
+              if (err) {
+                callback(err);
+              } else {
+                customerAttributes.address = address;
+                returnCustomer(customerAttributes, callback);
+              }
+            });
+          } else {
+            customerAttributes.address = updatedAddress;
+            returnCustomer(customerAttributes, callback);
+          }
+        }
+      });
+    }
+
+    var addressInformationChanged = customer.address;
+    if (addressInformationChanged) {
+      this.addressService.update(customer.address, (err, updatedAddress) => {
+        if (err) {
+          callback(err);
+        } else {
+          updateCustomer(customer, updatedAddress, callback);
+        }
+      });
+    } else {
+      updateCustomer(customer, null, callback);
+    }
   }
 
   fetch(id, callback) {
