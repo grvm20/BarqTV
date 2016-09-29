@@ -1,20 +1,13 @@
 'use strict';
 
+const _ = require('underscore');
+
 /***
 * Utility class for app
 ***/
 module.exports = class Utils {
 
-  static isEmpty(val) {
-    var isEmpty = true;
-    var val = value;
-    if (value) {
-      val = value.trim();
-    }
-
-    if (val) {
-      isEmpty = false;
-    }
-    return isEmpty;
+  static isEmpty (val) {
+    return _.isEmpty( (val && val.trim)? val.trim() : val );
   }
 }

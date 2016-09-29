@@ -25,19 +25,27 @@ module.exports = class CustomersController {
   }
 
 
-  static show(params, callback) {
+  show(params, callback) {
     if (areValidParams(params)) {
       var containsEmail = _.isString(params.email);
 
       if (containsEmail) {
         var email = params.email;
         this.customerService.fetch(email, (err, customer) => {
-          this.CustomerSerializer.render(customer, sendHttpResponse(callback));
+          if (err) {
+            callback(err);
+          } else {
+            this.CustomerSerializer.render(customer, sendHttpResponse(callback));
+          }
         });
       } else {
         // Return all customers.
         this.customerService.fetch(null, (err, customers) => {
-          this.CustomerSerializer.render(customers, sendHttpResponse(callback));
+          if (err) {
+            callback(err);
+          } else {
+            this.CustomerSerializer.render(customers, sendHttpResponse(callback));
+          }
         });
       }
     } else {
@@ -46,15 +54,15 @@ module.exports = class CustomersController {
     }
   }
 
-  static create(params, callback) {
+  create(params, callback) {
     // TODO
   }
 
-  static update(params, callback) {
+  update(params, callback) {
     // TODO
   }
 
-  static delete(params, callback) {
+  delete(params, callback) {
     // TODO
   }
 };

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "async": "^2.0.1",
+    "aws-sdk": "^2.6.5",
     "chai": "^3.5.0",
     "sprintf": "^0.1.5",
     "underscore": "^1.8.3"
