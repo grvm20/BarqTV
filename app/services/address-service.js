@@ -34,14 +34,26 @@ module.exports = class AddressService {
 
   save(addressAttributes, callback) {
 
-  // TODO - Rework method once we move to id per addres
+    // TODO - Rework method once we move to id per addres
     var id = generateGUID()
     addressAttributes.id = id;
 
     var address = new Address(addressAttributes);
     var addressDbModel = mapAddressToDbObject(address);
 
-    this._dao.persist(addressDbModel, callback);
+    this._dao.persist(addressDbModel, (err, persistedObject) => {
+      if (err) {
+        callback(err);
+      } else {
+        var addressAttributes = mapDbObjectToAddressAttributes(JSON.parse(persistedObject));
+        try {
+          var address = new Address(addressAttributes);
+        } catch (err) {
+          callback(err);
+        }
+        callback(null, address);
+      }
+    });
   }
 
   /**
@@ -60,16 +72,16 @@ module.exports = class AddressService {
       if (err) {
         callback(err);
       } else {
-        
-        if(Object.prototype.toString.call(fetchedAddress) === '[object Array]'){
+
+        if (Object.prototype.toString.call(fetchedAddress) === '[object Array]') {
           var addresses = [];
-          fetchedAddress.forEach(function(addressDbObject){
-            
+          fetchedAddress.forEach(function(addressDbObject) {
+
             var addressAttributes = mapDbObjectToAddressAttributes(addressDbObject);
 
             try {
               var address = new Address(addressAttributes);
-            } catch(err) {
+            } catch (err) {
               callback(err);
             }
 
@@ -78,18 +90,19 @@ module.exports = class AddressService {
 
           callback(null, addresses);
 
-        }else{
-          if(!(Object.keys(fetchedAddress).length === 0)){
+        } else {
+          if (!(Object.keys(fetchedAddress).length === 0)) {
             var addressAttributes = mapDbObjectToAddressAttributes(fetchedAddress);
 
             try {
               var address = new Address(addressAttributes);
-            } catch(err) {
+            } catch (err) {
               callback(err);
             }
-          }else{
+          } else {
             callback(null, fetchedAddress);
           }
+
         }
         callback(null, address);
       }
@@ -104,8 +117,20 @@ module.exports = class AddressService {
    **/
   delete(id, callback) {
     if (!Utils.isEmpty(id)) {
-        var key = createAddressKey(id);
-        this._dao.delete(key, callback);
+      var key = createAddressKey(id);
+      this._dao.delete(key, (err, persistedObject) => {
+        if (err) {
+          callback(err);
+        } else {
+          var addressAttributes = mapDbObjectToAddressAttributes(JSON.parse(persistedObject));
+          try {
+            var address = new Address(addressAttributes);
+          } catch (err) {
+            callback(err);
+          }
+          callback(null, address);
+        }
+      });
     } else {
       throw new InputValidationException('id');
     }
@@ -115,8 +140,8 @@ module.exports = class AddressService {
 function generateGUID() {
   // This is pseudo GUID. No clean way of getting GUID in JS
   var id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-  var r = Math.random() * 16 | 0,
-    v = c == 'x' ? r : (r & 0x3 | 0x8);
+    var r = Math.random() * 16 | 0,
+      v = c == 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
 
