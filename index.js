@@ -4,15 +4,15 @@
 const _ = require('underscore');
 
 // Internal imports.
-const Dao = require('app/services/dao');
+const Dao = require('./app/services/dao/dao');
 
-const Customer = require('app/models/customer');
-const CustomerService = require('app/services/customer-service');
-const CustomersSerializer = require('app/serializers/customer-serializer');
-const CustomersController = require('app/controllers/customers-controller');
+const Customer = require('./app/models/customer');
+const CustomerService = require('./app/services/customer-service');
+const CustomersSerializer = require('./app/views/customer-serializer');
+const CustomersController = require('./app/controllers/customers-controller');
 
-const Address = require('app/models/address');
-const AddressService = require('app/services/address-service');
+const Address = require('./app/models/address');
+const AddressService = require('./app/services/address-service');
 
 // Constants.
 const CUSTOMERS_TABLE_NAME = 'customers';
@@ -23,6 +23,10 @@ var customerDao;
 var customersSerializer;
 var customerService;
 var customersController;
+
+var addressDao;
+var addressService;
+var addressesController;
 
 
 // Functions.
@@ -48,12 +52,10 @@ function injectDependencies() {
   );
   console.log('Dependencies injected.');
 }
-
+injectDependencies();
 
 exports.customersControllerHandler = (event, context, callback) => {
   console.log('Received event:', JSON.stringify(event, null, 2));
-
-  injectDependencies();
 
   if (event.operation) {
     var operation = event.operation;
@@ -84,3 +86,5 @@ exports.customersControllerHandler = (event, context, callback) => {
       // Unsopported operation.
   }
 };
+
+// customersController.show({email: "josruice@gmail.com"}, ()=>{})

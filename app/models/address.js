@@ -5,19 +5,20 @@ const Utils = require("../utilities/utils")
 
 var containsDigitRegex = /.*[0-9].*/
 var zipCodeRegex = /[0-9]{5,}$/
+
 /***
  * Model class for Address
  ***/
-module.exports = class AddressModel {
+module.exports = class Address {
 
-  constructor(id, city, state, apt, number, street, zipCode) {
-    this.id = id;
-    this.city = city;
-    this.state = state ;
-    this.apt = apt;
-    this.number = number;
-    this.street = street;
-    this.zipCode = zipCode;
+  constructor(attributes) {
+    this.id = attributes.id;
+    this.city = attributes.city;
+    this.state = attributes.state;
+    this.apt = attributes.apt;
+    this.number = attributes.number;
+    this.street = attributes.street;
+    this.zipCode = attributes.zipCode;
   }
 
   set id(id){

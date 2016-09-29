@@ -1,8 +1,24 @@
 'use strict';
 
 const InputValidationException = require("../exceptions/invalid-input-exception")
-const Address = require('../models/addresses-model');
-const Utils = require("../utilities/utils")
+const Address = require('../models/address');
+const Utils = require("../utilities/utils");
+
+/*
+ * TODO: Move this mapping function to a data layer. The service shouldn't 
+ * know about them.
+ */
+function mapDbObjectToAddressAttributes (dbObject) {
+  return {
+    id: dbObject.id,
+    city: dbObject.city,
+    state: dbObject.state,
+    apt: dbObject.apt,
+    number: dbObject.number,
+    street: dbObject.street,
+    zipCode: dbObject.zip_code
+  };
+}
 
 module.exports = class AddressService {
 
@@ -44,7 +60,21 @@ module.exports = class AddressService {
     if (id) {
       key = createAddressKey(id);
     }
-    this._dao.fetch(key, callback);
+    this._dao.fetch(key, (err, addressDbObject) => {
+      if (err) {
+        callback(err);
+      } else {
+        var addressAttributes = mapDbObjectToAddressAttributes(addressDbObject);
+
+        try {
+          var address = new Address(addressAttributes);
+        } catch(err) {
+          callback(err);
+        }
+
+        callback(null, address);
+      }
+    });
   }
 
   /**

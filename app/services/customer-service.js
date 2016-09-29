@@ -38,13 +38,14 @@ module.exports = class CustomerService {
     this.addressService = addressService;
   }
 
+  // May throw expeptions.
   create(input) {
     if (input instanceof Customer) {
       return input;
     } else {
       var attributes = input;
       var addressData = attributes.address;
-      var newAddress = addressService.createAddress(addressData);
+      var newAddress = new Address(addressData);
       attributes.address = newAddress;
       var newCustomer = new Customer(attributes);
       return newCustomer;
@@ -52,7 +53,7 @@ module.exports = class CustomerService {
   }
 
   save(customer, callback) {
-    addressService.saveAddress(customer.address, (err, res) => {
+    this.addressService.save(customer.address, (err, res) => {
       if (err) {
         callback(err);
       } else {
@@ -75,15 +76,21 @@ module.exports = class CustomerService {
       // Fetch just one.
       var isValidId = Customer.isValidId(id);
       if (isValidId) {
-        var queryResult = dao.fetch({id: id}, (err, customerDbObject) => {
+        var queryResult = this.dao.fetch({id: id}, (err, customerDbObject) => {
           var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
           var addressId = customerAttributes.addressRef;
-          addressService.getAddress(addressId, (error, address) {
+          this.addressService.fetch(addressId, (err, address) => {
             if (err) {
               callback(err);
             } else {
               customerAttributes.address = address;
-              var customer = this.create(customerAttributes);
+
+              try {
+                var customer = this.create(customerAttributes);
+              } catch(err) {
+                callback(err);
+              }
+              
               console.log("Successfully fetched Customer with id: " + customer.id);
               callback(null, customer);
             }
@@ -97,16 +104,22 @@ module.exports = class CustomerService {
       this.dao.fetch(null, (err, customerDbObjects) => {
         var customers = [];
 
-        function forEachCustomerDbObject (customerDbObject, innerCallback) {
+        var forEachCustomerDbObject = (customerDbObject, innerCallback) => {
           // TODO: although parallel, this is a n+1 query! Optimize asap.
           var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
           var addressId = customerAttributes.addressRef;
-          addressService.getAddress(addressId, (error, address) {
+          this.addressService.fetch(addressId, (err, address) => {
             if (err) {
               callback(err);
             } else {
               customerAttributes.address = address;
-              var customer = this.create(customerAttributes);
+
+              try {
+                var customer = this.create(customerAttributes);
+              } catch(err) {
+                callback(err);
+              }              
+
               customers.push(customer);
               innerCallback();
             }

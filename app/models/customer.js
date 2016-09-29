@@ -35,7 +35,7 @@ module.exports = class Customer {
     return this._lastName;
   }
 
-  set address(addressRef) {
+  set address(address) {
     this._address = address;
   }
   get address() {
@@ -69,7 +69,7 @@ module.exports = class Customer {
   }
 
   static isValidId(id) {
-    isValidEmail(id);
+    return this.isValidEmail(id);
   }
 
   static isValidEmail(email) {
