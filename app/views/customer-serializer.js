@@ -3,25 +3,55 @@
 const _ = require('underscore');
 
 module.exports = class CustomerSerializer {
-  constructor() {}
+  constructor(addressSerializer) {
+    this.addressSerializer = addressSerializer;
+  }
 
-  static render(customers, callback) {
-    function renderSingleCustomer(customer) {
-      return JSON.stringify({
-        email: customer.email,
-        first_name: customer.firstName,
-        last_name: customer.lastName,
-        address_ref: customer.addressRef,
-        phone_number: customer.phoneNumber
-      });
+  serialize(customer) {
+    return {
+      email: customer.email,
+      first_name: customer.firstName,
+      last_name: customer.lastName,
+      address: this.addressSerializer.serialize(customer.address),
+      phone_number: customer.phoneNumber
+    };
+  }
+
+  deserialize(object) {
+    var result = {};
+
+    if (object.email) {
+      result.email = object.email;
+    }
+    if (object.first_name) {
+      result.firstName = object.first_name;
+    }
+    if (object.last_name) {
+      result.lastName = object.last_name;
+    }
+    if (object.address_ref) {
+      result.addressRef = object.address_ref;
+    }
+    if (object.phone_number) {
+      result.phoneNumber = object.phone_number;
+    }
+    if (object.address) {
+      result.address = this.addressSerializer.deserialize(object.address);
     }
 
+    return result;
+  }
+
+  render(customers, callback) {
     if (_.isArray(customers)) {
-      var result = '[' + _.map(customers, renderSingleCustomer).join() + ']'
+      var result = [];
+      _.each(customers, (el) => {
+        result.push(this.serialize(el));
+      })
     } else {
-      var result = renderSingleCustomer(customers);
+      var result = this.serialize(customers);
     }
 
-    callback(null, result);
+    callback(null, JSON.stringify(result));
   }
 }

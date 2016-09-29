@@ -5,7 +5,7 @@ const Address = require('../models/address');
 const Utils = require("../utilities/utils");
 
 /*
- * TODO: Move this mapping function to a data layer. The service shouldn't 
+ * TODO: Move these mapping functions to a data layer. The service shouldn't 
  * know about them.
  */
 function mapDbObjectToAddressAttributes (dbObject) {
@@ -18,6 +18,18 @@ function mapDbObjectToAddressAttributes (dbObject) {
     street: dbObject.street,
     zipCode: dbObject.zip_code
   };
+}
+
+function mapAddressToDbObject (address) {
+  return {
+    id: address.id,
+    city: address.city,
+    state: address.state,
+    apt: address.apt,
+    number: address.number,
+    street: address.street,
+    zip_code: address.zipCode
+  }
 }
 
 module.exports = class AddressService {
@@ -33,19 +45,16 @@ module.exports = class AddressService {
   }
 
   save(address, callback) {
+    if ( !(address instanceof Address) ) {
+      var attributes = address;
+      try {
+        var address = new Address(attributes);
+      } catch (err) {
+        callback(err);
+      }
+    }
 
-  // TODO - Rework method once we move to id per addres
-    var id = generateGUID()
-    var city = address.city;
-    var state = address.state;
-    var apt = address.apt;
-    var number = address.number;
-    var street = address.street;
-    var zipCode = address.zipcode;
-
-    var address = new Address(id, city, state, apt, number, street, zipCode);
-    var addressDbModel = createDBModel(address);
-
+    var addressDbModel = mapAddressToDbObject(address);
     this._dao.persist(addressDbModel, callback);
   }
 
@@ -93,16 +102,6 @@ module.exports = class AddressService {
   }
 }
 
-function generateGUID() {
-  // This is pseudo GUID. No clean way of getting GUID in JS
-  var id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-  var r = Math.random() * 16 | 0,
-    v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-
-  return id;
-}
 
 function createAddressKey(id) {
 
@@ -112,20 +111,3 @@ function createAddressKey(id) {
   return key;
 }
 
-/**
- * Generates necessary DB model as understood by DAO
- **/
-function createDBModel(address) {
-
-  var item = {
-    "id": address.id,
-    "city": address.city,
-    "state": address.state,
-    "apt": address.apt,
-    "number": address.number,
-    "street": address.street,
-    "zipcode": address.zipCode
-  };
-
-  return item;
-}

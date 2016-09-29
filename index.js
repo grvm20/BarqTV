@@ -8,11 +8,13 @@ const Dao = require('./app/services/dao/dao');
 
 const Customer = require('./app/models/customer');
 const CustomerService = require('./app/services/customer-service');
-const CustomersSerializer = require('./app/views/customer-serializer');
+const CustomerSerializer = require('./app/views/customer-serializer');
 const CustomersController = require('./app/controllers/customers-controller');
 
 const Address = require('./app/models/address');
 const AddressService = require('./app/services/address-service');
+const AddressSerializer = require('./app/views/address-serializer');
+// const AddressesController = require('./app/controllers/addresses-controller');
 
 // Constants.
 const CUSTOMERS_TABLE_NAME = 'customers';
@@ -20,12 +22,13 @@ const ADDRESSES_TABLE_NAME = 'addresses';
 
 // Singleton variables.
 var customerDao;
-var customersSerializer;
 var customerService;
+var customerSerializer;
 var customersController;
 
 var addressDao;
 var addressService;
+var addressSerializer;
 var addressesController;
 
 
@@ -39,7 +42,10 @@ function injectDependencies() {
     addressDao  
   );
 
-  customersSerializer = new CustomersSerializer();
+  addressSerializer = new AddressSerializer();
+  customerSerializer = new CustomerSerializer(
+    addressSerializer
+  );
   customerService = new CustomerService(
     customerDao,
     addressService
@@ -48,8 +54,13 @@ function injectDependencies() {
   // CustomersController receives a serializer class as a sort of interface.
   customersController = new CustomersController(
     customerService,
-    CustomersSerializer
+    customerSerializer
   );
+  // addressesController = new AddressesController(
+  //   addressService,
+  //   addressSerializer
+  // );
+
   console.log('Dependencies injected.');
 }
 injectDependencies();

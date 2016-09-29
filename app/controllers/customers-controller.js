@@ -19,9 +19,9 @@ function areValidParams(params) {
 }
 
 module.exports = class CustomersController {
-  constructor(customerService, CustomerSerializer) {
+  constructor(customerService, customerSerializer) {
     this.customerService = customerService;
-    this.CustomerSerializer = CustomerSerializer;
+    this.customerSerializer = customerSerializer;
   }
 
 
@@ -35,7 +35,7 @@ module.exports = class CustomersController {
           if (err) {
             callback(err);
           } else {
-            this.CustomerSerializer.render(customer, sendHttpResponse(callback));
+            this.customerSerializer.render(customer, sendHttpResponse(callback));
           }
         });
       } else {
@@ -44,7 +44,7 @@ module.exports = class CustomersController {
           if (err) {
             callback(err);
           } else {
-            this.CustomerSerializer.render(customers, sendHttpResponse(callback));
+            this.customerSerializer.render(customers, sendHttpResponse(callback));
           }
         });
       }
@@ -55,7 +55,26 @@ module.exports = class CustomersController {
   }
 
   create(params, callback) {
-    // TODO
+    if (areValidParams(params)) {
+      try {
+        var customerAttributes = this.customerSerializer.deserialize(params);
+        var customer = this.customerService.create(customerAttributes);
+      } catch(err) {
+        callback(err);
+      }
+
+      this.customerService.save(customer, (err, customer) => {
+        if (err) {
+            callback(err);
+          } else {
+            this.customerSerializer.render(customer, sendHttpResponse(callback));
+          }
+      });
+      
+    } else {
+      // Invalid params.
+      // Raise error.
+    }
   }
 
   update(params, callback) {

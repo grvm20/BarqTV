@@ -2,6 +2,7 @@
 
 const _ = require('underscore');
 const async = require('async');
+const sprintf = require('sprintf-js').sprintf;
 
 const Customer = require('../models/customer');
 const Address = require('../models/address');
@@ -53,15 +54,16 @@ module.exports = class CustomerService {
   }
 
   save(customer, callback) {
+    console.log(sprintf("Proceeding to save Customer %s.", customer.id));
     this.addressService.save(customer.address, (err, res) => {
       if (err) {
         callback(err);
       } else {
         var customerDbObject = mapCustomerToDbObject(customer);
-        console.log("Ready to persist: %s", JSON.stringify(customerDbObject));
+        console.log(sprintf("Ready to persist: %s.", JSON.stringify(customerDbObject)));
         this.dao.persist(customerDbObject, (err, item) => {
           if (err) {
-            console.log("Error while trying to persist: %s", JSON.stringify(customerDbObject));
+            console.log(sprintf("Error while trying to persist: %s.", JSON.stringify(customerDbObject)));
             callback(err);
           } else {
             callback(null, customer);
