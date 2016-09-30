@@ -10,7 +10,7 @@ var VALID_ADDRESS_REQUIRED_ATTRIBUTES = [
   "city",
   "state",
   "apt",
-  "number",
+  "building",
   "street",
   "zipCode"
 ];
@@ -26,7 +26,7 @@ module.exports = class Address {
       this.city = attributes.city;
       this.state = attributes.state;
       this.apt = attributes.apt;
-      this.number = attributes.number;
+      this.building = attributes.building;
       this.street = attributes.street;
       this.zipCode = attributes.zipCode;
       this.deleted = attributes.deleted || false;
@@ -74,12 +74,12 @@ module.exports = class Address {
     }
   }
 
-  set number (number) {
-    if (number) {
-      if(!Utils.isEmpty(number)) {
-        this._number = number;
+  set building (building) {
+    if (building) {
+      if(!Utils.isEmpty(building)) {
+        this._building = building;
       } else {
-        throw new InputValidationException("number")
+        throw new InputValidationException("building")
       }
     }
   }
@@ -126,8 +126,8 @@ module.exports = class Address {
     return this._state;
   }
 
-  get number () {
-    return this._number;
+  get building () {
+    return this._building;
   }
 
   get street () {
