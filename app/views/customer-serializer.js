@@ -12,7 +12,7 @@ module.exports = class CustomerSerializer {
       email: customer.email,
       first_name: customer.firstName,
       last_name: customer.lastName,
-      address: this.addressSerializer.serialize(customer.address),
+      address: customer.addressRef,
       phone_number: customer.phoneNumber
     };
   }
