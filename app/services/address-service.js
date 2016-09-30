@@ -15,7 +15,7 @@ function mapDbObjectToAddressAttributes(dbObject) {
     city: dbObject.city,
     state: dbObject.state,
     apt: dbObject.apt,
-    number: dbObject.number,
+    building: dbObject.building,
     street: dbObject.street,
     zipCode: dbObject.zip_code
   };
@@ -47,8 +47,8 @@ function mapAddressToDbObject(address) {
   if (address.apt) {
     item["apt"] = address.apt;
   }
-  if (address.number) {
-    item["number"] = address.number;
+  if (address.building) {
+    item["building"] = address.building;
   }
   if (address.street) {
     item["street"] = address.street;
@@ -56,7 +56,7 @@ function mapAddressToDbObject(address) {
   if (address.zipCode) {
     item["zip_code"] = address.zipCode;
   }
-  if (address.deleted) {
+  if (address.deleted != null) {
     item["deleted"] = address.deleted;
   }
 
@@ -66,19 +66,21 @@ function mapAddressToDbObject(address) {
 function constructUpdatableAddress(address) {
 
   var updatableAddress = new Address();
-
   if (address.city) {
+    console.log(address.city);
     updatableAddress.city = address.city;
   }
+
   if (address.state) {
     updatableAddress.state = address.state;
   }
   if (address.apt) {
     updatableAddress.apt = address.apt;
   }
-  if (address.number) {
-    updatableAddress.number = address.number;
+  if (address.building) {
+    updatableAddress.building = address.building;
   }
+
   if (address.street) {
     updatableAddress.street = address.street;
   }
@@ -199,7 +201,6 @@ module.exports = class AddressService {
         if (err) {
           callback(err);
         } else {
-
           var addressAttributes = mapDbObjectToAddressAttributes(deletedAddress);
 
           try {

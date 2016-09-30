@@ -66,7 +66,7 @@ module.exports = class AddressController {
         if (err) {
           callback(err);
         } else {
-          this.AddressSerializer.render(updatedAddress, sendHttpResponse(callback));
+          this.addressSerializer.render(updatedAddress, sendHttpResponse(callback));
         }
       });
     } else {

@@ -165,17 +165,17 @@ module.exports = class Dao {
 
           _.each(_.keys(newItem), (key) => {
             if (currentItem[key] !== newItem[key]) {
-              var attributeId = ":val"+i;
+              var attributeId = ":val" + i;
               updateAssignments.push(sprintf("%s = %s", key, attributeId));
               expressionAttributeValues[attributeId] = newItem[key];
               updateRequired = true;
               i++;
             }
           });
-          
+
           var updateExpression = sprintf("SET %s", updateAssignments.join(', '));
 
-          if(!updateRequired) {
+          if (!updateRequired) {
             console.log("No new value given to any field. Nothing to update.");
             callback(null, currentItem);
             return;
