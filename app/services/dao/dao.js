@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('underscore');
 const AWS = require('aws-sdk');
 const dynamoDocClient = new AWS.DynamoDB.DocumentClient();
 
@@ -22,22 +23,32 @@ module.exports = class Dao {
    * @callback - Callback function to which either error or data is passed back.
    * Argument to callback expected of the form(error, data)
    **/
-  persist(item, callback) {
+  persist(key, item, callback) {
 
-    // New customer is always active by default
-    item.deleted = false;
     var params = {
       TableName: this.tableName,
-      Item: item
+      Key: key
     };
-
-    dynamoDocClient.put(params, function(err, data) {
+    dynamoDocClient.get(params, function(err, data) {
       if (err) {
         console.error("Dynamo failed to persist data " + err);
         callback(err, null);
       } else {
-        console.log("Successfully persited record into dynamo: " + JSON.stringify(item));
-        callback(null, item);
+        if (_.isEmpty(data)) {
+          params = _.omit(params, 'Key');
+          params.Item = item;
+          dynamoDocClient.put(params, function(err, persistedData) {
+            if (err) {
+              console.error("Dynamo failed to persist data " + err);
+              callback(err, null);
+            } else {
+              console.log("Successfully persited record into dynamo: " + JSON.stringify(item));
+              callback(null, item);
+            }
+          });
+        } else {
+          throw "Item Already Exists";
+        }
       }
     });
   }

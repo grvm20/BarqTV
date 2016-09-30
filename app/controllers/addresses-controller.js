@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('underscore');
+const Utils = require("../utilities/utils");
 
 function sendHttpResponse(callback) {
   return (err, body) => {
@@ -58,13 +59,19 @@ module.exports = class AddressController {
   }
 
   update(params, callback) {
-    this.addressService.update(address, (err, updatedAddress) => {
-      if (err) {
-        callback(err);
-      } else {
-        this.AddressSerializer.render(updatedAddress, sendHttpResponse(callback));
-      }
-    });
+    var id = params.id;
+    var address = params.address;
+    if (!Utils.isEmpty(id) && areValidParams(address)) {
+      this.addressService.update(id, address, (err, updatedAddress) => {
+        if (err) {
+          callback(err);
+        } else {
+          this.AddressSerializer.render(updatedAddress, sendHttpResponse(callback));
+        }
+      });
+    } else {
+      // raise error
+    }
   }
 
   delete(params, callback) {
@@ -78,7 +85,7 @@ module.exports = class AddressController {
           this.addressSerializer.render(address, sendHttpResponse(callback));
         }
       });
-    }else {
+    } else {
       // raise error
     }
   }

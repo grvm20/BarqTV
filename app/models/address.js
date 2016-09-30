@@ -12,14 +12,16 @@ var zipCodeRegex = /[0-9]{5,}$/
 module.exports = class Address {
 
   constructor(attributes) {
-    this.id = attributes.id || Utils.generateGuid();
-    this.city = attributes.city;
-    this.state = attributes.state;
-    this.apt = attributes.apt;
-    this.number = attributes.number;
-    this.street = attributes.street;
-    this.zipCode = attributes.zipCode;
-    this.deleted = attributes.deleted || false;
+    if (attributes) {
+      this.id = attributes.id || Utils.generateGuid();
+      this.city = attributes.city;
+      this.state = attributes.state;
+      this.apt = attributes.apt;
+      this.number = attributes.number;
+      this.street = attributes.street;
+      this.zipCode = attributes.zipCode;
+      this.deleted = attributes.deleted || false;
+    }
   }
 
   set id(id) {
@@ -113,5 +115,4 @@ module.exports = class Address {
   get zipCode() {
     return this._zipCode;
   }
-
 }

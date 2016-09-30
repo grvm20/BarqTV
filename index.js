@@ -110,9 +110,6 @@ exports.addressesControllerHandler = (event, context, callback) => {
   }
 
   var params = _.omit(event, 'operation');
-  if (params.customer) {
-    params = params.customer;
-  }
 
   switch (operation) {
     case 'fetch':
