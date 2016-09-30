@@ -46,7 +46,6 @@ module.exports = class AddressSerializer {
   }
 
   render(addresses, callback) {
-
     if (_.isArray(addresses)) {
       var result = [];
       _.each(addresses, (el) => {
@@ -55,7 +54,6 @@ module.exports = class AddressSerializer {
     } else {
       var result = this.serialize(addresses);
     }
-
-    callback(null, JSON.stringify(result));
+    callback(null, result);
   }
 }

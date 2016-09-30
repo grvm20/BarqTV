@@ -20,15 +20,19 @@ var VALID_ADDRESS_REQUIRED_ATTRIBUTES = [
  ***/
 module.exports = class Address {
 
-  constructor (attributes) {
-    this.id = attributes.id || Utils.generateGuid();
-    this.city = attributes.city;
-    this.state = attributes.state;
-    this.apt = attributes.apt;
-    this.number = attributes.number;
-    this.street = attributes.street;
-    this.zipCode = attributes.zipCode;
+  constructor(attributes) {
+    if (attributes) {
+      this.id = attributes.id || Utils.generateGuid();
+      this.city = attributes.city;
+      this.state = attributes.state;
+      this.apt = attributes.apt;
+      this.number = attributes.number;
+      this.street = attributes.street;
+      this.zipCode = attributes.zipCode;
+      this.deleted = attributes.deleted || false;
+    }
   }
+
 
   set id (id) {
     if (id) {
@@ -100,6 +104,12 @@ module.exports = class Address {
     }
   }
 
+  set deleted (deleted) {
+    if (deleted) {
+      this._deleted = deleted;  
+    }
+  }
+
   get id () {
     return this._id;
   }
@@ -126,6 +136,10 @@ module.exports = class Address {
 
   get zipCode () {
     return this._zipCode;
+  }
+
+  get deleted () {
+    return this._deleted;
   }
 
   // To be valid, it must contain all required attributes.
@@ -159,5 +173,4 @@ module.exports = class Address {
 
     return true;
   }
-
 }
