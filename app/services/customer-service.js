@@ -69,6 +69,7 @@ module.exports = class CustomerService {
   }
 
   save(customer, callback) {
+    customer.validate();
     console.log(sprintf("Proceeding to save Customer %s.", customer.id));
     this.addressService.save(customer.address, (err, res) => {
       if (err) {
@@ -174,31 +175,33 @@ module.exports = class CustomerService {
   fetch(id, callback) {
     if (id) {
       // Fetch just one.
-      var isValidId = Customer.isValidId(id);
-      if (isValidId) {
-        var queryResult = this.dao.fetch({id: id}, (err, customerDbObject) => {
-          var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
-          var addressId = customerAttributes.addressRef;
-          this.addressService.fetch(addressId, (err, address) => {
-            if (err) {
-              callback(err);
-            } else {
-              customerAttributes.address = address;
-
-              try {
-                var customer = this.create(customerAttributes);
-              } catch(err) {
-                callback(err);
-              }
-              
-              console.log("Successfully fetched Customer with id: " + customer.id);
-              callback(null, customer);
-            }
-          });
-        });
-      } else {
-        // Raise error.
+      try {
+        var customer = new Customer({id: id});  
+      } catch (err) {
+        callback(err);
       }
+      
+      var queryResult = this.dao.fetch({id: customer.id}, (err, customerDbObject) => {
+        var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
+        var addressId = customerAttributes.addressRef;
+        this.addressService.fetch(addressId, (err, address) => {
+          if (err) {
+            callback(err);
+          } else {
+            customerAttributes.address = address;
+
+            try {
+              var customer = this.create(customerAttributes);
+            } catch(err) {
+              callback(err);
+            }
+            
+            console.log("Successfully fetched Customer with id: " + customer.id);
+            callback(null, customer);
+          }
+        });
+      });
+
     } else {
       // Fetch all.
       this.dao.fetch(null, (err, customerDbObjects) => {
