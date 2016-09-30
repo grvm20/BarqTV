@@ -44,6 +44,8 @@ module.exports = class CustomersController {
         this.customerService.fetch(null, (err, customers) => {
           if (err) {
             callback(err);
+          } else if (_.isEmpty(customers)) {
+            sendHttpResponse(callback)(null, {});
           } else {
             this.customerSerializer.render(customers, sendHttpResponse(callback));
           }

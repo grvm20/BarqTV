@@ -22,24 +22,31 @@ function mapDbObjectToCustomerAttributes (dbObject) {
   };
 }
 
+function createCustomerKey (id) {
+  var key = {
+    "id": id
+  };
+  return key;
+}
+
 function mapCustomerToDbObject (customer) {
   var result = {
     id: customer.id
   }
 
-  if (customer.firstName) {
+  if (typeof customer.firstName !== 'undefined') {
     result.first_name = customer.firstName;
   }
-  if (customer.lastName) {
+  if (typeof customer.lastName !== 'undefined') {
     result.last_name = customer.lastName;
   }
-  if (customer.addressRef) {
+  if (typeof customer.addressRef !== 'undefined') {
     result.address_ref = customer.addressRef;
   }
-  if (customer.phoneNumber) {
+  if (typeof customer.phoneNumber !== 'undefined') {
     result.phone_number = customer.phoneNumber;
   }
-  if (customer.deleted) {
+  if (typeof customer.deleted !== 'undefined') {
     result.deleted = customer.deleted;
   }
 
@@ -47,13 +54,17 @@ function mapCustomerToDbObject (customer) {
 }
 
 module.exports = class CustomerService {
-  constructor(dao, addressService) {
+  constructor (dao, addressService) {
     this.dao = dao;
     this.addressService = addressService;
   }
 
-  // May throw expeptions.
-  create(input) {
+  /**
+   * Builds a Customer object, with all its dependencies. Does not persist it.
+   * @input - attributes used to build the Customer.
+   * Throws InputValidationException.
+   **/
+  create (input) {
     if (input instanceof Customer) {
       return input;
     } else {
@@ -68,30 +79,53 @@ module.exports = class CustomerService {
     }
   }
 
-  save(customer, callback) {
+  /**
+   * Saves the given Customer to persistence.
+   * @customer - a valid Customer object.
+   * @callback - callback function with parameters (err, customer).
+   * Throws InputValidationException.
+   **/
+  save (customer, callback) {
     customer.validate();
-    console.log(sprintf("Proceeding to save Customer %s.", customer.id));
-    this.addressService.save(customer.address, (err, res) => {
+    console.log(sprintf("Proceeding to save Customer %s.", JSON.stringify(customer)));
+    this.isIdAvailable(customer.id, (err, idAvailable) => {
       if (err) {
         callback(err);
+      } else if (!idAvailable) {
+        callback({errMessage: sprintf("Email address is already in use.", customer.email)});
       } else {
-        var customerDbObject = mapCustomerToDbObject(customer);
-        console.log(sprintf("Ready to persist: %s.", JSON.stringify(customerDbObject)));
-        this.dao.persist(customerDbObject, (err, item) => {
+        this.addressService.save(customer.address, (err, res) => {
           if (err) {
-            console.log(sprintf("Error while trying to persist: %s.", JSON.stringify(customerDbObject)));
             callback(err);
           } else {
-            callback(null, customer);
+            var customerDbObject = mapCustomerToDbObject(customer);
+            console.log(sprintf("Ready to persist: %s.",
+              JSON  .stringify(customerDbObject)));
+
+            this.dao.persist(createCustomerKey(customer.id), customerDbObject,
+              (err, item) => {
+                if (err) {
+                  console.log(sprintf("Error while trying to persist: %s.",
+                    JSON.stringify(customerDbObject)));
+                  callback(err);
+                } else {
+                  callback(null, customer);
+                }
+              });
           }
         });
       }
     });
   }
 
-  delete(customer, callback) {
+  /**
+   * Deletes the given Customer from persistence.
+   * @customer - a Customer object.
+   * @callback - callback function with parameters (err, customer).
+   **/
+  delete (customer, callback) {
     console.log(sprintf("Proceeding to delete Customer %s.", customer.id));
-    this.dao.delete({id: customer.id}, (err, customerDbObject) => {
+    this.dao.delete(createCustomerKey(customer.id), (err, customerDbObject) => {
       // TODO: refactor this part to be DRY, as it is shared.
       var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
       var addressId = customerAttributes.addressRef;
@@ -114,7 +148,12 @@ module.exports = class CustomerService {
     });
   }
 
-  update(customer, callback) {
+  /**
+   * Updates the given Customer and persists its changes.
+   * @customer - a Customer object.
+   * @callback - callback function with parameters (err, customer).
+   **/
+  update (customer, callback) {
     console.log(sprintf("Proceeding to update Customer %s.", customer.id));
 
     var returnCustomer = (customerAttributes, callback) => {
@@ -130,12 +169,13 @@ module.exports = class CustomerService {
 
     var updateCustomer = (customer, updatedAddress, callback) => {
       var customerDbObject = mapCustomerToDbObject(customer);
-      var key = customerDbObject.id;
+      var key = createCustomerKey(customer.id);
       var attributesToUpdate = _.omit(customerDbObject, 'id');
       console.log(sprintf("Ready to update: %s.", JSON.stringify(customerDbObject)));
-      this.dao.update({id: key}, attributesToUpdate, (err, customerDbObject) => {
+      this.dao.update(key, attributesToUpdate, (err, customerDbObject) => {
         if (err) {
-          console.log(sprintf("Error while trying to update: %s.", JSON.stringify(customerDbObject)));
+          console.log(sprintf("Error while trying to update: %s.",
+            JSON.stringify(customerDbObject)));
           callback(err);
         } else {
           var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
@@ -160,7 +200,8 @@ module.exports = class CustomerService {
 
     var addressInformationChanged = customer.address;
     if (addressInformationChanged) {
-      this.addressService.update(customer.address, (err, updatedAddress) => {
+      var addressId = customer.addressRef;
+      this.addressService.update(addressId, customer.address, (err, updatedAddress) => {
         if (err) {
           callback(err);
         } else {
@@ -172,7 +213,13 @@ module.exports = class CustomerService {
     }
   }
 
-  fetch(id, callback) {
+  /**
+   * Fetches Customer objects from persistence and returns them.
+   * @id - id corresponding to the Customer that needs to be fetched.
+   * If nothing is provided then it returns all Customers.
+   * @callback - callback function with parameters (err, customers).
+   **/
+  fetch (id, callback) {
     if (id) {
       // Fetch just one.
       try {
@@ -182,24 +229,28 @@ module.exports = class CustomerService {
       }
       
       var queryResult = this.dao.fetch({id: customer.id}, (err, customerDbObject) => {
-        var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
-        var addressId = customerAttributes.addressRef;
-        this.addressService.fetch(addressId, (err, address) => {
-          if (err) {
-            callback(err);
-          } else {
-            customerAttributes.address = address;
-
-            try {
-              var customer = this.create(customerAttributes);
-            } catch(err) {
+        if (_.isEmpty(customerDbObject)) {
+          callback(null, {});
+        } else {
+          var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
+          var addressId = customerAttributes.addressRef;
+          this.addressService.fetch(addressId, (err, address) => {
+            if (err) {
               callback(err);
+            } else {
+              customerAttributes.address = address;
+
+              try {
+                var customer = this.create(customerAttributes);
+              } catch(err) {
+                callback(err);
+              }
+              
+              console.log("Successfully fetched Customer with id: " + customer.id);
+              callback(null, customer);
             }
-            
-            console.log("Successfully fetched Customer with id: " + customer.id);
-            callback(null, customer);
-          }
-        });
+          });
+        }
       });
 
     } else {
@@ -229,7 +280,7 @@ module.exports = class CustomerService {
           });
         }
 
-        function done() {
+        function done () {
           console.log("Successfully fetched all Customers.");
           callback(err, customers);
         }
@@ -237,5 +288,30 @@ module.exports = class CustomerService {
         async.each(customerDbObjects, forEachCustomerDbObject, done);
       });
     }
+  }
+
+  /**
+   * Alias for isIdAvailable();
+   **/
+  isEmailAvailable (email, callback) {
+    isIdAvailable (email, callback);
+  }
+
+  /**
+   * Checks if an ID is being used in persistence.
+   * @id - id to be checked.
+   * @callback - callback function with parameters (err, isAvailable), where 
+   * isAvailable is a boolean.
+   **/
+  isIdAvailable (id, callback) {
+    this.fetch (id, (err, customer) => {
+      if (err) {
+        callback(err);
+      } else if (_.isEmpty(customer)) {
+        callback(null, true);
+      } else {
+        callback(null, false);        
+      }
+    });
   }
 }
