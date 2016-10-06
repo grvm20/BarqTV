@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('underscore');
-const InputValidationException = require("../exceptions/invalid-input-exception");
+const InvalidInputException = require("../exceptions/invalid-input-exception");
 const Utils = require("../utilities/utils");
 
 var ZIP_CODE_REGEX = /[0-9]{5,}$/;
@@ -10,9 +10,10 @@ var VALID_ADDRESS_REQUIRED_ATTRIBUTES = [
   "city",
   "state",
   "apt",
-  "building",
+  "number",
   "street",
-  "zipCode"
+  "zipCode",
+  "deleted"
 ];
 
 /***
@@ -26,7 +27,7 @@ module.exports = class Address {
       this.city = attributes.city;
       this.state = attributes.state;
       this.apt = attributes.apt;
-      this.building = attributes.building;
+      this.number = attributes.number;
       this.street = attributes.street;
       this.zipCode = attributes.zipCode;
       this.deleted = attributes.deleted || false;
@@ -39,7 +40,7 @@ module.exports = class Address {
       if(!Utils.isEmpty(id)) {
         this._id = id;
       } else {
-        throw new InputValidationException("id")
+        throw new InvalidInputException("id")
       }
     }
   }
@@ -49,7 +50,7 @@ module.exports = class Address {
       if(!(Utils.isEmpty(city) || Utils.CONTAINS_DIGIT_REGEX.test(city))) {
         this._city = city;
       } else {
-        throw new InputValidationException("city")
+        throw new InvalidInputException("city")
       }
     }
   }
@@ -59,7 +60,7 @@ module.exports = class Address {
       if(!(Utils.isEmpty(state) || Utils.CONTAINS_DIGIT_REGEX.test(state))) {
         this._state = state;
       } else {
-        throw new InputValidationException("state")
+        throw new InvalidInputException("state")
       }
     }
   }
@@ -69,17 +70,17 @@ module.exports = class Address {
       if(!Utils.isEmpty(apt)) {
         this._apt = apt;
       } else {
-        throw new InputValidationException("apt")
+        throw new InvalidInputException("apt")
       }
     }
   }
 
-  set building (building) {
-    if (building) {
-      if(!Utils.isEmpty(building)) {
-        this._building = building;
+  set number (number) {
+    if (number) {
+      if(!Utils.isEmpty(number)) {
+        this._number = number;
       } else {
-        throw new InputValidationException("building")
+        throw new InvalidInputException("number")
       }
     }
   }
@@ -89,7 +90,7 @@ module.exports = class Address {
       if(!Utils.isEmpty(street)) {
         this._street = street;
       } else {
-        throw new InputValidationException("street")
+        throw new InvalidInputException("street")
       }
     }
   }
@@ -99,13 +100,13 @@ module.exports = class Address {
       if(!Utils.isEmpty(zipCode) && ZIP_CODE_REGEX.test(zipCode)) {
         this._zipCode = zipCode;
       } else {
-        throw new InputValidationException("zipCode")
+        throw new InvalidInputException("zipCode")
       }
     }
   }
 
   set deleted (deleted) {
-    if (deleted) {
+    if (typeof deleted === 'boolean') {
       this._deleted = deleted;  
     }
   }
@@ -126,8 +127,8 @@ module.exports = class Address {
     return this._state;
   }
 
-  get building () {
-    return this._building;
+  get number () {
+    return this._number;
   }
 
   get street () {
@@ -145,29 +146,10 @@ module.exports = class Address {
   // To be valid, it must contain all required attributes.
   validate () {
     _.each(VALID_ADDRESS_REQUIRED_ATTRIBUTES, (attribute) => {
-      var isValidAttribute = true;
-
-      var hasAttribute = this[attribute];
-      if (hasAttribute) {
-        var validationOutput;
-        if (typeof this[attribute].validate === 'function') {
-          validationOutput = this[attribute].validate();
-          if (typeof validationOutput === 'boolean') {
-            isValidAttribute = isValidAttribute && (validationOutput === true);
-          }
-        }
-        if (typeof this[attribute].isValid === 'function') {
-          validationOutput = this[attribute].isValid();
-          if (typeof validationOutput === 'boolean') {
-            isValidAttribute = isValidAttribute && (validationOutput === true);
-          }
-        }
-      } else {
-        isValidAttribute = false;
-      }
-
-      if (!isValidAttribute) {
-        throw new InputValidationException(attribute);
+      var hasAttribute = typeof this[attribute] !== 'undefined';
+      var isValidAttribute = Utils.isValid(this[attribute]);
+      if (!hasAttribute || !isValidAttribute) {
+        throw new InvalidInputException(attribute);
       }
     });
 

@@ -15,7 +15,7 @@ function mapDbObjectToAddressAttributes(dbObject) {
     city: dbObject.city,
     state: dbObject.state,
     apt: dbObject.apt,
-    building: dbObject.building,
+    number: dbObject.number,
     street: dbObject.street,
     zipCode: dbObject.zip_code
   };
@@ -47,8 +47,8 @@ function mapAddressToDbObject(address) {
   if (address.apt) {
     item["apt"] = address.apt;
   }
-  if (address.building) {
-    item["building"] = address.building;
+  if (address.number) {
+    item["number"] = address.number;
   }
   if (address.street) {
     item["street"] = address.street;
@@ -77,8 +77,8 @@ function constructUpdatableAddress(address) {
   if (address.apt) {
     updatableAddress.apt = address.apt;
   }
-  if (address.building) {
-    updatableAddress.building = address.building;
+  if (address.number) {
+    updatableAddress.number = address.number;
   }
 
   if (address.street) {
@@ -115,6 +115,7 @@ module.exports = class AddressService {
       try {
         var address = new Address(addressAttributes);
       } catch (err) {
+        console.error(err);
         callback(err);
       }
     }
@@ -199,6 +200,7 @@ module.exports = class AddressService {
 
       this._dao.delete(key, (err, deletedAddress) => {
         if (err) {
+          console.error(err);
           callback(err);
         } else {
           var addressAttributes = mapDbObjectToAddressAttributes(deletedAddress);
@@ -231,6 +233,7 @@ module.exports = class AddressService {
 
       this._dao.update(key, updatableAddressDbModel, (err, deletedAddress) => {
         if (err) {
+          console.error(err);
           callback(err);
         } else {
 

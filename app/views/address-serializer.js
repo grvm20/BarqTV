@@ -11,7 +11,7 @@ module.exports = class AddressSerializer {
       city: address.city,
       state: address.state,
       apt: address.apt,
-      building: address.building,
+      number: address.number,
       street: address.street,
       zip_code: address.zipCode
     };
@@ -32,8 +32,8 @@ module.exports = class AddressSerializer {
     if (object.apt) {
       result.apt = object.apt;
     }
-    if (object.building) {
-      result.building = object.building;
+    if (object.number) {
+      result.number = object.number;
     }
     if (object.street) {
       result.street = object.street;
