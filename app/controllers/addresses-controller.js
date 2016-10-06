@@ -3,18 +3,6 @@
 const _ = require('underscore');
 const Utils = require("../utilities/utils");
 
-function sendHttpResponse(callback) {
-  return (err, body) => {
-    callback(null, {
-      statusCode: err ? '400' : '200',
-      body: err ? err.message : body,
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-  };
-}
-
 function areValidParams(params) {
   return _.isObject(params)
 }
@@ -34,7 +22,7 @@ module.exports = class AddressController {
           console.log("Error fetching data for id:" + id);
           callback(err);
         } else {
-          this.addressSerializer.render(address, sendHttpResponse(callback));
+          this.addressSerializer.render(address, callback);
         }
       });
     } else {
@@ -50,7 +38,7 @@ module.exports = class AddressController {
           console.log("Error while trying to save address information: " + JSON.stringify(params.address))
           callback(err);
         } else {
-          this.addressSerializer.render(savedAddress, sendHttpResponse(callback));
+          this.addressSerializer.render(savedAddress, callback);
         }
       });
     } else {
@@ -66,7 +54,7 @@ module.exports = class AddressController {
         if (err) {
           callback(err);
         } else {
-          this.addressSerializer.render(updatedAddress, sendHttpResponse(callback));
+          this.addressSerializer.render(updatedAddress, callback);
         }
       });
     } else {
@@ -82,7 +70,7 @@ module.exports = class AddressController {
           console.log("Error while trying to delete address information for id: " + id);
           callback(err);
         } else {
-          this.addressSerializer.render(address, sendHttpResponse(callback));
+          this.addressSerializer.render(address, callback);
         }
       });
     } else {

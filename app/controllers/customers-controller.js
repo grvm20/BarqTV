@@ -3,18 +3,6 @@
 const _ = require('underscore');
 const sprintf = require('sprintf-js').sprintf;
 
-function sendHttpResponse(callback) {
-  return (err, body) => {
-    callback(null, {
-      statusCode: err ? '400' : '200',
-      body: err ? err.message : body,
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-  };
-}
-
 function areValidParams(params) {
   return _.isObject(params)
 }
@@ -34,20 +22,22 @@ module.exports = class CustomersController {
         var email = params.email;
         this.customerService.fetch(email, (err, customer) => {
           if (err) {
-            callback(err);
+            console.error(err);
+            return callback(err);
           } else {
-            this.customerSerializer.render(customer, sendHttpResponse(callback));
+            this.customerSerializer.render(customer, callback);
           }
         });
       } else {
         // Return all customers.
         this.customerService.fetch(null, (err, customers) => {
           if (err) {
-            callback(err);
+            console.error(err);
+            return callback(err);
           } else if (_.isEmpty(customers)) {
-            sendHttpResponse(callback)(null, {});
+            callback(null, {});
           } else {
-            this.customerSerializer.render(customers, sendHttpResponse(callback));
+            this.customerSerializer.render(customers, callback);
           }
         });
       }
@@ -61,13 +51,15 @@ module.exports = class CustomersController {
     if (areValidParams(params)) {
       this.buildCustomerFromParams(params, (err, customer) => {
         if (err) {
-          callback(err);
+          console.error(err);
+          return callback(err);
         } else {
           this.customerService.save(customer, (err, savedCustomer) => {
             if (err) {
-                callback(err);
+                console.error(err);
+                return callback(err);
               } else {
-                this.customerSerializer.render(savedCustomer, sendHttpResponse(callback));
+                this.customerSerializer.render(savedCustomer, callback);
               }
           });
         }
@@ -82,13 +74,15 @@ module.exports = class CustomersController {
     if (areValidParams(params)) {
       this.buildCustomerFromParams(params, (err, customer) => {
         if (err) {
-          callback(err);
+          console.error(err);
+          return callback(err);
         } else {
           this.customerService.update(customer, (err, updatedCustomer) => {
             if (err) {
-                callback(err);
+                console.error(err);
+                return callback(err);
               } else {
-                this.customerSerializer.render(updatedCustomer, sendHttpResponse(callback));
+                this.customerSerializer.render(updatedCustomer, callback);
               }
           });
         }
@@ -103,13 +97,15 @@ module.exports = class CustomersController {
     if (areValidParams(params)) {
       this.buildCustomerFromParams(params, (err, customer) => {
         if (err) {
-          callback(err);
+          console.error(err);
+          return callback(err);
         } else {
           this.customerService.delete(customer, (err, deletedCustomer) => {
             if (err) {
-                callback(err);
+                console.error(err);
+                return callback(err);
               } else {
-                this.customerSerializer.render(deletedCustomer, sendHttpResponse(callback));
+                this.customerSerializer.render(deletedCustomer, callback);
               }
           });
         }
@@ -123,12 +119,14 @@ module.exports = class CustomersController {
   buildCustomerFromParams(params, callback) {
     var customerAttributes = this.customerSerializer.deserialize(params);
 
-    console.log(sprintf("Customer attributes received %s.", JSON.stringify(customerAttributes)));
+    console.log(sprintf("Customer attributes received %s.",
+      JSON.stringify(customerAttributes)));
 
     try {
       var customer = this.customerService.create(customerAttributes);
     } catch (err) {
-      callback(err);
+      console.error(err);
+      return callback(err);
     }
 
     console.log(sprintf("Customer object created %s.", JSON.stringify(customer)));

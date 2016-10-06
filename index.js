@@ -33,6 +33,26 @@ var addressSerializer;
 
 
 // Functions.
+function sendHttpResponse(callback) {
+  return (err, body) => {
+    var statusCode = '200';
+    var body = body;
+    if (err) {
+      statusCode = '400';
+      body = err.message;
+    }
+
+    callback(null, {
+      statusCode: statusCode,
+      body: body,
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+  };
+};
+
+
 function injectDependencies() {
   console.log('Injecting dependencies.');
   customerDao = new Dao(CUSTOMERS_TABLE_NAME);
@@ -84,16 +104,16 @@ exports.customersControllerHandler = (event, context, callback) => {
   switch (operation) {
     case 'fetchAll':
     case 'fetch':
-      customersController.show(params, callback)
+      customersController.show(params, sendHttpResponse(callback))
       break;
     case 'create':
-      customersController.create(params, callback)
+      customersController.create(params, sendHttpResponse(callback))
       break;
     case 'update':
-      customersController.update(params, callback)
+      customersController.update(params, sendHttpResponse(callback))
       break;
     case 'delete':
-      customersController.delete(params, callback)
+      customersController.delete(params, sendHttpResponse(callback))
       break;
     default:
       // Unsupported operation.
