@@ -1,14 +1,13 @@
 'use strict';
 
+const Exception = require('./exception');
+
 /***
 * Exception class. To be used when validating input
 ***/
-module.exports = class InvalidInputException{
-	constructor(key){
-		this.key = key
-	}
-
-	toString() {
-		return "Invalid: " + this.key;
-	}
+module.exports = class InvalidInputException extends Exception {
+  constructor (field) {
+    super("Invalid " + field);
+    this.field = field;
+  }
 }
