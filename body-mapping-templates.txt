@@ -1,0 +1,54 @@
+Body mapping templates.
+
+
+Begin: GET /customers/
+#set($inputRoot = $input.path('$.body'))
+[
+#foreach($customer in $inputRoot)
+    {
+        "email" : "$customer.email",
+        "first_name" : "$customer.first_name",
+        "last_name" : "$customer.last_name",
+        "phone_number" : "$customer.phone_number",
+        "address" : {
+            "href" : "https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$customer.address"
+        },
+        "self" : {
+            "href" : "https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/customers/$customer.email"
+        }
+    }#if($foreach.hasNext),#end
+
+#end
+]
+End: GET /customers/
+
+
+Begin: GET /customers/{email}, POST /customers, PUT /customers
+#set($inputRoot = $input.path('$.body'))
+{
+    "email" : "$inputRoot.email",
+    "first_name" : "$inputRoot.first_name",
+    "last_name" : "$inputRoot.last_name",
+    "phone_number" : "$inputRoot.phone_number",
+    "address" : {
+        "href" : "https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.address"
+    },
+    "self" : {
+        "href" : "https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/customers/$inputRoot.email"
+    }
+}
+End: GET /customers/{email}, POST /customers, PUT /customers
+
+
+Begin: DELETE /customers/{email}
+#set($inputRoot = $input.path('$.body'))
+{
+    "email" : "$inputRoot.email",
+    "first_name" : "$inputRoot.first_name",
+    "last_name" : "$inputRoot.last_name",
+    "phone_number" : "$inputRoot.phone_number",
+    "address" : {
+        "href" : "https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.address"
+    }
+}
+End: DELETE /customers/{email}
