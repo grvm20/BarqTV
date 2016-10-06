@@ -151,6 +151,7 @@ module.exports = class Dao {
     // Get object from Dynamo to compare first.
     this.fetch(key, (err, currentItem) => {
       if (err) {
+        console.error(err);
         callback(err);
       } else {
         if (currentItem && _.isEmpty(currentItem)) {

@@ -1,17 +1,38 @@
 'use strict';
 
 const _ = require('underscore');
-const InputValidationException = require("../exceptions/invalid-input-exception");
+const InvalidInputException = require("../exceptions/invalid-input-exception");
 const Utils = require("../utilities/utils");
 
-const VALID_ID_REGEX = Utils.VALID_EMAIL_REGEX;
 const VALID_CUSTOMER_REQUIRED_ATTRIBUTES = [
   "id",
   "firstName",
   "lastName",
   "phoneNumber",
-  "address"
+  "address",
+  "deleted"
 ];
+
+const isValidId = (id) => {
+  var isNotEmpty = !Utils.isEmpty(id);
+  var hasEmailFormat = Utils.VALID_EMAIL_REGEX.test(id);
+  return isNotEmpty && hasEmailFormat;
+}
+
+const isValidName = (name) => {
+  var isNotEmpty = !Utils.isEmpty(name);
+  var doesNotContainDigits = !Utils.CONTAINS_DIGIT_REGEX.test(name);
+  var doesNotContainInvalidChars = !/[\{\}\(\)_\$#"'@\|!\?\+\*%<>]/.test(name);
+  return isNotEmpty && doesNotContainDigits && doesNotContainInvalidChars;
+};
+
+const isValidPhoneNumber = (phoneNumber) => {
+  var isNotEmpty = !Utils.isEmpty(phoneNumber);
+  var containsDigits = Utils.CONTAINS_DIGIT_REGEX.test(phoneNumber);
+  var isLongEnough = phoneNumber.length > 5;
+  var isNotTooLong = phoneNumber.length < 12;
+  return isNotEmpty && containsDigits && isLongEnough && isNotTooLong;
+};
 
 module.exports = class Customer {
   constructor (attributes) {
@@ -25,10 +46,10 @@ module.exports = class Customer {
 
   set id (id){
     if (id) {
-      if(!Utils.isEmpty(id) && VALID_ID_REGEX.test(id)){
+      if (isValidId(id)){
         this._id = id;
       } else {
-        throw new InputValidationException("id")
+        throw new InvalidInputException("id")
       }
     }
   }
@@ -38,10 +59,10 @@ module.exports = class Customer {
 
   set firstName (firstName) {
     if (firstName) {
-      if(!Utils.isEmpty(firstName) && !Utils.CONTAINS_DIGIT_REGEX.test(firstName)){
+      if (isValidName(firstName)){
         this._firstName = firstName;
       } else {
-        throw new InputValidationException("firstName")
+        throw new InvalidInputException("firstName")
       }
     }
   }
@@ -51,10 +72,10 @@ module.exports = class Customer {
 
   set lastName (lastName) {
     if (lastName) {
-      if(!Utils.isEmpty(lastName) && !Utils.CONTAINS_DIGIT_REGEX.test(lastName)){
+      if (isValidName(lastName)){
         this._lastName = lastName;
       } else {
-        throw new InputValidationException("lastName")
+        throw new InvalidInputException("lastName")
       }
     }
   }
@@ -63,7 +84,13 @@ module.exports = class Customer {
   }
 
   set address (address) {
-    this._address = address;
+    if (address) {
+      if (Utils.isValid(address)) {
+        this._address = address;
+      } else {
+        throw new InvalidInputException("address")
+      }
+    }
   }
   get address () {
     return this._address;
@@ -79,10 +106,10 @@ module.exports = class Customer {
 
   set phoneNumber (phoneNumber) {
     if (phoneNumber) {
-      if(!Utils.isEmpty(phoneNumber) && Utils.CONTAINS_DIGIT_REGEX.test(phoneNumber)){
+      if (isValidPhoneNumber(phoneNumber)){
         this._phoneNumber = phoneNumber;
       } else {
-        throw new InputValidationException("PhoneNumber")
+        throw new InvalidInputException("PhoneNumber")
       }
     }
   }
@@ -91,7 +118,9 @@ module.exports = class Customer {
   }
 
   set deleted (deleted) {
-    this._deleted = deleted;
+    if (typeof deleted === 'boolean') {
+      this._deleted = deleted;  
+    }
   }
   get deleted () {
     return this._deleted;
@@ -103,7 +132,7 @@ module.exports = class Customer {
       try {
         this.id = email
       } catch (err) {
-        throw new InputValidationException("email")
+        throw new InvalidInputException("email")
       }
     }
   }
@@ -114,29 +143,10 @@ module.exports = class Customer {
   // To be valid, it must contain all required attributes.
   validate () {
     _.each(VALID_CUSTOMER_REQUIRED_ATTRIBUTES, (attribute) => {
-      var isValidAttribute = true;
-
-      var hasAttribute = this[attribute];
-      if (hasAttribute) {
-        var validationOutput;
-        if (typeof this[attribute].validate === 'function') {
-          validationOutput = this[attribute].validate();
-          if (typeof validationOutput === 'boolean') {
-            isValidAttribute = isValidAttribute && (validationOutput === true);
-          }
-        }
-        if (typeof this[attribute].isValid === 'function') {
-          validationOutput = this[attribute].isValid();
-          if (typeof validationOutput === 'boolean') {
-            isValidAttribute = isValidAttribute && (validationOutput === true);
-          }
-        }
-      } else {
-        isValidAttribute = false;
-      }
-
-      if (!isValidAttribute) {
-        throw new InputValidationException(attribute);
+      var hasAttribute = typeof this[attribute] !== 'undefined';
+      var isValidAttribute = Utils.isValid(this[attribute]);
+      if (!hasAttribute || !isValidAttribute) {
+        throw new InvalidInputException(attribute);
       }
     });
 

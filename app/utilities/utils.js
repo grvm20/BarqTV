@@ -21,6 +21,27 @@ class Utils {
 
     return id;
   }
+
+  static isValid(object) {
+    if (typeof object !== 'undefined') {
+      var isValid = true;
+      if (typeof object.validate === 'function') {
+        var validationOutput = object.validate();
+        if (typeof validationOutput === 'boolean') {
+          var isValid = isValid && (validationOutput === true);
+        }
+      }
+      if (typeof object.isValid === 'function') {
+        var validationOutput = object.isValid();
+        if (typeof validationOutput === 'boolean') {
+          var isValid = isValid && (validationOutput === true);
+        }
+      }
+      return isValid;
+    } else {
+      return false;
+    }
+  }
 }
 
 // Class constants.

@@ -104,6 +104,19 @@ module.exports = class AddressService {
     }
   }
 
+  /**
+   * Builds an Address object, with all its dependencies. Does not persist it.
+   * @input - attributes used to build the Address.
+   * Throws InputValidationException.
+   **/
+  create (input) {
+    if (input instanceof Address) {
+      return input;
+    } else {
+      return new Address(input);
+    }
+  }
+
   save(address, callback) {
     if (!(address instanceof Address)) {
       var addressAttributes = address;

@@ -75,7 +75,10 @@ describe('CustomerService', function() {
       };
 
       var mockAddressService = {
-        fetch: function(address, callback) {
+        create: (address) => {
+          return address;
+        },
+        fetch: (address, callback) => {
           callback(null, mockAddress);
         }
       };

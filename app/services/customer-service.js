@@ -34,19 +34,19 @@ function mapCustomerToDbObject (customer) {
     id: customer.id
   }
 
-  if (typeof customer.firstName !== 'undefined') {
+  if (customer.firstName && typeof customer.firstName !== 'undefined') {
     result.first_name = customer.firstName;
   }
-  if (typeof customer.lastName !== 'undefined') {
+  if (customer.lastName && typeof customer.lastName !== 'undefined') {
     result.last_name = customer.lastName;
   }
-  if (typeof customer.addressRef !== 'undefined') {
+  if (customer.addressRef && typeof customer.addressRef !== 'undefined') {
     result.address_ref = customer.addressRef;
   }
-  if (typeof customer.phoneNumber !== 'undefined') {
+  if (customer.phoneNumber && typeof customer.phoneNumber !== 'undefined') {
     result.phone_number = customer.phoneNumber;
   }
-  if (typeof customer.deleted !== 'undefined') {
+  if (customer.deleted && typeof customer.deleted !== 'undefined') {
     result.deleted = customer.deleted;
   }
 
@@ -69,7 +69,7 @@ module.exports = class CustomerService {
       return input;
     } else {
       var attributes = input;
-      if (attributes.address) {
+      if (attributes.address && !attributes.address instanceof Address) {
         var addressData = attributes.address;
         var newAddress = new Address(addressData);
         attributes.address = newAddress;
@@ -86,17 +86,24 @@ module.exports = class CustomerService {
    * Throws InputValidationException.
    **/
   save (customer, callback) {
-    customer.validate();
+    try {
+      customer.validate();
+    } catch (err) {
+      console.error(err);
+      return callback(err);
+    }
     console.log(sprintf("Proceeding to save Customer %s.", JSON.stringify(customer)));
     this.isIdAvailable(customer.id, (err, idAvailable) => {
       if (err) {
-        callback(err);
+        console.error(err);
+        return callback(err);
       } else if (!idAvailable) {
-        callback({errMessage: sprintf("Email address is already in use.", customer.email)});
+        callback({message: sprintf("Email address is already in use.", customer.email)});
       } else {
         this.addressService.save(customer.address, (err, res) => {
           if (err) {
-            callback(err);
+            console.error(err);
+            return callback(err);
           } else {
             var customerDbObject = mapCustomerToDbObject(customer);
             console.log(sprintf("Ready to persist: %s.",
@@ -107,7 +114,7 @@ module.exports = class CustomerService {
                 if (err) {
                   console.log(sprintf("Error while trying to persist: %s.",
                     JSON.stringify(customerDbObject)));
-                  callback(err);
+                  return callback(err);
                 } else {
                   callback(null, customer);
                 }
@@ -131,14 +138,15 @@ module.exports = class CustomerService {
       var addressId = customerAttributes.addressRef;
       this.addressService.fetch(addressId, (err, address) => {
         if (err) {
-          callback(err);
+          console.error(err);
+          return callback(err);
         } else {
           customerAttributes.address = address;
 
           try {
             var customer = this.create(customerAttributes);
           } catch(err) {
-            callback(err);
+            return callback(err);
           }
           
           console.log("Successfully fetched Customer with id: " + customer.id);
@@ -160,7 +168,7 @@ module.exports = class CustomerService {
       try {
         var customer = this.create(customerAttributes);
       } catch(err) {
-        callback(err);
+        return callback(err);
       }
       
       console.log("Successfully updated Customer with id: " + customer.id);
@@ -176,7 +184,7 @@ module.exports = class CustomerService {
         if (err) {
           console.log(sprintf("Error while trying to update: %s.",
             JSON.stringify(customerDbObject)));
-          callback(err);
+          return callback(err);
         } else {
           var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
 
@@ -184,7 +192,8 @@ module.exports = class CustomerService {
             var addressId = customerAttributes.addressRef;
             this.addressService.fetch(addressId, (err, address) => {
               if (err) {
-                callback(err);
+                console.error(err);
+                return callback(err);
               } else {
                 customerAttributes.address = address;
                 returnCustomer(customerAttributes, callback);
@@ -203,7 +212,8 @@ module.exports = class CustomerService {
       var addressId = customer.addressRef;
       this.addressService.update(addressId, customer.address, (err, updatedAddress) => {
         if (err) {
-          callback(err);
+          console.error(err);
+          return callback(err);
         } else {
           updateCustomer(customer, updatedAddress, callback);
         }
@@ -225,7 +235,8 @@ module.exports = class CustomerService {
       try {
         var customer = new Customer({id: id});  
       } catch (err) {
-        callback(err);
+        console.error(err);
+        return callback(err);
       }
       
       var queryResult = this.dao.fetch({id: customer.id}, (err, customerDbObject) => {
@@ -236,16 +247,17 @@ module.exports = class CustomerService {
           var addressId = customerAttributes.addressRef;
           this.addressService.fetch(addressId, (err, address) => {
             if (err) {
-              callback(err);
+              console.error(err);
+              return callback(err);
             } else {
               customerAttributes.address = address;
 
               try {
                 var customer = this.create(customerAttributes);
               } catch(err) {
-                callback(err);
+                return callback(err);
               }
-              
+
               console.log("Successfully fetched Customer with id: " + customer.id);
               callback(null, customer);
             }
@@ -264,14 +276,15 @@ module.exports = class CustomerService {
           var addressId = customerAttributes.addressRef;
           this.addressService.fetch(addressId, (err, address) => {
             if (err) {
-              callback(err);
+              console.error(err);
+              return callback(err);
             } else {
               customerAttributes.address = address;
 
               try {
                 var customer = this.create(customerAttributes);
               } catch(err) {
-                callback(err);
+                return callback(err);
               }              
 
               customers.push(customer);
@@ -306,7 +319,8 @@ module.exports = class CustomerService {
   isIdAvailable (id, callback) {
     this.fetch (id, (err, customer) => {
       if (err) {
-        callback(err);
+        console.error(err);
+        return callback(err);
       } else if (_.isEmpty(customer)) {
         callback(null, true);
       } else {
