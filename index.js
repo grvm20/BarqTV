@@ -29,7 +29,6 @@ var addressDao;
 var addressService;
 var addressSerializer;
 var addressesController;
-var addressSerializer;
 
 
 // Functions.
@@ -40,6 +39,7 @@ function sendHttpResponse(callback) {
     if (err) {
       statusCode = '400';
       body = err.message;
+      console.error(err);
     }
 
     callback(null, {

@@ -100,7 +100,7 @@ module.exports = class Address {
       if(!Utils.isEmpty(zipCode) && ZIP_CODE_REGEX.test(zipCode)) {
         this._zipCode = zipCode;
       } else {
-        throw new InvalidInputException("zipCode")
+        throw new InvalidInputException("zip code")
       }
     }
   }

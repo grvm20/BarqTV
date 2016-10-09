@@ -1,7 +1,69 @@
-Body mapping templates.
+####################################
+REQUEST body-mapping templates:
+####################################
 
 
-Begin: GET /customers/
+Begin: POST /customers/{email}
+#set($inputRoot = $input.path('$'))
+#set($inputAddress = $input.path('$.address'))
+{
+  "operation" : "create",
+  "customer" : {
+    "last_name" : "$inputRoot.last_name",
+    "first_name" : "$inputRoot.first_name",
+    "email" : "$inputRoot.email",
+    "phone_number" : "$inputRoot.phone_number",
+    "address" : {
+      "city" : "$inputAddress.city",
+      "state" : "$inputAddress.state",
+      "apt" : "$inputAddress.apt",
+      "street" : "$inputAddress.street",
+      "number" : "$inputAddress.number",
+      "zip_code" : "$inputAddress.zip_code"
+    }
+  }
+}
+End: POST /customers/{email}
+
+
+Begin: UPDATE /customers/{email}
+#set($inputRoot = $input.path('$'))
+#set($inputAddress = $input.path('$.address'))
+{
+  "operation" : "update",
+  "customer" : {
+    "last_name" : "$inputRoot.last_name",
+    "first_name" : "$inputRoot.first_name",
+    "email" : "$input.params().get('path').get('email')",
+    "phone_number" : "$inputRoot.phone_number",
+    "address" : {
+      "city" : "$inputAddress.city",
+      "state" : "$inputAddress.state",
+      "apt" : "$inputAddress.apt",
+      "street" : "$inputAddress.street",
+      "number" : "$inputAddress.number",
+      "zip_code" : "$inputAddress.zip_code"
+    }
+  }
+}
+End: UPDATE /customers/{email}
+
+
+Begin: DELETE /customers/{email}
+{
+  "operation" : "delete",
+  "customer" : {
+    "email" : "$input.params().get('path').get('email')"
+  }
+}
+End: DELETE /customers/{email}
+
+
+####################################
+RESPONSE body-mapping templates:
+####################################
+
+Begin: GET /customers
 #set($inputRoot = $input.path('$.body'))
 [
 #foreach($customer in $inputRoot)
@@ -20,7 +82,7 @@ Begin: GET /customers/
 
 #end
 ]
-End: GET /customers/
+End: GET /customers
 
 
 Begin: GET /customers/{email}, POST /customers, PUT /customers

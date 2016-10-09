@@ -22,7 +22,6 @@ module.exports = class CustomersController {
         var email = params.email;
         this.customerService.fetch(email, (err, customer) => {
           if (err) {
-            console.error(err);
             return callback(err);
           } else {
             this.customerSerializer.render(customer, callback);
@@ -32,7 +31,6 @@ module.exports = class CustomersController {
         // Return all customers.
         this.customerService.fetch(null, (err, customers) => {
           if (err) {
-            console.error(err);
             return callback(err);
           } else if (_.isEmpty(customers)) {
             callback(null, {});
@@ -51,12 +49,10 @@ module.exports = class CustomersController {
     if (areValidParams(params)) {
       this.buildCustomerFromParams(params, (err, customer) => {
         if (err) {
-          console.error(err);
           return callback(err);
         } else {
           this.customerService.save(customer, (err, savedCustomer) => {
             if (err) {
-                console.error(err);
                 return callback(err);
               } else {
                 this.customerSerializer.render(savedCustomer, callback);
@@ -74,12 +70,10 @@ module.exports = class CustomersController {
     if (areValidParams(params)) {
       this.buildCustomerFromParams(params, (err, customer) => {
         if (err) {
-          console.error(err);
           return callback(err);
         } else {
           this.customerService.update(customer, (err, updatedCustomer) => {
             if (err) {
-                console.error(err);
                 return callback(err);
               } else {
                 this.customerSerializer.render(updatedCustomer, callback);
@@ -97,12 +91,10 @@ module.exports = class CustomersController {
     if (areValidParams(params)) {
       this.buildCustomerFromParams(params, (err, customer) => {
         if (err) {
-          console.error(err);
           return callback(err);
         } else {
           this.customerService.delete(customer, (err, deletedCustomer) => {
             if (err) {
-                console.error(err);
                 return callback(err);
               } else {
                 this.customerSerializer.render(deletedCustomer, callback);
@@ -125,7 +117,6 @@ module.exports = class CustomersController {
     try {
       var customer = this.customerService.create(customerAttributes);
     } catch (err) {
-      console.error(err);
       return callback(err);
     }
 

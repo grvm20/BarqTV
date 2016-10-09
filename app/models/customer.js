@@ -62,7 +62,7 @@ module.exports = class Customer {
       if (isValidName(firstName)){
         this._firstName = firstName;
       } else {
-        throw new InvalidInputException("firstName")
+        throw new InvalidInputException("first name")
       }
     }
   }
@@ -75,7 +75,7 @@ module.exports = class Customer {
       if (isValidName(lastName)){
         this._lastName = lastName;
       } else {
-        throw new InvalidInputException("lastName")
+        throw new InvalidInputException("last name")
       }
     }
   }
@@ -109,7 +109,7 @@ module.exports = class Customer {
       if (isValidPhoneNumber(phoneNumber)){
         this._phoneNumber = phoneNumber;
       } else {
-        throw new InvalidInputException("PhoneNumber")
+        throw new InvalidInputException("phone number")
       }
     }
   }

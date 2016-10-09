@@ -20,25 +20,25 @@ module.exports = class AddressSerializer {
   deserialize(object) {
     var result = {};
 
-    if (object.id) {
+    if (object.id != null) {
       result.id = object.id;
     }
-    if (object.city) {
+    if (object.city != null) {
       result.city = object.city;
     }
-    if (object.state) {
+    if (object.state != null) {
       result.state = object.state;
     }
-    if (object.apt) {
+    if (object.apt != null) {
       result.apt = object.apt;
     }
-    if (object.number) {
+    if (object.number != null) {
       result.number = object.number;
     }
-    if (object.street) {
+    if (object.street != null) {
       result.street = object.street;
     }
-    if (object.zip_code) {
+    if (object.zip_code != null) {
       result.zipCode = object.zip_code;
     }
 

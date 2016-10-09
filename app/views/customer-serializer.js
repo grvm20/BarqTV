@@ -20,22 +20,22 @@ module.exports = class CustomerSerializer {
   deserialize(object) {
     var result = {};
 
-    if (object.email) {
+    if (object.email != null) {
       result.email = object.email;
     }
-    if (object.first_name) {
+    if (object.first_name != null) {
       result.firstName = object.first_name;
     }
-    if (object.last_name) {
+    if (object.last_name != null) {
       result.lastName = object.last_name;
     }
-    if (object.address_ref) {
+    if (object.address_ref != null) {
       result.addressRef = object.address_ref;
     }
-    if (object.phone_number) {
+    if (object.phone_number != null) {
       result.phoneNumber = object.phone_number;
     }
-    if (object.address) {
+    if (object.address != null) {
       result.address = this.addressSerializer.deserialize(object.address);
     }
 

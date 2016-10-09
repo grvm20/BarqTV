@@ -34,19 +34,21 @@ function mapCustomerToDbObject (customer) {
     id: customer.id
   }
 
-  if (customer.firstName && typeof customer.firstName !== 'undefined') {
+  // Using loose equality check (==) instead of strict (===) as explained in:
+  // http://stackoverflow.com/questions/2559318/how-to-check-for-an-undefined-or-null-variable-in-javascript
+  if (customer.firstName != null) {
     result.first_name = customer.firstName;
   }
-  if (customer.lastName && typeof customer.lastName !== 'undefined') {
+  if (customer.lastName != null) {
     result.last_name = customer.lastName;
   }
-  if (customer.addressRef && typeof customer.addressRef !== 'undefined') {
+  if (customer.addressRef != null) {
     result.address_ref = customer.addressRef;
   }
-  if (customer.phoneNumber && typeof customer.phoneNumber !== 'undefined') {
+  if (customer.phoneNumber != null) {
     result.phone_number = customer.phoneNumber;
   }
-  if (customer.deleted && typeof customer.deleted !== 'undefined') {
+  if (customer.deleted != null) {
     result.deleted = customer.deleted;
   }
 
@@ -89,20 +91,19 @@ module.exports = class CustomerService {
     try {
       customer.validate();
     } catch (err) {
-      console.error(err);
       return callback(err);
     }
-    console.log(sprintf("Proceeding to save Customer %s.", JSON.stringify(customer)));
+    console.log(sprintf("Proceeding to save Customer %s.",
+      JSON.stringify(customer)));
     this.isIdAvailable(customer.id, (err, idAvailable) => {
       if (err) {
-        console.error(err);
         return callback(err);
       } else if (!idAvailable) {
-        callback({message: sprintf("Email address is already in use.", customer.email)});
+        callback({message: sprintf("Email address is already in use.",
+          customer.email)});
       } else {
         this.addressService.save(customer.address, (err, res) => {
           if (err) {
-            console.error(err);
             return callback(err);
           } else {
             var customerDbObject = mapCustomerToDbObject(customer);
@@ -138,7 +139,6 @@ module.exports = class CustomerService {
       var addressId = customerAttributes.addressRef;
       this.addressService.fetch(addressId, (err, address) => {
         if (err) {
-          console.error(err);
           return callback(err);
         } else {
           customerAttributes.address = address;
@@ -158,69 +158,65 @@ module.exports = class CustomerService {
 
   /**
    * Updates the given Customer and persists its changes.
-   * @customer - a Customer object.
-   * @callback - callback function with parameters (err, customer).
+   * @newCustomer - a Customer object.
+   * @callback - callback function with parameters (err, completeCustomer).
    **/
-  update (customer, callback) {
-    console.log(sprintf("Proceeding to update Customer %s.", customer.id));
+  update (newCustomer, callback) {
+    console.log(sprintf("Proceeding to update Customer %s.", newCustomer.id));
 
-    var returnCustomer = (customerAttributes, callback) => {
-      try {
-        var customer = this.create(customerAttributes);
-      } catch(err) {
-        return callback(err);
-      }
-      
-      console.log("Successfully updated Customer with id: " + customer.id);
-      callback(null, customer);
-    };
-
-    var updateCustomer = (customer, updatedAddress, callback) => {
-      var customerDbObject = mapCustomerToDbObject(customer);
-      var key = createCustomerKey(customer.id);
+    var updateCustomer = (customerToUpdate, callback) => {
+      var customerDbObject = mapCustomerToDbObject(customerToUpdate);
+      var key = createCustomerKey(customerToUpdate.id);
       var attributesToUpdate = _.omit(customerDbObject, 'id');
-      console.log(sprintf("Ready to update: %s.", JSON.stringify(customerDbObject)));
+      console.log(sprintf("Ready to update: %s.",
+        JSON.stringify(customerDbObject)));
       this.dao.update(key, attributesToUpdate, (err, customerDbObject) => {
         if (err) {
           console.log(sprintf("Error while trying to update: %s.",
             JSON.stringify(customerDbObject)));
           return callback(err);
         } else {
-          var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
+          var customerAttributes = mapDbObjectToCustomerAttributes(
+            customerDbObject);
+          customerAttributes.address = customerToUpdate.address;
 
-          if (!updatedAddress) {
-            var addressId = customerAttributes.addressRef;
-            this.addressService.fetch(addressId, (err, address) => {
+          try {
+            var newCompleteCustomer = this.create(customerAttributes);
+          } catch(err) {
+            return callback(err);
+          }
+          
+          console.log("Successfully updated Customer with id: " +
+            newCompleteCustomer.id);
+          return callback(null, newCompleteCustomer);
+        }
+      });
+    }
+
+    this.fetch(newCustomer.id, (err, currentCustomer) => {
+      if (err) {
+        return callback(err);
+      } else {
+        var addressInformationChanged = newCustomer.address;
+        if (addressInformationChanged) {
+          console.log('Updating its address first.');
+          var addressId = currentCustomer.addressRef;
+          this.addressService.update(addressId, newCustomer.address,
+            (err, updatedAddress) => {
               if (err) {
-                console.error(err);
                 return callback(err);
               } else {
-                customerAttributes.address = address;
-                returnCustomer(customerAttributes, callback);
+                newCustomer.address = updatedAddress;
+                updateCustomer(newCustomer, callback);
               }
-            });
-          } else {
-            customerAttributes.address = updatedAddress;
-            returnCustomer(customerAttributes, callback);
-          }
-        }
-      });
-    }
-
-    var addressInformationChanged = customer.address;
-    if (addressInformationChanged) {
-      var addressId = customer.addressRef;
-      this.addressService.update(addressId, customer.address, (err, updatedAddress) => {
-        if (err) {
-          console.error(err);
-          return callback(err);
+            }
+          );
         } else {
-          updateCustomer(customer, updatedAddress, callback);
+          newCustomer.address = currentCustomer.address;
+          updateCustomer(newCustomer, callback);
         }
-      });
-    } else {
-      updateCustomer(customer, null, callback);
-    }
+      }
+    }); 
   }
 
   /**
@@ -235,34 +231,35 @@ module.exports = class CustomerService {
       try {
         var customer = new Customer({id: id});  
       } catch (err) {
-        console.error(err);
         return callback(err);
       }
       
-      var queryResult = this.dao.fetch({id: customer.id}, (err, customerDbObject) => {
-        if (_.isEmpty(customerDbObject)) {
-          callback(null, {});
-        } else {
-          var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
-          var addressId = customerAttributes.addressRef;
-          this.addressService.fetch(addressId, (err, address) => {
-            if (err) {
-              console.error(err);
-              return callback(err);
-            } else {
-              customerAttributes.address = address;
-
-              try {
-                var customer = this.create(customerAttributes);
-              } catch(err) {
+      var queryResult = this.dao.fetch({id: customer.id},
+        (err, customerDbObject) => {
+          if (_.isEmpty(customerDbObject)) {
+            callback(null, {});
+          } else {
+            var customerAttributes = mapDbObjectToCustomerAttributes(
+              customerDbObject);
+            var addressId = customerAttributes.addressRef;
+            this.addressService.fetch(addressId, (err, address) => {
+              if (err) {
                 return callback(err);
-              }
+              } else {
+                customerAttributes.address = address;
 
-              console.log("Successfully fetched Customer with id: " + customer.id);
-              callback(null, customer);
-            }
-          });
-        }
+                try {
+                  var customer = this.create(customerAttributes);
+                } catch(err) {
+                  return callback(err);
+                }
+
+                console.log("Successfully fetched Customer with id: " +
+                  customer.id);
+                callback(null, customer);
+              }
+            });
+          }
       });
 
     } else {
@@ -272,11 +269,11 @@ module.exports = class CustomerService {
 
         var forEachCustomerDbObject = (customerDbObject, innerCallback) => {
           // TODO: although parallel, this is a n+1 query! Optimize asap.
-          var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
+          var customerAttributes = mapDbObjectToCustomerAttributes(
+            customerDbObject);
           var addressId = customerAttributes.addressRef;
           this.addressService.fetch(addressId, (err, address) => {
             if (err) {
-              console.error(err);
               return callback(err);
             } else {
               customerAttributes.address = address;
@@ -319,7 +316,6 @@ module.exports = class CustomerService {
   isIdAvailable (id, callback) {
     this.fetch (id, (err, customer) => {
       if (err) {
-        console.error(err);
         return callback(err);
       } else if (_.isEmpty(customer)) {
         callback(null, true);

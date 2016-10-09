@@ -1,24 +1,23 @@
-var assert = require('assert');
-var Customer = require('../app/models/customer');
-var CustomerService = require('../app/services/customer-service');
+const expect = require('chai').expect;
+const Customer = require('../app/models/customer');
+const CustomerService = require('../app/services/customer-service');
 
-describe('CustomerService', function() {
-  describe('#save()', function() {
-    it('should pass valid DAO parameters', function(done) {
+describe('CustomerService', () => {
+  describe('#save()', () => {
+    it('should pass valid DAO parameters', (done) => {
       var mockAddress = {
         id: "6B8C1303-CC12-4DD0-96DA-D592FB17DD64"
       };
 
       var mockDao = {
         persist: (key, attributes, callback) => {
-          assert.equal("myuser@gmail.com", key.id);
-          assert.equal("myuser@gmail.com", attributes.id);
-          assert.equal("Javier", attributes.first_name);
-          assert.equal("Lopez", attributes.last_name);
-          assert.equal("3327658892", attributes.phone_number);
-          assert.equal("6B8C1303-CC12-4DD0-96DA-D592FB17DD64",
-            attributes.address_ref);
-          assert.equal(false, attributes.deleted);
+          expect(key.id).to.equal("myuser@gmail.com");
+          expect(attributes.id).to.equal("myuser@gmail.com");
+          expect(attributes.first_name).to.equal("Javier");
+          expect(attributes.last_name).to.equal("Lopez");
+          expect(attributes.phone_number).to.equal("3327658892");
+          expect(attributes.address_ref).to.equal("6B8C1303-CC12-4DD0-96DA-D592FB17DD64");
+          expect(attributes.deleted).to.be.false;
           done();
         },
         fetch: (key, callback) => {
@@ -47,7 +46,7 @@ describe('CustomerService', function() {
       customerService.save(customer, done);
     });
 
-    it('should fail when trying to save an existing customer', function(done) {
+    it('should fail when trying to save an existing customer', (done) => {
       var dbCustomer = {
         id: "myuser@gmail.com",
         first_name: "Javier",
@@ -86,7 +85,62 @@ describe('CustomerService', function() {
       var customerService = new CustomerService(mockDao, mockAddressService);
       customerService.save(customer, (err, customer) => {
         console.log(err);
-        assert(err);
+        expect(err).to.exist;
+        done();
+      });
+    });
+  });
+
+  describe('#update()', () => {
+    it('should update the customer correctly', (done) => {
+      var customer = new Customer({
+        id: "myuser@gmail.com",
+        firstName: "Pepe",
+      });
+
+      var oldCustomerData = {
+        id: "myuser@gmail.com",
+        firstName: "Javier",
+        lastName: "Lopez",
+        phoneNumber: "3327658892",
+        address: "6B8C1303-CC12-4DD0-96DA-D592FB17DD64"
+      };
+
+      var newCustomerData = {
+        id: "myuser@gmail.com",
+        firstName: "Pepe",
+        lastName: "Lopez",
+        phoneNumber: "3327658892",
+        address: "6B8C1303-CC12-4DD0-96DA-D592FB17DD64"
+      };
+
+      var mockAddress = {
+        id: "6B8C1303-CC12-4DD0-96DA-D592FB17DD64"
+      };
+
+      var mockDao = {
+        update: (key, newItem, callback) => {
+          expect(key.id).to.equal("myuser@gmail.com");
+          expect(newItem.first_name).to.equal("Pepe");
+          callback(null, newCustomerData);
+        },
+        fetch: (key, callback) => {
+          callback(null, oldCustomerData);
+        }
+      };
+
+      var mockAddressService = {
+        create: (address) => {
+          return address;
+        },
+        fetch: (address, callback) => {
+          callback(null, mockAddress);
+        }
+      };
+
+      var customerService = new CustomerService(mockDao, mockAddressService);
+      customerService.update(customer, (err, customer) => {
+        console.log(customer);
         done();
       });
     });
