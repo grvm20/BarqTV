@@ -12,10 +12,10 @@ const Utils = require("../utilities/utils");
 function mapDbObjectToAddressAttributes(dbObject) {
   return {
     id: dbObject.id,
-    city: dbObject.city,
-    state: dbObject.state,
+    residential_city: dbObject.residential_city,
+    residential_state: dbObject.residential_state,
     apt: dbObject.apt,
-    number: dbObject.number,
+    building: dbObject.building,
     street: dbObject.street,
     zipCode: dbObject.zip_code
   };
@@ -38,17 +38,17 @@ function mapAddressToDbObject(address) {
   if (address.id) {
     item["id"] = address.id;
   }
-  if (address.city) {
-    item["city"] = address.city;
+  if (address.residential_city) {
+    item["residential_city"] = address.residential_city;
   }
-  if (address.state) {
-    item["state"] = address.state;
+  if (address.residential_state) {
+    item["residential_state"] = address.residential_state;
   }
   if (address.apt) {
     item["apt"] = address.apt;
   }
-  if (address.number) {
-    item["number"] = address.number;
+  if (address.building) {
+    item["building"] = address.building;
   }
   if (address.street) {
     item["street"] = address.street;
@@ -66,19 +66,19 @@ function mapAddressToDbObject(address) {
 function constructUpdatableAddress(address) {
 
   var updatableAddress = new Address();
-  if (address.city) {
-    console.log(address.city);
-    updatableAddress.city = address.city;
+  if (address.residential_city) {
+    console.log(address.residential_city);
+    updatableAddress.residential_city = address.residential_city;
   }
 
-  if (address.state) {
-    updatableAddress.state = address.state;
+  if (address.residential_state) {
+    updatableAddress.residential_state = address.residential_state;
   }
   if (address.apt) {
     updatableAddress.apt = address.apt;
   }
-  if (address.number) {
-    updatableAddress.number = address.number;
+  if (address.building) {
+    updatableAddress.building = address.building;
   }
 
   if (address.street) {

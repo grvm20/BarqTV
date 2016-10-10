@@ -7,10 +7,10 @@ const Utils = require("../utilities/utils");
 var ZIP_CODE_REGEX = /[0-9]{5,}$/;
 var VALID_ADDRESS_REQUIRED_ATTRIBUTES = [
   "id",
-  "city",
-  "state",
+  "residential_city",
+  "residential_state",
   "apt",
-  "number",
+  "building",
   "street",
   "zipCode",
   "deleted"
@@ -24,10 +24,10 @@ module.exports = class Address {
   constructor(attributes) {
     if (attributes) {
       this.id = attributes.id || Utils.generateGuid();
-      this.city = attributes.city;
-      this.state = attributes.state;
+      this.residential_city = attributes.residential_city;
+      this.residential_state = attributes.residential_state;
       this.apt = attributes.apt;
-      this.number = attributes.number;
+      this.building = attributes.building;
       this.street = attributes.street;
       this.zipCode = attributes.zipCode;
       this.deleted = attributes.deleted || false;
@@ -45,22 +45,22 @@ module.exports = class Address {
     }
   }
 
-  set city (city) {
-    if (city) {
-      if(!(Utils.isEmpty(city) || Utils.CONTAINS_DIGIT_REGEX.test(city))) {
-        this._city = city;
+  set residential_city (residential_city) {
+    if (residential_city) {
+      if(!(Utils.isEmpty(residential_city) || Utils.CONTAINS_DIGIT_REGEX.test(residential_city))) {
+        this._residential_city = residential_city;
       } else {
-        throw new InvalidInputException("city")
+        throw new InvalidInputException("residential_city")
       }
     }
   }
 
-  set state (state) {
-    if (state) {
-      if(!(Utils.isEmpty(state) || Utils.CONTAINS_DIGIT_REGEX.test(state))) {
-        this._state = state;
+  set residential_state (residential_state) {
+    if (residential_state) {
+      if(!(Utils.isEmpty(residential_state) || Utils.CONTAINS_DIGIT_REGEX.test(residential_state))) {
+        this._residential_state = residential_state;
       } else {
-        throw new InvalidInputException("state")
+        throw new InvalidInputException("residential_state")
       }
     }
   }
@@ -75,12 +75,12 @@ module.exports = class Address {
     }
   }
 
-  set number (number) {
-    if (number) {
-      if(!Utils.isEmpty(number)) {
-        this._number = number;
+  set building (building) {
+    if (building) {
+      if(!Utils.isEmpty(building)) {
+        this._building = building;
       } else {
-        throw new InvalidInputException("number")
+        throw new InvalidInputException("building")
       }
     }
   }
@@ -119,16 +119,16 @@ module.exports = class Address {
     return this._apt;
   }
 
-  get city () {
-    return this._city;
+  get residential_city () {
+    return this._residential_city;
   }
 
-  get state () {
-    return this._state;
+  get residential_state () {
+    return this._residential_state;
   }
 
-  get number () {
-    return this._number;
+  get building () {
+    return this._building;
   }
 
   get street () {
