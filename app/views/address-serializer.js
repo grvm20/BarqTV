@@ -9,7 +9,7 @@ module.exports = class AddressSerializer {
     return {
       id: address.id,
       city: address.residential_city,
-      residential_state: address.residential_state,
+      state: address.residential_state,
       apt: address.apt,
       building: address.building,
       street: address.street,
