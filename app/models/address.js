@@ -46,62 +46,50 @@ module.exports = class Address {
   }
 
   set residential_city (residential_city) {
-    if (residential_city) {
-      if(!(Utils.isEmpty(residential_city) || Utils.CONTAINS_DIGIT_REGEX.test(residential_city))) {
+    if(!(Utils.isEmpty(residential_city) || Utils.CONTAINS_DIGIT_REGEX.test(residential_city))) {
         this._residential_city = residential_city;
       } else {
         throw new InvalidInputException("residential_city")
       }
-    }
   }
 
   set residential_state (residential_state) {
-    if (residential_state) {
-      if(!(Utils.isEmpty(residential_state) || Utils.CONTAINS_DIGIT_REGEX.test(residential_state))) {
-        this._residential_state = residential_state;
-      } else {
-        throw new InvalidInputException("residential_state")
-      }
+    if(!(Utils.isEmpty(residential_state) || Utils.CONTAINS_DIGIT_REGEX.test(residential_state))) {
+      this._residential_state = residential_state;
+    } else {
+      throw new InvalidInputException("residential_state")
     }
   }
 
   set apt (apt) {
-    if (apt) {
-      if(!Utils.isEmpty(apt)) {
-        this._apt = apt;
-      } else {
-        throw new InvalidInputException("apt")
-      }
+    if(!Utils.isEmpty(apt)) {
+      this._apt = apt;
+    } else {
+      throw new InvalidInputException("apt")
     }
   }
 
   set building (building) {
-    if (building) {
-      if(!Utils.isEmpty(building)) {
-        this._building = building;
-      } else {
-        throw new InvalidInputException("building")
-      }
+    if(!Utils.isEmpty(building)) {
+      this._building = building;
+    } else {
+      throw new InvalidInputException("building")
     }
   }
 
   set street (street) {
-    if (street) {
-      if(!Utils.isEmpty(street)) {
-        this._street = street;
-      } else {
-        throw new InvalidInputException("street")
-      }
+    if(!Utils.isEmpty(street)) {
+      this._street = street;
+    } else {
+      throw new InvalidInputException("street")
     }
-  }
+}
 
   set zipCode (zipCode) {
-    if (zipCode) {
-      if(!Utils.isEmpty(zipCode) && ZIP_CODE_REGEX.test(zipCode)) {
-        this._zipCode = zipCode;
-      } else {
-        throw new InvalidInputException("zip code")
-      }
+    if(!Utils.isEmpty(zipCode) && ZIP_CODE_REGEX.test(zipCode)) {
+      this._zipCode = zipCode;
+    } else {
+      throw new InvalidInputException("zip code")
     }
   }
 
