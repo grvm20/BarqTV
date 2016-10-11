@@ -43,7 +43,142 @@ function injectDependencies(customerDao, addressDao) {
   );
 }
 
-describe('Customer use cases', () => {
+describe('Customer Use Cases', () => {
+  describe('Save customer', () => {
+    it.only('should save the Customer',
+      (done) => {
+        var params = {
+          "last_name" : "Gateway",
+          "first_name" : "API",
+          "email" : "api_gateway_test@gmail.com",
+          "phone_number" : "9281234476",
+          "address" : {
+            "city" : "Champaign",
+            "state" : "IL",
+            "apt" : "52",
+            "street" : "Main St",
+            "number" : "22",
+            "zip_code" : "68080"
+          }
+        }
+
+        var mockCustomerDao = {
+          fetch: (key, callback) => {
+            callback(null, {});
+          },
+          persist: (key, newItem, callback) => {
+            callback(null, {
+              id: params.email,
+              first_name: params.first_name,
+              last_name: params.last_name,
+              phone_number: params.phone_number,
+              address_ref: "ed7888cd-30d0-4208-8491-6aa5f416c12f",
+              deleted: false
+            })
+          }
+        };
+        var mockAddressDao = {
+          fetch: (key, callback) => {
+            callback(null, {
+              id: "ed7888cd-30d0-4208-8491-6aa5f416c12f",
+              apt: params.address.apt,
+              residential_city: params.address.city,
+              deleted: false,
+              building: params.address.number,
+              residential_state: params.address.state,
+              street: params.address.street,
+              zip_code: params.address.zip_code
+            });
+          },
+          persist: (key, newItem, callback) => {
+            debugger;
+            callback(null, {
+              id: "ed7888cd-30d0-4208-8491-6aa5f416c12f",
+              apt: params.address.apt,
+              residential_city: params.address.city,
+              deleted: false,
+              building: params.address.number,
+              residential_state: params.address.state,
+              street: params.address.street,
+              zip_code: params.address.zip_code
+            });
+          }
+        };
+
+        injectDependencies(mockCustomerDao, mockAddressDao);
+        customersController.create(params, (err, customer) => {
+          // Assert staff.
+          done(err);
+        });
+      }
+    );
+
+    it('shouldn\'t save a Customer that already exists',
+      // WIP
+      (done) => {
+        var params = {
+          "last_name" : "Gateway",
+          "first_name" : "API",
+          "email" : "api_gateway_test@gmail.com",
+          "phone_number" : "9281234476",
+          "address" : {
+            "city" : "Champaign",
+            "state" : "IL",
+            "apt" : "52",
+            "street" : "Main St",
+            "number" : "22",
+            "zip_code" : "68080"
+          }
+        }
+
+        var mockCustomerDao = {
+          fetch: (key, callback) => {
+            callback(null, {
+              id: params.email,
+              first_name: params.first_name,
+              last_name: params.last_name,
+              phone_number: params.phone_number,
+              address_ref: "ed7888cd-30d0-4208-8491-6aa5f416c12f",
+              deleted: false
+            });
+          }
+        };
+        var mockAddressDao = {
+          fetch: (key, callback) => {
+            callback(null, {
+              id: "ed7888cd-30d0-4208-8491-6aa5f416c12f",
+              apt: params.address.apt,
+              residential_city: params.address.city,
+              deleted: false,
+              building: params.address.number,
+              residential_state: params.address.state,
+              street: params.address.street,
+              zip_code: params.address.zip_code
+            });
+          },
+          persist: (key, newItem, callback) => {
+            callback(null, {
+              id: "ed7888cd-30d0-4208-8491-6aa5f416c12f",
+              apt: params.address.apt,
+              residential_city: params.address.city,
+              deleted: false,
+              building: params.address.number,
+              residential_state: params.address.state,
+              street: params.address.street,
+              zip_code: params.address.zip_code
+            });
+          }
+        };
+
+        injectDependencies(mockCustomerDao, mockAddressDao);
+        customersController.create(params, (err, customer) => {
+          expect(err).to.exist;
+          done();
+        });
+      }
+    );
+  });
+
   describe('Update customer', () => {
     it('should update an existing Customer (only Customer fields updated)',
       (done) => {
@@ -61,9 +196,6 @@ describe('Customer use cases', () => {
             "zip_code" : ""
           }
         }
-
-        
-        
 
         var mockCustomerDao = {
           fetch: (key, callback) => {
@@ -92,10 +224,10 @@ describe('Customer use cases', () => {
             callback(null, {
               id: "ed7888cd-30d0-4208-8491-6aa5f416c12f",
               apt: "52",
-              city: "Champaign",
+              residential_city: "Champaign",
               deleted: false,
-              number: "53",
-              state: "IL",
+              building: "53",
+              residential_state: "IL",
               street: "Main St",
               zip_code: "68080"
             });
@@ -104,10 +236,10 @@ describe('Customer use cases', () => {
             callback(null, {
               id: "ed7888cd-30d0-4208-8491-6aa5f416c12f",
               apt: "52",
-              city: "Champaign",
+              residential_city: "Champaign",
               deleted: false,
-              number: "53",
-              state: "IL",
+              building: "53",
+              residential_state: "IL",
               street: "Main St",
               zip_code: "68080"
             });
@@ -116,7 +248,6 @@ describe('Customer use cases', () => {
 
         injectDependencies(mockCustomerDao, mockAddressDao);
         customersController.update(params, (err, customer) => {
-          // Assert staff.
           done(err);
         });
       }

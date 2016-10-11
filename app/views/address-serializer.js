@@ -8,10 +8,10 @@ module.exports = class AddressSerializer {
   serialize(address) {
     return {
       id: address.id,
-      city: address.residential_city,
-      state: address.residential_state,
+      city: address.city,
+      state: address.state,
       apt: address.apt,
-      building: address.building,
+      number: address.number,
       street: address.street,
       zip_code: address.zipCode
     };
@@ -26,14 +26,14 @@ module.exports = class AddressSerializer {
     if (object.city != null) {
       result.city = object.city;
     }
-    if (object.residential_state != null) {
-      result.residential_state = object.residential_state;
+    if (object.state != null) {
+      result.state = object.state;
     }
     if (object.apt != null) {
       result.apt = object.apt;
     }
-    if (object.building != null) {
-      result.building = object.building;
+    if (object.number != null) {
+      result.number = object.number;
     }
     if (object.street != null) {
       result.street = object.street;

@@ -12,10 +12,10 @@ const Utils = require("../utilities/utils");
 function mapDbObjectToAddressAttributes(dbObject) {
   return {
     id: dbObject.id,
-    residential_city: dbObject.residential_city,
-    residential_state: dbObject.residential_state,
+    city: dbObject.residential_city,
+    state: dbObject.residential_state,
     apt: dbObject.apt,
-    building: dbObject.building,
+    number: dbObject.building,
     street: dbObject.street,
     zipCode: dbObject.zip_code
   };
@@ -38,17 +38,17 @@ function mapAddressToDbObject(address) {
   if (address.id) {
     item["id"] = address.id;
   }
-  if (address.residential_city) {
-    item["residential_city"] = address.residential_city;
+  if (address.city) {
+    item["residential_city"] = address.city;
   }
-  if (address.residential_state) {
-    item["residential_state"] = address.residential_state;
+  if (address.state) {
+    item["residential_state"] = address.state;
   }
   if (address.apt) {
     item["apt"] = address.apt;
   }
-  if (address.building) {
-    item["building"] = address.building;
+  if (address.number) {
+    item["building"] = address.number;
   }
   if (address.street) {
     item["street"] = address.street;
@@ -64,23 +64,20 @@ function mapAddressToDbObject(address) {
 }
 
 function constructUpdatableAddress(address) {
-
   var updatableAddress = new Address();
-  if (address.residential_city) {
-    console.log(address.residential_city);
-    updatableAddress.residential_city = address.residential_city;
-  }
 
+  if (address.residential_city) {
+    updatableAddress.city = address.residential_city;
+  }
   if (address.residential_state) {
-    updatableAddress.residential_state = address.residential_state;
+    updatableAddress.state = address.residential_state;
   }
   if (address.apt) {
     updatableAddress.apt = address.apt;
   }
   if (address.building) {
-    updatableAddress.building = address.building;
+    updatableAddress.number = address.building;
   }
-
   if (address.street) {
     updatableAddress.street = address.street;
   }
@@ -89,7 +86,6 @@ function constructUpdatableAddress(address) {
   }
 
   return updatableAddress
-
 }
 
 module.exports = class AddressService {
@@ -117,7 +113,7 @@ module.exports = class AddressService {
     }
   }
 
-  save(address, callback) {
+  save (address, callback) {
     if (!(address instanceof Address)) {
       var addressAttributes = address;
       if (!addressAttributes.id) {
@@ -129,7 +125,7 @@ module.exports = class AddressService {
         var address = new Address(addressAttributes);
       } catch (err) {
         console.error(err);
-        callback(err);
+        return callback(err);
       }
     }
     var key = createAddressKey(address.id);
@@ -138,9 +134,9 @@ module.exports = class AddressService {
 
       if (err) {
         console.log("Error while trying to save data: " + JSON.stringify(address));
-        callback(err);
+        return callback(err);
       } else {
-        callback(null, address);
+        return callback(null, address);
       }
     });
   }
@@ -161,7 +157,7 @@ module.exports = class AddressService {
     this._dao.fetch(key, (err, fetchedAddress) => {
       if (err) {
         console.log("Error while trying to fetch data: " + id);
-        callback(err);
+        return callback(err);
       } else {
 
         if (_.isArray(fetchedAddress)) {
@@ -174,13 +170,13 @@ module.exports = class AddressService {
               var address = new Address(addressAttributes);
             } catch (err) {
               console.log("Error while trying to fetch data: " + id);
-              callback(err);
+              return callback(err);
             }
 
             addresses.push(address)
           });
 
-          callback(null, addresses);
+          return callback(null, addresses);
 
         } else {
           if (!(Object.keys(fetchedAddress).length === 0)) {
@@ -190,12 +186,12 @@ module.exports = class AddressService {
               var address = new Address(addressAttributes);
             } catch (err) {
               console.log("Error while trying to fetch data: " + id);
-              callback(err);
+              return callback(err);
             }
 
-            callback(null, address);
+            return callback(null, address);
           } else {
-            callback(null, fetchedAddress);
+            return callback(null, fetchedAddress);
           }
         }
       }
@@ -214,7 +210,7 @@ module.exports = class AddressService {
       this._dao.delete(key, (err, deletedAddress) => {
         if (err) {
           console.error(err);
-          callback(err);
+          return callback(err);
         } else {
           var addressAttributes = mapDbObjectToAddressAttributes(deletedAddress);
 
@@ -222,9 +218,9 @@ module.exports = class AddressService {
             var address = new Address(addressAttributes);
           } catch (err) {
             console.log("Error while trying to delete data: " + id);
-            callback(err);
+            return callback(err);
           }
-          callback(null, address);
+          return callback(null, address);
         }
       });
     } else {
@@ -247,7 +243,7 @@ module.exports = class AddressService {
       this._dao.update(key, updatableAddressDbModel, (err, deletedAddress) => {
         if (err) {
           console.error(err);
-          callback(err);
+          return callback(err);
         } else {
 
           var addressAttributes = mapDbObjectToAddressAttributes(deletedAddress);
@@ -256,9 +252,9 @@ module.exports = class AddressService {
             var address = new Address(addressAttributes);
           } catch (err) {
             console.log("Error while trying to update data: " + id + ", address: " + JSON.stringify(address));
-            callback(err);
+            return callback(err);
           }
-          callback(null, address);
+          return callback(null, address);
         }
       });
     } else {

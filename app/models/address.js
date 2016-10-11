@@ -7,10 +7,10 @@ const Utils = require("../utilities/utils");
 var ZIP_CODE_REGEX = /[0-9]{5,}$/;
 var VALID_ADDRESS_REQUIRED_ATTRIBUTES = [
   "id",
-  "residential_city",
-  "residential_state",
+  "city",
+  "state",
   "apt",
-  "building",
+  "number",
   "street",
   "zipCode",
   "deleted"
@@ -24,10 +24,10 @@ module.exports = class Address {
   constructor(attributes) {
     if (attributes) {
       this.id = attributes.id || Utils.generateGuid();
-      this.residential_city = attributes.residential_city;
-      this.residential_state = attributes.residential_state;
+      this.city = attributes.city;
+      this.state = attributes.state;
       this.apt = attributes.apt;
-      this.building = attributes.building;
+      this.number = attributes.number;
       this.street = attributes.street;
       this.zipCode = attributes.zipCode;
       this.deleted = attributes.deleted || false;
@@ -45,19 +45,19 @@ module.exports = class Address {
     }
   }
 
-  set residential_city (residential_city) {
-    if(!(Utils.isEmpty(residential_city) || Utils.CONTAINS_DIGIT_REGEX.test(residential_city))) {
-        this._residential_city = residential_city;
+  set city (city) {
+    if(!(Utils.isEmpty(city) || Utils.CONTAINS_DIGIT_REGEX.test(city))) {
+        this._city = city;
       } else {
-        throw new InvalidInputException("residential_city")
+        throw new InvalidInputException("city")
       }
   }
 
-  set residential_state (residential_state) {
-    if(!(Utils.isEmpty(residential_state) || Utils.CONTAINS_DIGIT_REGEX.test(residential_state))) {
-      this._residential_state = residential_state;
+  set state (state) {
+    if(!(Utils.isEmpty(state) || Utils.CONTAINS_DIGIT_REGEX.test(state))) {
+      this._state = state;
     } else {
-      throw new InvalidInputException("residential_state")
+      throw new InvalidInputException("state")
     }
   }
 
@@ -69,11 +69,11 @@ module.exports = class Address {
     }
   }
 
-  set building (building) {
-    if(!Utils.isEmpty(building)) {
-      this._building = building;
+  set number (number) {
+    if(!Utils.isEmpty(number)) {
+      this._number = number;
     } else {
-      throw new InvalidInputException("building")
+      throw new InvalidInputException("number")
     }
   }
 
@@ -107,16 +107,16 @@ module.exports = class Address {
     return this._apt;
   }
 
-  get residential_city () {
-    return this._residential_city;
+  get city () {
+    return this._city;
   }
 
-  get residential_state () {
-    return this._residential_state;
+  get state () {
+    return this._state;
   }
 
-  get building () {
-    return this._building;
+  get number () {
+    return this._number;
   }
 
   get street () {
