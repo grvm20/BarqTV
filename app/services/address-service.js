@@ -63,31 +63,6 @@ function mapAddressToDbObject(address) {
   return item;
 }
 
-function constructUpdatableAddress(address) {
-  var updatableAddress = new Address();
-
-  if (address.residential_city) {
-    updatableAddress.city = address.residential_city;
-  }
-  if (address.residential_state) {
-    updatableAddress.state = address.residential_state;
-  }
-  if (address.apt) {
-    updatableAddress.apt = address.apt;
-  }
-  if (address.building) {
-    updatableAddress.number = address.building;
-  }
-  if (address.street) {
-    updatableAddress.street = address.street;
-  }
-  if (address.zipCode) {
-    updatableAddress.zipCode = address.zipCode;
-  }
-
-  return updatableAddress
-}
-
 module.exports = class AddressService {
 
   constructor(dao) {
@@ -128,6 +103,7 @@ module.exports = class AddressService {
         return callback(err);
       }
     }
+
     var key = createAddressKey(address.id);
     var addressDbModel = mapAddressToDbObject(address);
     this._dao.persist(key, addressDbModel, (err, persistedObject) => {
@@ -237,8 +213,7 @@ module.exports = class AddressService {
   update(id, address, callback) {
     if (!Utils.isEmpty(id)) {
       var key = createAddressKey(id);
-      var updatableAddress = constructUpdatableAddress(address);
-      var updatableAddressDbModel = mapAddressToDbObject(updatableAddress);
+      var updatableAddressDbModel = mapAddressToDbObject(address);
 
       this._dao.update(key, updatableAddressDbModel, (err, deletedAddress) => {
         if (err) {

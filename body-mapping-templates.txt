@@ -3,7 +3,7 @@ REQUEST body-mapping templates:
 ####################################
 
 
-Begin: POST /customers/{email}
+Begin: POST /customers
 #set($inputRoot = $input.path('$'))
 #set($inputAddress = $input.path('$.address'))
 {
@@ -23,7 +23,23 @@ Begin: POST /customers/{email}
     }
   }
 }
-End: POST /customers/{email}
+End: POST /customers
+
+
+Begin: POST /addresses
+#set($inputRoot = $input.path('$'))
+{
+  "operation" : "create",
+  "address" : {
+    "city" : "$inputRoot.city",
+    "state" : "$inputRoot.state",
+    "apt" : "$inputRoot.apt",
+    "street" : "$inputRoot.street",
+    "number" : "$inputRoot.number",
+    "zip_code" : "$inputRoot.zip_code"
+  }
+}
+End: POST /addresses
 
 
 Begin: UPDATE /customers/{email}
@@ -49,6 +65,23 @@ Begin: UPDATE /customers/{email}
 End: UPDATE /customers/{email}
 
 
+Begin: UPDATE /addresses/{id}
+#set($inputRoot = $input.path('$'))
+{
+  "operation" : "update",
+  "id" : "$input.params('id')",
+  "address" : {
+    "city" : "$inputRoot.city",
+    "state" : "$inputRoot.state",
+    "apt" : "$inputRoot.apt",
+    "number" : "$inputRoot.number",
+    "street" : "$inputRoot.street",
+    "zip_code" : "$inputRoot.zip_code"
+  }
+}
+End: UPDATE /addresses/{id}
+
+
 Begin: DELETE /customers/{email}
 {
   "operation" : "delete",
@@ -57,6 +90,15 @@ Begin: DELETE /customers/{email}
   }
 }
 End: DELETE /customers/{email}
+
+
+Begin: DELETE /addresses/{id}
+{
+  "operation" : "delete",
+  "id" : "$input.params('id')"
+}
+End: DELETE /addresses/{id}
+
 
 
 ####################################
@@ -85,6 +127,28 @@ Begin: GET /customers
 End: GET /customers
 
 
+Begin: GET /addresses
+#set($inputRoot = $input.path('$.body'))
+[
+#foreach($address in $inputRoot)
+    {
+        "id" : "$address.id",
+        "city" : "$address.city",
+        "state" : "$address.state",
+        "apt" : "$address.apt",
+        "building" : "$address.building",
+        "street" : "$address.street",
+        "zip_code" : "$address.zip_code",
+        "self" : {
+            "href" : "https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$customer.email"
+        }
+    }#if($foreach.hasNext),#end
+
+#end
+]
+End: GET /addresses
+
+
 Begin: GET /customers/{email}, POST /customers, PUT /customers
 #set($inputRoot = $input.path('$.body'))
 {
@@ -102,6 +166,23 @@ Begin: GET /customers/{email}, POST /customers, PUT /customers
 End: GET /customers/{email}, POST /customers, PUT /customers
 
 
+Begin: GET /addresses/{id}, PUT /addresses/{id}, POST /addresses/{id}
+#set($inputRoot = $input.path('$.body'))
+{
+  "id" : "$inputRoot.id",
+  "city" : "$inputRoot.city",
+  "state" : "$inputRoot.state",
+  "apt" : "$inputRoot.apt",
+  "number" : "$inputRoot.number",
+  "street" : "$inputRoot.street",
+  "zip_code" : "$inputRoot.zip_code",
+  "self" : {
+    "href" : "https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.id"
+  }
+}
+End: GET /addresses/{id}, PUT /addresses/{id}, POST /addresses/{id}
+
+
 Begin: DELETE /customers/{email}
 #set($inputRoot = $input.path('$.body'))
 {
@@ -114,3 +195,17 @@ Begin: DELETE /customers/{email}
     }
 }
 End: DELETE /customers/{email}
+
+
+Begin: GET /addresses/{id}, PUT /addresses/{id}, POST /addresses/{id}
+#set($inputRoot = $input.path('$.body'))
+{
+  "id" : "$inputRoot.id",
+  "city" : "$inputRoot.city",
+  "state" : "$inputRoot.state",
+  "apt" : "$inputRoot.apt",
+  "number" : "$inputRoot.number",
+  "street" : "$inputRoot.street",
+  "zip_code" : "$inputRoot.zip_code"
+}
+End: GET /addresses/{id}, PUT /addresses/{id}, POST /addresses/{id}

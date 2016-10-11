@@ -45,7 +45,7 @@ function injectDependencies(customerDao, addressDao) {
 
 describe('Customer Use Cases', () => {
   describe('Save customer', () => {
-    it.only('should save the Customer',
+    it('should save the Customer',
       (done) => {
         var params = {
           "last_name" : "Gateway",
@@ -91,7 +91,6 @@ describe('Customer Use Cases', () => {
             });
           },
           persist: (key, newItem, callback) => {
-            debugger;
             callback(null, {
               id: "ed7888cd-30d0-4208-8491-6aa5f416c12f",
               apt: params.address.apt,
@@ -248,6 +247,94 @@ describe('Customer Use Cases', () => {
 
         injectDependencies(mockCustomerDao, mockAddressDao);
         customersController.update(params, (err, customer) => {
+          done(err);
+        });
+      }
+    );
+  });
+});
+
+describe('Address Use Cases', () => {
+  describe('Save address', () => {
+    it('should save the Address',
+      (done) => {
+        var params = {
+          "address" : {
+            "city" : "Las Vegas",
+            "state" : "NV",
+            "apt" : "190",
+            "street" : "Second Street",
+            "number" : "890",
+            "zip_code" : "43090"
+          }
+        }
+
+        var mockAddressDao = {
+          fetch: (key, callback) => {
+            callback(null, {});
+          },
+          persist: (key, newItem, callback) => {
+            callback(null, {
+              id: "e7a32e39-371f-41f7-81f7-ca3f4be9c546",
+              apt: params.apt,
+              residential_city: params.city,
+              deleted: false,
+              building: params.number,
+              residential_state: params.state,
+              street: params.street,
+              zip_code: params.zip_code
+            });
+          }
+        };
+
+        injectDependencies(null, mockAddressDao);
+        addressesController.create(params, (err, address) => {
+          done(err);
+        });
+      }
+    );
+  });
+
+  describe('Update address', () => {
+    it('should update an existing Address',
+      (done) => {
+        var params = {
+          "id" : "e7a02e34-371f-41f7-81f7-ca3f4be9c546",
+          "address" : {
+            "number" : "112"
+          }
+        }
+
+        var mockAddressDao = {
+          fetch: (key, callback) => {
+            callback(null, {
+              id: "e7a02e34-371f-41f7-81f7-ca3f4be9c546",
+              apt: "52",
+              residential_city: "Champaign",
+              deleted: false,
+              building: "53",
+              residential_state: "IL",
+              street: "Main St",
+              zip_code: "68080"
+            });
+          },
+          update: (key, newItem, callback) => {
+            expect(newItem.building).to.equal("112");
+            callback(null, {
+              id: "e7a02e34-371f-41f7-81f7-ca3f4be9c546",
+              apt: "52",
+              residential_city: "Champaign",
+              deleted: false,
+              building: "112",
+              residential_state: "IL",
+              street: "Main St",
+              zip_code: "68080"
+            });
+          }
+        };
+
+        injectDependencies(null, mockAddressDao);
+        addressesController.update(params, (err, address) => {
           done(err);
         });
       }
