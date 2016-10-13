@@ -46,62 +46,50 @@ module.exports = class Address {
   }
 
   set city (city) {
-    if (city) {
-      if(!(Utils.isEmpty(city) || Utils.CONTAINS_DIGIT_REGEX.test(city))) {
+    if(!(Utils.isEmpty(city) || Utils.CONTAINS_DIGIT_REGEX.test(city))) {
         this._city = city;
       } else {
         throw new InvalidInputException("city")
       }
-    }
   }
 
   set state (state) {
-    if (state) {
-      if(!(Utils.isEmpty(state) || Utils.CONTAINS_DIGIT_REGEX.test(state))) {
-        this._state = state;
-      } else {
-        throw new InvalidInputException("state")
-      }
+    if(!(Utils.isEmpty(state) || Utils.CONTAINS_DIGIT_REGEX.test(state))) {
+      this._state = state;
+    } else {
+      throw new InvalidInputException("state")
     }
   }
 
   set apt (apt) {
-    if (apt) {
-      if(!Utils.isEmpty(apt)) {
-        this._apt = apt;
-      } else {
-        throw new InvalidInputException("apt")
-      }
+    if(!Utils.isEmpty(apt)) {
+      this._apt = apt;
+    } else {
+      throw new InvalidInputException("apt")
     }
   }
 
   set number (number) {
-    if (number) {
-      if(!Utils.isEmpty(number)) {
-        this._number = number;
-      } else {
-        throw new InvalidInputException("number")
-      }
+    if(!Utils.isEmpty(number)) {
+      this._number = number;
+    } else {
+      throw new InvalidInputException("number")
     }
   }
 
   set street (street) {
-    if (street) {
-      if(!Utils.isEmpty(street)) {
-        this._street = street;
-      } else {
-        throw new InvalidInputException("street")
-      }
+    if(!Utils.isEmpty(street)) {
+      this._street = street;
+    } else {
+      throw new InvalidInputException("street")
     }
-  }
+}
 
   set zipCode (zipCode) {
-    if (zipCode) {
-      if(!Utils.isEmpty(zipCode) && ZIP_CODE_REGEX.test(zipCode)) {
-        this._zipCode = zipCode;
-      } else {
-        throw new InvalidInputException("zip code")
-      }
+    if(!Utils.isEmpty(zipCode) && ZIP_CODE_REGEX.test(zipCode)) {
+      this._zipCode = zipCode;
+    } else {
+      throw new InvalidInputException("zip code")
     }
   }
 

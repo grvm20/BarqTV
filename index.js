@@ -133,16 +133,16 @@ exports.addressesControllerHandler = (event, context, callback) => {
 
   switch (operation) {
     case 'fetch':
-      addressesController.show(params, callback)
+      addressesController.show(params, sendHttpResponse(callback))
       break;
     case 'create':
-      addressesController.create(params, callback)
+      addressesController.create(params, sendHttpResponse(callback))
       break;
     case 'update':
-      addressesController.update(params, callback)
+      addressesController.update(params, sendHttpResponse(callback))
       break;
     case 'delete':
-      addressesController.delete(params, callback)
+      addressesController.delete(params, sendHttpResponse(callback))
       break;
     default:
       // Unsupported operation.

@@ -33,7 +33,8 @@ module.exports = class AddressController {
 
   create(params, callback) {
     if (areValidParams(params) && areValidParams(params.address)) {
-      this.addressService.save(params.address, (err, savedAddress) => {
+      var address = this.addressSerializer.deserialize(params.address);
+      this.addressService.save(address, (err, savedAddress) => {
         if (err) {
           console.log("Error while trying to save address information: " + JSON.stringify(params.address))
           callback(err);
