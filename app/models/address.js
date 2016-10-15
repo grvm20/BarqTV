@@ -4,7 +4,7 @@ const _ = require('underscore');
 const InvalidInputException = require("../exceptions/invalid-input-exception");
 const Utils = require("../utilities/utils");
 
-var ZIP_CODE_REGEX = /[0-9]{5,}$/;
+
 var VALID_ADDRESS_REQUIRED_ATTRIBUTES = [
   "id",
   "city",
@@ -15,6 +15,23 @@ var VALID_ADDRESS_REQUIRED_ATTRIBUTES = [
   "zipCode",
   "deleted"
 ];
+
+const isValidCity = (city) => {
+  return Utils.isAlphabeticString(city);
+}
+const isValidState = (state) => {
+  return Utils.isAlphabeticString(state);
+}
+const isValidId = (id) => {
+  var isNotEmpty = !Utils.isEmpty(id);
+  return isNotEmpty;
+}
+const isValidZipCode = (zipCode) => {
+  const ZIP_CODE_FORMAT_REGEX = /[0-9]{5,}$/;
+  var isNotEmpty = !Utils.isEmpty(zipCode);
+  var hasZipCodeFormat = ZIP_CODE_FORMAT_REGEX.test(zipCode);
+  return isNotEmpty && hasZipCodeFormat
+}
 
 /***
  * Model class for Address
@@ -37,7 +54,7 @@ module.exports = class Address {
 
   set id (id) {
     if (id) {
-      if(!Utils.isEmpty(id)) {
+      if (isValidId(id)) {
         this._id = id;
       } else {
         throw new InvalidInputException("id")
@@ -46,50 +63,62 @@ module.exports = class Address {
   }
 
   set city (city) {
-    if(!(Utils.isEmpty(city) || Utils.CONTAINS_DIGIT_REGEX.test(city))) {
+    if (city) {
+      if (isValidCity(city)) {
         this._city = city;
       } else {
         throw new InvalidInputException("city")
       }
+    }
   }
 
   set state (state) {
-    if(!(Utils.isEmpty(state) || Utils.CONTAINS_DIGIT_REGEX.test(state))) {
-      this._state = state;
-    } else {
-      throw new InvalidInputException("state")
+    if (state) {
+      if (isValidState(state)) {
+        this._state = state;
+      } else {
+        throw new InvalidInputException("state")
+      }
     }
   }
 
   set apt (apt) {
-    if(!Utils.isEmpty(apt)) {
-      this._apt = apt;
-    } else {
-      throw new InvalidInputException("apt")
+    if (apt) {
+      if (!Utils.isEmpty(apt)) {
+        this._apt = apt;
+      } else {
+        throw new InvalidInputException("apt")
+      }
     }
   }
 
   set number (number) {
-    if(!Utils.isEmpty(number)) {
-      this._number = number;
-    } else {
-      throw new InvalidInputException("number")
+    if (number) {
+      if (!Utils.isEmpty(number)) {
+        this._number = number;
+      } else {
+        throw new InvalidInputException("number")
+      }
     }
   }
 
   set street (street) {
-    if(!Utils.isEmpty(street)) {
-      this._street = street;
-    } else {
-      throw new InvalidInputException("street")
+    if (street) {
+      if (!Utils.isEmpty(street)) {
+        this._street = street;
+      } else {
+        throw new InvalidInputException("street")
+      }
     }
-}
+  }
 
   set zipCode (zipCode) {
-    if(!Utils.isEmpty(zipCode) && ZIP_CODE_REGEX.test(zipCode)) {
-      this._zipCode = zipCode;
-    } else {
-      throw new InvalidInputException("zip code")
+    if (zipCode) {
+      if (isValidZipCode(zipCode)) {
+        this._zipCode = zipCode;
+      } else {
+        throw new InvalidInputException("zip code")
+      }
     }
   }
 

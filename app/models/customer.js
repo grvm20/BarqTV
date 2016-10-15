@@ -20,10 +20,7 @@ const isValidId = (id) => {
 }
 
 const isValidName = (name) => {
-  var isNotEmpty = !Utils.isEmpty(name);
-  var doesNotContainDigits = !Utils.CONTAINS_DIGIT_REGEX.test(name);
-  var doesNotContainInvalidChars = !/[\{\}\(\)_\$#"'@\|!\?\+\*%<>]/.test(name);
-  return isNotEmpty && doesNotContainDigits && doesNotContainInvalidChars;
+  return Utils.isAlphabeticString(name);
 };
 
 const isValidPhoneNumber = (phoneNumber) => {

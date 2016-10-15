@@ -1,14 +1,33 @@
 'use strict';
 
-const _ = require('underscore');
-
 /***
  * Utility class for app
  ***/
+
+var isEmptyObject = (object) => {
+  var doesNotHaveKeys = Object.keys(object).length === 0;
+  return doesNotHaveKeys;
+}
+
 class Utils {
 
   static isEmpty (val) {
-    return _.isEmpty( (val && val.trim)? val.trim() : val );
+    var isUndefined = typeof val === 'undefined';
+    var isNull = val === null;
+    var isString = typeof val === 'string';
+    var isObject = typeof val === 'object';
+
+    if (isUndefined || isNull) {
+      return true;
+    } else if (isString) {
+      var hasJustSpaces = val.trim().length === 0;
+      return hasJustSpaces;
+    } else if (isObject) {
+      return isEmptyObject(val);
+    } else {
+      // Default case, for the rest of the datatypes.
+      return false;
+    }
   }
 
   static generateGuid() {
@@ -41,6 +60,14 @@ class Utils {
     } else {
       return false;
     }
+  }
+
+  // Alphabetic strings can contain . and , too.
+  static isAlphabeticString(string) {
+    var isNotEmpty = !Utils.isEmpty(string);
+    var doesNotContainDigits = !Utils.CONTAINS_DIGIT_REGEX.test(string);
+    var doesNotContainInvalidChars = !/[\{\}\(\)_\$#"'@\|!\?\+\*%<>/]/.test(string);
+    return isNotEmpty && doesNotContainDigits && doesNotContainInvalidChars;
   }
 }
 
