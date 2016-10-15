@@ -1,23 +1,17 @@
 'use strict';
 
 const _ = require('underscore');
-const AWS = require('aws-sdk');
 const sprintf = require('sprintf-js').sprintf;
-
-const dynamoDocClient = new AWS.DynamoDB.DocumentClient();
-
 
 /***
  * DAO class which handles all data access related operations.
- * Expects table name to be injected to each object of the class through constructor.
- *
- * To access database initialize an object with the table name and call the required operation 
- * passing the necessary parameters and callbacks
+ * Expects a DynamoDB client object and a table name to be injected.
  ***/
 module.exports = class Dao {
 
-  constructor(tableName) {
-    this.tableName = tableName;
+  constructor(dynamoDocClient, tableName) {
+    this._tableName = tableName;
+    this._dynamoDocClient = dynamoDocClient
   }
 
   /**
@@ -29,10 +23,10 @@ module.exports = class Dao {
   persist(key, item, callback) {
 
     var params = {
-      TableName: this.tableName,
+      TableName: this._tableName,
       Key: key
     };
-    dynamoDocClient.get(params, function(err, data) {
+    this._dynamoDocClient.get(params, function(err, data) {
       if (err) {
         console.error("Dynamo failed to persist data " + err);
         callback(err, null);
@@ -40,7 +34,7 @@ module.exports = class Dao {
         if (_.isEmpty(data)) {
           params = _.omit(params, 'Key');
           params.Item = item;
-          dynamoDocClient.put(params, function(err, persistedData) {
+          this._dynamoDocClient.put(params, function(err, persistedData) {
             if (err) {
               console.error("Dynamo failed to persist data " + err);
               callback(err, null);
@@ -65,19 +59,19 @@ module.exports = class Dao {
   fetch(key, callback) {
 
     var params = {
-      TableName: this.tableName
+      TableName: this._tableName
     };
     if (key != null && key != "") {
       params.Key = key;
 
-      dynamoDocClient.get(params, function(err, data) {
+      this._dynamoDocClient.get(params, function(err, data) {
         if (err) {
           console.error("Dynamo failed to fetch data " + err);
           callback(err, null);
         } else {
           console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
           var item = data.Item;
-          // This is necessary because we dont have a GSI on is_active field.
+          // This is necessary because we dont have a GSI on deleted field.
           // So we have to manually filter out the result
           if (!item || (item && item.deleted == true)) {
             item = {}
@@ -91,7 +85,7 @@ module.exports = class Dao {
       params.FilterExpression = "deleted = :value";
       params.ExpressionAttributeValues = { ":value": false };
 
-      dynamoDocClient.scan(params, function(err, data) {
+      this._dynamoDocClient.scan(params, function(err, data) {
         if (err) {
           console.error("Dynamo failed to fetch data " + err);
           callback(err, null);
@@ -112,11 +106,11 @@ module.exports = class Dao {
   delete(key, callback) {
 
     var params = {
-      TableName: this.tableName,
+      TableName: this._tableName,
       Key: key
     };
 
-    dynamoDocClient.get(params, function(err, data) {
+    this._dynamoDocClient.get(params, function(err, data) {
       if (err) {
         console.error("Dynamo failed to fetch data " + err);
         callback(err, null);
@@ -127,7 +121,7 @@ module.exports = class Dao {
         item.deleted = true;
         params.Item = item;
 
-        dynamoDocClient.put(params, function(err, data) {
+        this._dynamoDocClient.put(params, function(err, data) {
           if (err) {
             console.error("Dynamo failed to persist data " + err);
             callback(err, null);
@@ -184,14 +178,14 @@ module.exports = class Dao {
 
           console.log(sprintf("Using update expression: %s.", updateExpression));
           var params = {
-            TableName: this.tableName,
+            TableName: this._tableName,
             Key: key,
             UpdateExpression: updateExpression,
             ExpressionAttributeValues: expressionAttributeValues,
             ReturnValues: "ALL_NEW"
           };
 
-          dynamoDocClient.update(params, function(err, data) {
+          this._dynamoDocClient.update(params, function(err, data) {
             if (err) {
               console.error("Dynamo failed to Update data " + err);
               callback(err, null);

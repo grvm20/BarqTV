@@ -2,6 +2,7 @@
 
 // Vendor imports.
 const _ = require('underscore');
+const AWS = require('aws-sdk');
 
 // Internal imports.
 const Dao = require('./app/services/dao/dao');
@@ -20,6 +21,8 @@ const CUSTOMERS_TABLE_NAME = 'customers';
 const ADDRESSES_TABLE_NAME = 'addresses';
 
 // Singleton variables.
+var dynamoDocClient;
+
 var customerDao;
 var customerService;
 var customerSerializer;
@@ -55,8 +58,10 @@ function sendHttpResponse(callback) {
 
 function injectDependencies() {
   console.log('Injecting dependencies.');
-  customerDao = new Dao(CUSTOMERS_TABLE_NAME);
-  addressDao = new Dao(ADDRESSES_TABLE_NAME);
+  dynamoDocClient = new AWS.DynamoDB.DocumentClient();
+
+  customerDao = new Dao(dynamoDocClient, CUSTOMERS_TABLE_NAME);
+  addressDao = new Dao(dynamoDocClient, ADDRESSES_TABLE_NAME);
 
   addressService = new AddressService(
     addressDao
