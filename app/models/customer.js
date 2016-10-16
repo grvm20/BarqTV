@@ -139,18 +139,5 @@ module.exports = class Customer {
   get email () {
     return this.id;
   }
-
-  // To be valid, it must contain all required attributes.
-  validate () {
-    _.each(VALID_CUSTOMER_REQUIRED_ATTRIBUTES, (attribute) => {
-      var hasAttribute = typeof this[attribute] !== 'undefined';
-      var isValidAttribute = Utils.isValid(this[attribute]);
-      if (!hasAttribute || !isValidAttribute) {
-        throw new InvalidInputException(attribute);
-      }
-    });
-
-    return true;
-  }
 }
 

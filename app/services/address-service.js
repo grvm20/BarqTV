@@ -91,11 +91,6 @@ module.exports = class AddressService {
   save (address, callback) {
     if (!(address instanceof Address)) {
       var addressAttributes = address;
-      if (!addressAttributes.id) {
-        var id = Utils.generateGuid();
-        addressAttributes.id = id;
-      }
-
       try {
         var address = new Address(addressAttributes);
       } catch (err) {

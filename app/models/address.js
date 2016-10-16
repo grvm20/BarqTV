@@ -130,17 +130,4 @@ module.exports = class Address {
   get deleted () {
     return this._deleted;
   }
-
-  // To be valid, it must contain all required attributes.
-  validate () {
-    _.each(VALID_ADDRESS_REQUIRED_ATTRIBUTES, (attribute) => {
-      var hasAttribute = typeof this[attribute] !== 'undefined';
-      var isValidAttribute = Utils.isValid(this[attribute]);
-      if (!hasAttribute || !isValidAttribute) {
-        throw new InvalidInputException(attribute);
-      }
-    });
-
-    return true;
-  }
 }

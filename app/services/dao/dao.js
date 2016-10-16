@@ -1,11 +1,7 @@
 'use strict';
 
 const _ = require('underscore');
-const AWS = require('aws-sdk');
 const sprintf = require('sprintf-js').sprintf;
-
-const dynamoDocClient = new AWS.DynamoDB.DocumentClient();
-
 
 /***
  * DAO class which handles all data access related operations.
@@ -16,8 +12,9 @@ const dynamoDocClient = new AWS.DynamoDB.DocumentClient();
  ***/
 module.exports = class Dao {
 
-  constructor(tableName) {
+  constructor(tableName, dynamoDocClient) {
     this.tableName = tableName;
+    this.dynamoDocClient = dynamoDocClient;
   }
 
   /**
@@ -32,7 +29,8 @@ module.exports = class Dao {
       TableName: this.tableName,
       Key: key
     };
-    dynamoDocClient.get(params, function(err, data) {
+    var self = this;
+    this.dynamoDocClient.get(params, function(err, data) {
       if (err) {
         console.error("Dynamo failed to persist data " + err);
         callback(err, null);
@@ -40,7 +38,7 @@ module.exports = class Dao {
         if (_.isEmpty(data)) {
           params = _.omit(params, 'Key');
           params.Item = item;
-          dynamoDocClient.put(params, function(err, persistedData) {
+          self.dynamoDocClient.put(params, function(err, persistedData) {
             if (err) {
               console.error("Dynamo failed to persist data " + err);
               callback(err, null);
@@ -70,7 +68,7 @@ module.exports = class Dao {
     if (key != null && key != "") {
       params.Key = key;
 
-      dynamoDocClient.get(params, function(err, data) {
+      this.dynamoDocClient.get(params, function(err, data) {
         if (err) {
           console.error("Dynamo failed to fetch data " + err);
           callback(err, null);
@@ -91,7 +89,7 @@ module.exports = class Dao {
       params.FilterExpression = "deleted = :value";
       params.ExpressionAttributeValues = { ":value": false };
 
-      dynamoDocClient.scan(params, function(err, data) {
+      this.dynamoDocClient.scan(params, function(err, data) {
         if (err) {
           console.error("Dynamo failed to fetch data " + err);
           callback(err, null);
@@ -115,8 +113,8 @@ module.exports = class Dao {
       TableName: this.tableName,
       Key: key
     };
-
-    dynamoDocClient.get(params, function(err, data) {
+    var self = this;
+    this.dynamoDocClient.get(params, function(err, data) {
       if (err) {
         console.error("Dynamo failed to fetch data " + err);
         callback(err, null);
@@ -127,7 +125,7 @@ module.exports = class Dao {
         item.deleted = true;
         params.Item = item;
 
-        dynamoDocClient.put(params, function(err, data) {
+        self.dynamoDocClient.put(params, function(err, data) {
           if (err) {
             console.error("Dynamo failed to persist data " + err);
             callback(err, null);
@@ -149,6 +147,7 @@ module.exports = class Dao {
    **/
   update(key, newItem, callback) {
     // Get object from Dynamo to compare first.
+    var self = this;
     this.fetch(key, (err, currentItem) => {
       if (err) {
         console.error(err);
@@ -191,7 +190,7 @@ module.exports = class Dao {
             ReturnValues: "ALL_NEW"
           };
 
-          dynamoDocClient.update(params, function(err, data) {
+          self.dynamoDocClient.update(params, function(err, data) {
             if (err) {
               console.error("Dynamo failed to Update data " + err);
               callback(err, null);

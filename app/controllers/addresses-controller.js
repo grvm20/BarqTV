@@ -9,9 +9,10 @@ function areValidParams(params) {
 
 module.exports = class AddressController {
 
-  constructor(addressService, addressSerializer) {
+  constructor(addressService, addressSerializer, addressNormalizer) {
     this.addressService = addressService;
     this.addressSerializer = addressSerializer;
+    this.addressNormalizer = addressNormalizer;
   }
 
   show(params, callback) {
@@ -32,14 +33,31 @@ module.exports = class AddressController {
   }
 
   create(params, callback) {
+
     if (areValidParams(params) && areValidParams(params.address)) {
+
       var address = this.addressSerializer.deserialize(params.address);
-      this.addressService.save(address, (err, savedAddress) => {
-        if (err) {
-          console.log("Error while trying to save address information: " + JSON.stringify(params.address))
+      var self = this;
+
+      this.addressNormalizer.normalize(address, (err, normalizedAddress) => {
+        if(err){
+          console.log("Error while persisting normalizing address");
           callback(err);
-        } else {
-          this.addressSerializer.render(savedAddress, callback);
+          return;
+        }else{
+            self.addressService.save(normalizedAddress, (err, savedAddress) => {
+            if (err) {
+
+              console.log("Error while trying to save address information: " + JSON.stringify(params.address))
+              callback(err);
+              return;
+
+            } else {
+
+              self.addressSerializer.render(savedAddress, callback);
+              return;
+            }
+          });
         }
       });
     } else {

@@ -42,6 +42,16 @@ class Utils {
       return false;
     }
   }
+
+  static validateAttributesNotEmpty(attributeKeys, object){
+    _.each(attributeKeys, (attribute) => {
+        var hasAttribute = typeof object[attribute] !== 'undefined';
+        var isValidAttribute = this.isValid(object[attribute]);
+        if (!hasAttribute || !isValidAttribute) {
+          throw new InvalidInputException(attribute);
+        }
+    });
+  }
 }
 
 // Class constants.
