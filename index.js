@@ -80,7 +80,8 @@ function injectDependencies() {
   addressSerializer = new AddressSerializer();
   addressesController = new AddressesController(
     addressService,
-    addressSerializer
+    addressSerializer,
+    customersController
   );
 
   console.log('Dependencies injected.');
