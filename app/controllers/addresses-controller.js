@@ -35,8 +35,14 @@ module.exports = class AddressController {
         // Get address of given customer email.
         this.customersController.show(params, (err, customerData) => {
           if (err) return callback(err);
-          var id = customerData.address;
-          return fetchAddress(id, callback);
+          var hasAddress = customerData.address;
+          if (hasAddress) {
+            var addressId = customerData.address;
+            return fetchAddress(addressId, callback);
+          } else {
+            // TODO Refactor to object not found error.
+            return callback(new Exception("Address not found"));
+          }
         })
       } else {
         // Get all addreses.
