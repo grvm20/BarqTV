@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>Angular Registration</title>
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,100,700,900' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="css/style.css">
+  
+  <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+  <script src="//d79i1fxsrar4t.cloudfront.net/jquery.liveaddress/3.2/jquery.liveaddress.min.js"></script>
+  <script>var liveaddress = $.LiveAddress({
+  key: "13784757283489467",
+  debug: true,
+  target: "US",
+  addresses: [{
+    address1: '#street-address',
+    locality: '#city',
+    administrative_area: '#state',
+    postal_code: '#zip',
+    }]
+  });
+  </script>
+
+ 
+
+</head>
+<body>
+<header></header>
+
+<div class="textintro">
+<center>
+      <h1>Hi !</h1>
+      <p> Log-in to access lambda awesomeness from cloudcruisers!</p>
+</center>
+</div>
+
+
+<section class ="card register"> 
+<form>
+<label>First Name</label>
+<input type="text" id="firstname" name="firstname" placeholder="First Name" class="form-control" required>
+<label>Last Name</label>
+<input type="text" id="lastname" name="lastname" placeholder="Last Name" class="form-control" required>
+<br>
+<label>Email</label>
+<input type="email" id="email" name="email" placeholder="xyz@sample.com" class="form-control" required>
+<br>
+<label>Enter Address</label>
+<input type="text" id="street-address" name="street-address" placeholder="Street Address" class="form-control">
+<label>City</label>
+<input type="text" id="city" name="city" placeholder="City" class="form-control">
+<br>
+<label>State</label>
+<input type="text" id="state" name="state" placeholder="State" class="form-control">
+<br>
+<label>Zip</label>
+<input type="text" id="zip" name="zip" placeholder="Zip" class="form-control">
+<input type="submit" name="submit" value="Submit" class="btn">
+
+</form>
+</section>
+
+</body>
+</html>
