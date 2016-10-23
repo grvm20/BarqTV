@@ -5,9 +5,9 @@ const Exception = require('./exception');
 /***
 * Exception class. To be used when Data Object accessed is not found
 ***/
-module.exports = class MethodNotAllowedException extends DaoException {
+module.exports = class ObjectExistsException extends DaoException {
   constructor (err) {
-    super("This method is not allowed, error thrown: " + err);
+    super("The object already exists in DAO: " + err);
     this.err = err;
   }
 }
