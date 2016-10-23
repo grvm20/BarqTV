@@ -9,22 +9,45 @@ function areValidParams(params) {
 
 module.exports = class AddressController {
 
-  constructor(addressService, addressSerializer) {
+  constructor(addressService, addressSerializer, customersController) {
     this.addressService = addressService;
     this.addressSerializer = addressSerializer;
+    this.customersController = customersController;
   }
 
   show(params, callback) {
-    if (areValidParams(params)) {
-      var id = params.id;
+    var fetchAddress = (id, callback) => {
       this.addressService.fetch(id, (err, address) => {
         if (err) {
           console.log("Error fetching data for id:" + id);
-          callback(err);
+          return callback(err);
         } else {
-          this.addressSerializer.render(address, callback);
+          return this.addressSerializer.render(address, callback);
         }
       });
+    }
+
+    if (areValidParams(params)) {
+      if (params.id) {
+        var id = params.id;
+        return fetchAddress(id, callback);
+      } else if (params.email) {
+        // Get address of given customer email.
+        this.customersController.show(params, (err, customerData) => {
+          if (err) return callback(err);
+          var hasAddress = customerData.address;
+          if (hasAddress) {
+            var addressId = customerData.address;
+            return fetchAddress(addressId, callback);
+          } else {
+            // TODO Refactor to object not found error.
+            return callback(new Exception("Address not found"));
+          }
+        })
+      } else {
+        // Get all addreses.
+        return fetchAddress(null, callback);
+      }
     } else {
       // Invalid params.
       // Raise error.

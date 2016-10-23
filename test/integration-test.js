@@ -39,7 +39,8 @@ function injectDependencies(customerDao, addressDao) {
   var addressSerializer = new AddressSerializer();
   addressesController = new AddressesController(
     addressService,
-    addressSerializer
+    addressSerializer,
+    customersController
   );
 }
 
@@ -339,5 +340,162 @@ describe('Address Use Cases', () => {
         });
       }
     );
+  });
+
+  describe('Get all Addresses', () => {
+    it('should return all Addresses when params is an empty object', (done) => {
+      var params = {};
+      var addressesDataObjects = [
+        {
+          id: "ed7888cd-30d0-4208-8491-6aa5f416c12f",
+          apt: "N/A",
+          residential_city: "Washington",
+          deleted: false,
+          building: "1600",
+          residential_state: "DC",
+          street: "Pennsylvania Ave",
+          zip_code: "20500"
+        },
+        {
+          id: "41f87ef3-48bd-4721-a250-d4fa2f11afa2",
+          apt: "2A",
+          residential_city: "San Francisco",
+          deleted: false,
+          building: "550 W",
+          residential_state: "CA",
+          street: "Market Street",
+          zip_code: "15009"
+        },
+        {
+          id: "0671d16b-a925-4526-90cb-508257192d15",
+          apt: "60",
+          residential_city: "Chicago",
+          deleted: false,
+          building: "433 N",
+          residential_state: "IL",
+          street: "Main St.",
+          zip_code: "68155"
+        }
+      ];
+
+      var mockAddressDao = {
+        fetch: (key, callback) => {
+          expect(key).to.not.exist;
+          callback(null, addressesDataObjects);
+        }
+      };
+
+      injectDependencies(null, mockAddressDao);
+      addressesController.show(params, (err, addressesData) => {
+        expect(err).to.not.exist;
+        for (var i = 0; i < addressesDataObjects.length; ++i) {
+          var addressData = addressesData[i];
+          var addressDataObject = addressesDataObjects[i];
+
+          expect(addressData.id).to.equal(addressDataObject.id);
+          expect(addressData.city).to.equal(addressDataObject.residential_city);
+          expect(addressData.state).to.equal(addressDataObject.residential_state);
+          expect(addressData.apt).to.equal(addressDataObject.apt);
+          expect(addressData.number).to.equal(addressDataObject.building);
+          expect(addressData.street).to.equal(addressDataObject.street);
+          expect(addressData.zip_code).to.equal(addressDataObject.zip_code);
+        }
+        done();
+      });
+    });
+  });
+
+  describe('Get Address by id', () => {
+    it('should return an Address information given its id', (done) => {
+      var addressDataObject = {
+        id: "ed7888cd-30d0-4208-8491-6aa5f416c12f",
+        apt: "N/A",
+        residential_city: "Washington",
+        deleted: false,
+        building: "1600",
+        residential_state: "DC",
+        street: "Pennsylvania Ave",
+        zip_code: "20500"
+      };
+
+      var params = {
+        id: addressDataObject.id
+      }
+
+      var mockAddressDao = {
+        fetch: (key, callback) => {
+          expect(key.id).to.equal(addressDataObject.id);
+          callback(null, addressDataObject);
+        }
+      };
+
+      injectDependencies(null, mockAddressDao);
+      addressesController.show(params, (err, addressData) => {
+        expect(err).to.not.exist;
+        expect(addressData.id).to.equal(addressDataObject.id);
+        expect(addressData.city).to.equal(addressDataObject.residential_city);
+        expect(addressData.state).to.equal(addressDataObject.residential_state);
+        expect(addressData.apt).to.equal(addressDataObject.apt);
+        expect(addressData.number).to.equal(addressDataObject.building);
+        expect(addressData.street).to.equal(addressDataObject.street);
+        expect(addressData.zip_code).to.equal(addressDataObject.zip_code);
+        done();
+      });
+    });
+  });
+
+  describe('Get Address by customer', () => {
+    it('should return a Customer\'s address when her email is given', (done) => {
+      var customerDataObject = {
+        id: "frank_underwood@gmail.com",
+        first_name: "Frank",
+        last_name: "Underwood",
+        phone_number: "9291234567",
+        address_ref: "ed7888cd-30d0-4208-8491-6aa5f416c12f",
+        deleted: false
+      };
+
+      var addressDataObject = {
+        id: "ed7888cd-30d0-4208-8491-6aa5f416c12f",
+        apt: "N/A",
+        residential_city: "Washington",
+        deleted: false,
+        building: "1600",
+        residential_state: "DC",
+        street: "Pennsylvania Ave",
+        zip_code: "20500"
+      };
+
+      var params = {
+        email: customerDataObject.id
+      }
+
+      var mockCustomerDao = {
+        fetch: (key, callback) => {
+          expect(key.id).to.equal(customerDataObject.id);
+          callback(null, customerDataObject);
+        }
+      };
+
+      var mockAddressDao = {
+        fetch: (key, callback) => {
+          expect(key.id).to.equal(addressDataObject.id);
+          callback(null, addressDataObject);
+        }
+      };
+
+      injectDependencies(mockCustomerDao, mockAddressDao);
+      addressesController.show(params, (err, addressData) => {
+        expect(err).to.not.exist;
+        expect(addressData.id).to.equal(addressDataObject.id);
+        expect(addressData.city).to.equal(addressDataObject.residential_city);
+        expect(addressData.state).to.equal(addressDataObject.residential_state);
+        expect(addressData.apt).to.equal(addressDataObject.apt);
+        expect(addressData.number).to.equal(addressDataObject.building);
+        expect(addressData.street).to.equal(addressDataObject.street);
+        expect(addressData.zip_code).to.equal(addressDataObject.zip_code);
+        done();
+      });
+    });
   });
 });
