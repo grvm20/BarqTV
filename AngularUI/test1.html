@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>Angular Registration</title>
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,100,700,900' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="css/style.css">
+  
+  <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+  <script src="https://d79i1fxsrar4t.cloudfront.net/jquery.liveaddress/3.2/jquery.liveaddress.min.js"></script>
+  <script src="testcontrol2.js"></script>
+  
+</head>
+<body>
+  <header></header>
+
+  <div class="textintro">
+    <center>
+      <h1>Hi !</h1>
+      <p> Log-in to access lambda awesomeness from cloudcruisers!</p>
+    </center>
+  </div>
+  
+<div id="response">
+<center>
+    <h1>Response:</h1>
+    <pre></pre>
+</center>
+</div> 
+
+<section class ="card register"> 
+  <form id="firstForm">
+    <label>First Name</label>
+    <input type="text" id="firstname" name="firstname" placeholder="First Name" class="form-control" pattern="[a-zA-Z]{2,64}" oninvalid="setCustomValidity('Plz enter Valid name')" required>
+    <label>Last Name</label>
+    <input type="text" id="lastname" name="lastname" placeholder="Last Name" class="form-control" pattern="[a-zA-Z]{2,64}" oninvalid="setCustomValidity('Plz enter Valid name')"  required>
+    <br>
+    <label>Email</label>
+    <input type="email" id="email" name="email" placeholder="" class="form-control" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" oninvalid="setCustomValidity('Plz enter Valid email')" required >
+    <br>
+    <label>Phone Number</label>
+    <input type="text" id="phonenumber" name="phonenumber" placeholder="" required >
+    <br>
+    <label>Enter Address - Start typing to get suggestions</label>
+    <input type="text" id="street-address" name="street-address" class="form-control" onblur="populateAddress()">
+    <label>Apartment Number</label>
+    <input type="text" id="apt" name="Apartment No" class="form-control">
+    <br>
+    <label>Street Number</label>
+    <input type="text" id="number" name="number" class="form-control">
+    <br>
+    <label>Street Name</label>
+    <input type="text" id="streetname" name="streetname" class="form-control">
+    <br>
+    <label>City</label>
+    <input type="text" id="city" name="city" class="form-control">
+    <br>
+    <label>State</label>
+    <input type="text" id="state" name="state" class="form-control">
+    <br>
+    <label>Zip</label>
+    <input type="text" id="zip" name="zip" class="form-control">
+    <input type="button" name="submit" value="Submit" onclick="PostTest()" class="btn">
+
+  </form>
+</section>
+
+</body>
+</html>
