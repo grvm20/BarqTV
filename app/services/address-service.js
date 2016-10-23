@@ -63,6 +63,32 @@ function mapAddressToDbObject(address) {
   return item;
 }
 
+function createPartialAddress(input) {
+
+  var address = new Address();
+
+  if (input.city) {
+    address.city = input.city;
+  }
+  if (input.state) {
+    address.state = input.state;
+  }
+  if (input.apt) {
+    address.apt = input.apt;
+  }
+  if (input.number) {
+    address.number = input.number;
+  }
+  if (input.street) {
+    address.street = input.street;
+  }
+  if (input.zipCode) {
+    address.zipCode = input.zipCode;
+  }
+
+  return address;
+}
+
 module.exports = class AddressService {
 
   constructor(dao) {
@@ -80,22 +106,21 @@ module.exports = class AddressService {
    * @input - attributes used to build the Address.
    * Throws InputValidationException.
    **/
-  create (input) {
+  create (input, partialAttributes) {
     if (input instanceof Address) {
       return input;
     } else {
-      return new Address(input);
+      if(partialAttributes){
+        return createPartialAddress(input);
+      }else{
+        return new Address(input);
+      }
     }
   }
 
   save (address, callback) {
     if (!(address instanceof Address)) {
       var addressAttributes = address;
-      if (!addressAttributes.id) {
-        var id = Utils.generateGuid();
-        addressAttributes.id = id;
-      }
-
       try {
         var address = new Address(addressAttributes);
       } catch (err) {
@@ -172,68 +197,5 @@ module.exports = class AddressService {
         }
       }
     });
-  }
-
-  /**
-   * Deletes data from db.
-   * @id - Id corresponding to row that needs to be deleted.
-   * @callback - callback function
-   **/
-  delete(id, callback) {
-    if (!Utils.isEmpty(id)) {
-      var key = createAddressKey(id);
-
-      this._dao.delete(key, (err, deletedAddress) => {
-        if (err) {
-          console.error(err);
-          return callback(err);
-        } else {
-          var addressAttributes = mapDbObjectToAddressAttributes(deletedAddress);
-
-          try {
-            var address = new Address(addressAttributes);
-          } catch (err) {
-            console.log("Error while trying to delete data: " + id);
-            return callback(err);
-          }
-          return callback(null, address);
-        }
-      });
-    } else {
-      throw new InputValidationException('id');
-    }
-  }
-
-  /**
-   * Updates data of db.
-   * @id - Id corresponding to row that needs to be updated.
-   * @address - address objects which has data that needs to be updated
-   * @callback - callback function
-   **/
-  update(id, address, callback) {
-    if (!Utils.isEmpty(id)) {
-      var key = createAddressKey(id);
-      var updatableAddressDbModel = mapAddressToDbObject(address);
-
-      this._dao.update(key, updatableAddressDbModel, (err, deletedAddress) => {
-        if (err) {
-          console.error(err);
-          return callback(err);
-        } else {
-
-          var addressAttributes = mapDbObjectToAddressAttributes(deletedAddress);
-
-          try {
-            var address = new Address(addressAttributes);
-          } catch (err) {
-            console.log("Error while trying to update data: " + id + ", address: " + JSON.stringify(address));
-            return callback(err);
-          }
-          return callback(null, address);
-        }
-      });
-    } else {
-      throw new InputValidationException('id');
-    }
   }
 }
