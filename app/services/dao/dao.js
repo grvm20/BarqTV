@@ -7,10 +7,10 @@ const sprintf = require('sprintf-js').sprintf;
 Initializing Exception Object paths here
 */
 
-const ObjectNotFoundException = require("../../exceptions/object-not-found-exception")
-const DataObjectErrorException = require("../../exceptions/data-object-error-exception")
-const MethodNotAllowedException = require("../../exceptions/method-not-allowed-exception")
-const ObjectExistsException = require("../../exceptions/object-exists-exception")
+const ObjectNotFoundException = require("../../exceptions/object-not-found-exception");
+const DataObjectErrorException = require("../../exceptions/data-object-error-exception");
+const MethodNotAllowedException = require("../../exceptions/method-not-allowed-exception");
+const ObjectExistsException = require("../../exceptions/object-exists-exception");
 
 /***
  * DAO class which handles all data access related operations.
