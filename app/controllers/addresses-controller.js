@@ -34,7 +34,7 @@ module.exports = class AddressController {
   }
 
   show(params, callback) {
-    if (areValidParams(params) && !Utils.isEmpty(params.id)) {
+    if (areValidParams(params)) {
       var id = params.id;
       this.addressService.fetch(id, (err, address) => {
         if (err) {
