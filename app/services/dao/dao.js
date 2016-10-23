@@ -10,6 +10,7 @@ Initializing Exception Object paths here
 const ObjectNotFoundException = require("../../exceptions/object-not-found-exception")
 const DataObjectErrorException = require("../../exceptions/data-object-error-exception")
 const MethodNotAllowedException = require("../../exceptions/method-not-allowed-exception")
+const ObjectExistsException = require("../../exceptions/object-exists-exception")
 
 /***
  * DAO class which handles all data access related operations.
@@ -56,7 +57,8 @@ module.exports = class Dao {
             }
           });
         } else {
-          throw "Item Already Exists";
+          var err =  "Item Already Exists";
+          callback(ObjectExistsException(err),null);
         }
       }
     });
@@ -77,6 +79,7 @@ module.exports = class Dao {
       params.Key = key;
 
       this.dynamoDocClient.get(params, function(err, data) {
+        //Check for console log output here -  based on that (err content basically) switch and send either objectnotfoundexception or daoobjectexception
         if (err) {
           console.error("Dynamo failed to fetch data " + err);
           callback(ObjectNotFoundException(err),null);
@@ -128,6 +131,9 @@ module.exports = class Dao {
         callback(ObjectNotFoundException(err), null);
       } else {
         console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
+
+        // TODO: Check if item.deleted is already true & send ObjectNotFound error
+
 
         var item = data.Item;
         item.deleted = true;
