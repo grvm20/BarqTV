@@ -67,8 +67,13 @@ function injectDependencies() {
   customerDao = new Dao(CUSTOMERS_TABLE_NAME, DYNAMO_DOC_ClIENT);
   addressDao = new Dao(ADDRESSES_TABLE_NAME, DYNAMO_DOC_ClIENT);
 
+  addressSao = new AddressSao(ADDRESS_SAO_HOST, ADDRESS_SAO_AUTH_ID, ADDRESS_SAO_AUTH_ID_TOKEN, HTTPS);
+  addressSerializer = new AddressSerializer();
+  addressNormalizer = new AddressNormalizer(addressSao);
   addressService = new AddressService(
-    addressDao
+    addressDao,
+    addressNormalizer,
+    addressSerializer
   );
 
   addressSerializer = new AddressSerializer();
@@ -86,13 +91,9 @@ function injectDependencies() {
     customerSerializer
   );
 
-  addressSao = new AddressSao(ADDRESS_SAO_HOST, ADDRESS_SAO_AUTH_ID, ADDRESS_SAO_AUTH_ID_TOKEN, HTTPS);
-  addressNormalizer = new AddressNormalizer(addressSao);
-  addressSerializer = new AddressSerializer();
   addressesController = new AddressesController(
     addressService,
-    addressSerializer,
-    addressNormalizer
+    addressSerializer
   );
 
   console.log('Dependencies injected.');
