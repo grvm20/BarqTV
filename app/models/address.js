@@ -22,8 +22,8 @@ var VALID_ADDRESS_REQUIRED_ATTRIBUTES = [
 module.exports = class Address {
 
   constructor(attributes) {
-    if (attributes) {
-      this.id = attributes.id || Utils.generateGuid();
+    if (_.isObject(attributes)) {
+      this.id = attributes.id;
       this.city = attributes.city;
       this.state = attributes.state;
       this.apt = attributes.apt;
