@@ -1,6 +1,6 @@
 'use strict';
 
-const Exception = require('./exception');
+const DaoException = require('./dao-exception');
 
 /***
 * Exception class. To be used when Data Object accessed is not found

@@ -11,6 +11,7 @@
     "async": "^2.0.1",
     "aws-sdk": "^2.6.5",
     "chai": "^3.5.0",
+    "request": "^2.75.0",
     "sprintf-js": "^1.0.3",
     "underscore": "^1.8.3"
   },
