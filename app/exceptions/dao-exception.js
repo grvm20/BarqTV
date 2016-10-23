@@ -5,9 +5,9 @@ const Exception = require('./exception');
 /***
 * Exception class. To be used when Data Object accessed is not found
 ***/
-module.exports = class ObjectNotFoundException extends DaoException {
+module.exports = class DaoException extends Exception {
   constructor (err) {
-    super("Object not found in your data model, error thrown: " + err);
+    super("Dao Exception has occured: " + err);
     this.err = err;
   }
 }
