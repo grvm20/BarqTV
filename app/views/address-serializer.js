@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('underscore');
+const Utils = require('../utilities/utils');
 
 module.exports = class AddressSerializer {
   constructor() {}
@@ -19,26 +20,25 @@ module.exports = class AddressSerializer {
 
   deserialize(object) {
     var result = {};
-
-    if (object.id != null) {
+    if (!Utils.isEmpty(object.id)) {
       result.id = object.id;
     }
-    if (object.city != null) {
+    if (!Utils.isEmpty(object.city)) {
       result.city = object.city;
     }
-    if (object.state != null) {
+    if (!Utils.isEmpty(object.state)) {
       result.state = object.state;
     }
-    if (object.apt != null) {
+    if (!Utils.isEmpty(object.apt)) {
       result.apt = object.apt;
     }
-    if (object.number != null) {
+    if (!Utils.isEmpty(object.number)) {
       result.number = object.number;
     }
-    if (object.street != null) {
+    if (!Utils.isEmpty(object.street)) {
       result.street = object.street;
     }
-    if (object.zip_code != null) {
+    if (!Utils.isEmpty(object.zip_code)) {
       result.zipCode = object.zip_code;
     }
 

@@ -10,7 +10,6 @@ function areValidParams(params) {
 function getUpdationDetails(address, currentAddress) {
 
   var updateRequired = false;
-
   _.each(_.keys(address), (key) => {
     if (currentAddress[key] !== address[key]) {
       currentAddress[key] = address[key];
@@ -45,7 +44,7 @@ module.exports = class AddressController {
         }
       });
     } else {
-      return callback("Null or Empty Object Passed which trying to show data");
+      return callback("Null Object Passed which trying to show data");
     }
   }
 
@@ -92,16 +91,14 @@ module.exports = class AddressController {
       // This will validate new entries
       this.addressService.create(address, true);
 
-
       this.show(params, (err, currentAddress) => {
-
         if (err) {
           return callback(err);
         } else {
-
           var updationDetails = getUpdationDetails(address, currentAddress);
 
           var isUpdationRequired = updationDetails["isUpdateRequired"];
+
           if (isUpdationRequired) {
 
             var params = {};
@@ -109,6 +106,7 @@ module.exports = class AddressController {
             params["address"] = updatedAddress;
 
             this.create(params, (err, address) => {
+
               if (err) {
                 // If get item already exist exception then return updatedAddress
                 return callback(err);
