@@ -9,7 +9,6 @@ const VALID_CUSTOMER_REQUIRED_ATTRIBUTES = [
   "firstName",
   "lastName",
   "phoneNumber",
-  "address",
   "deleted"
 ];
 
@@ -31,6 +30,12 @@ const isValidPhoneNumber = (phoneNumber) => {
   return isNotEmpty && containsDigits && isLongEnough && isNotTooLong;
 };
 
+const isValidAddressRef = (addressRef) => {
+  var isNotEmpty = !Utils.isEmpty(addressRef);
+  var hasUuidFormat = Utils.VALID_UUID_REGEX.test(addressRef)
+  return isNotEmpty && hasUuidFormat;
+};
+
 module.exports = class Customer {
   constructor (attributes) {
     this.id = attributes.id || attributes.email;
@@ -38,6 +43,7 @@ module.exports = class Customer {
     this.lastName = attributes.lastName;
     this.phoneNumber = attributes.phoneNumber;
     this.address = attributes.address;
+    this.addressRef = attributes.addressRef;
     this.deleted = attributes.deleted || false;
   }
 
@@ -93,11 +99,21 @@ module.exports = class Customer {
     return this._address;
   }
 
+  set addressRef (addressRef) {
+    var hasNoAddress = !this.address;
+    if (hasNoAddress && addressRef) {
+      if (isValidAddressRef(addressRef)) {
+        this._addressRef = addressRef;
+      } else {
+        throw new InvalidInputException("address reference")
+      }
+    }
+  }
   get addressRef () {
     if (this.address) {
-      return this._address.id;  
+      return this.address.id;
     } else {
-      return null;
+      return this._addressRef;
     }
   }
 

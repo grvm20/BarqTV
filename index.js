@@ -14,7 +14,7 @@ const CustomersController = require('./app/controllers/customers-controller');
 const AddressesController = require('./app/controllers/addresses-controller');
 const AddressService = require('./app/services/address-service');
 const AddressSerializer = require('./app/views/address-serializer');
-
+const AddressSao = require('./app/services/address-sao');
 
 // Constants.
 const CUSTOMERS_TABLE_NAME = 'customers';
@@ -32,6 +32,7 @@ var addressDao;
 var addressService;
 var addressSerializer;
 var addressesController;
+var addressSao;
 
 
 // Functions.
@@ -55,13 +56,22 @@ function sendHttpResponse(callback) {
   };
 };
 
-
-function injectDependencies() {
+const injectDependencies = (customCustomerDao, customAddressDao) => {
   console.log('Injecting dependencies.');
   dynamoDocClient = new AWS.DynamoDB.DocumentClient();
+  addressSao = new AddressSao({});
 
-  customerDao = new Dao(dynamoDocClient, CUSTOMERS_TABLE_NAME);
-  addressDao = new Dao(dynamoDocClient, ADDRESSES_TABLE_NAME);
+  if (typeof customCustomerDao !== 'undefined') {
+    customerDao = customCustomerDao
+  } else {
+    customerDao = new Dao(dynamoDocClient, CUSTOMERS_TABLE_NAME);
+  }
+
+  if (typeof customAddressDao !== 'undefined') {
+    addressDao = customAddressDao
+  } else {
+    addressDao = new Dao(dynamoDocClient, ADDRESSES_TABLE_NAME);
+  }
 
   addressService = new AddressService(
     addressDao
@@ -73,7 +83,7 @@ function injectDependencies() {
   );
   customerService = new CustomerService(
     customerDao,
-    addressService
+    addressSao
   );
 
   // CustomersController receives a serializer class as a sort of interface.
@@ -89,11 +99,19 @@ function injectDependencies() {
     customersController
   );
 
+  // Add real values to the SAOs at the end, to overcome circular dependencies.
+  addressSao.addressesController = addressesController;
+
   console.log('Dependencies injected.');
+  return {addressDao, addressesController, addressSao, addressSerializer,
+    addressSerializer, addressService, customerDao, customersController,
+    customerSerializer, customerService}
 }
-injectDependencies();
+exports.injectDependencies = injectDependencies;
+
 
 exports.customersControllerHandler = (event, context, callback) => {
+  injectDependencies();
   console.log('Received event:', JSON.stringify(event, null, 2));
 
   if (event.operation) {
@@ -126,7 +144,9 @@ exports.customersControllerHandler = (event, context, callback) => {
   }
 };
 
+
 exports.addressesControllerHandler = (event, context, callback) => {
+  injectDependencies();
   console.log('Received event:', JSON.stringify(event, null, 2));
 
   if (event.operation) {

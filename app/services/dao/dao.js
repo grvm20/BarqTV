@@ -26,7 +26,7 @@ module.exports = class Dao {
       TableName: this._tableName,
       Key: key
     };
-    this._dynamoDocClient.get(params, function(err, data) {
+    this._dynamoDocClient.get(params, (err, data) => {
       if (err) {
         console.error("Dynamo failed to persist data " + err);
         callback(err, null);
@@ -34,7 +34,7 @@ module.exports = class Dao {
         if (_.isEmpty(data)) {
           params = _.omit(params, 'Key');
           params.Item = item;
-          this._dynamoDocClient.put(params, function(err, persistedData) {
+          this._dynamoDocClient.put(params, (err, persistedData) => {
             if (err) {
               console.error("Dynamo failed to persist data " + err);
               callback(err, null);
@@ -64,7 +64,7 @@ module.exports = class Dao {
     if (key != null && key != "") {
       params.Key = key;
 
-      this._dynamoDocClient.get(params, function(err, data) {
+      this._dynamoDocClient.get(params, (err, data) => {
         if (err) {
           console.error("Dynamo failed to fetch data " + err);
           callback(err, null);
@@ -85,7 +85,7 @@ module.exports = class Dao {
       params.FilterExpression = "deleted = :value";
       params.ExpressionAttributeValues = { ":value": false };
 
-      this._dynamoDocClient.scan(params, function(err, data) {
+      this._dynamoDocClient.scan(params, (err, data) => {
         if (err) {
           console.error("Dynamo failed to fetch data " + err);
           callback(err, null);
@@ -110,7 +110,7 @@ module.exports = class Dao {
       Key: key
     };
 
-    this._dynamoDocClient.get(params, function(err, data) {
+    this._dynamoDocClient.get(params, (err, data) => {
       if (err) {
         console.error("Dynamo failed to fetch data " + err);
         callback(err, null);
@@ -121,7 +121,7 @@ module.exports = class Dao {
         item.deleted = true;
         params.Item = item;
 
-        this._dynamoDocClient.put(params, function(err, data) {
+        this._dynamoDocClient.put(params, (err, data) => {
           if (err) {
             console.error("Dynamo failed to persist data " + err);
             callback(err, null);
@@ -185,7 +185,7 @@ module.exports = class Dao {
             ReturnValues: "ALL_NEW"
           };
 
-          this._dynamoDocClient.update(params, function(err, data) {
+          this._dynamoDocClient.update(params, (err, data) => {
             if (err) {
               console.error("Dynamo failed to Update data " + err);
               callback(err, null);
