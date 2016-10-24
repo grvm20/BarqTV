@@ -3,12 +3,11 @@
 // Vendor imports.
 const _ = require('underscore');
 const AWS = require('aws-sdk');
-const DYNAMO_DOC_ClIENT = new AWS.DynamoDB.DocumentClient();
 const HTTPS = require('https');
 
 // Internal imports.
 const Dao = require('./app/services/dao/dao');
-const AddressSao = require('./app/services/sao/address-sao');
+const AddressSao = require('./app/services/address-sao');
 
 const CustomerService = require('./app/services/customer-service');
 const CustomerSerializer = require('./app/views/customer-serializer');
@@ -18,6 +17,7 @@ const AddressesController = require('./app/controllers/addresses-controller');
 const AddressService = require('./app/services/address-service');
 const AddressSerializer = require('./app/views/address-serializer');
 const AddressNormalizer = require('./app/normalizers/address-normalizer');
+const AddressNormalizerSao = require('./app/services/sao/address-normalizer-sao');
 
 // Constants.
 const CUSTOMERS_TABLE_NAME = 'customers';
@@ -27,17 +27,20 @@ const ADDRESS_SAO_AUTH_ID = '10d3d858-072e-fdf3-0c44-a669f2cca11e';
 const ADDRESS_SAO_AUTH_ID_TOKEN = '0gaJxoGO4b3btMZf7X3v';
 
 // Singleton variables.
+var dynamoDocClient;
+
 var customerDao;
 var customerService;
 var customerSerializer;
 var customersController;
 
 var addressDao;
-var addressSao;
+var addressNormalizerSao;
 var addressNormalizer;
 var addressService;
 var addressSerializer;
 var addressesController;
+var addressSao;
 
 
 // Functions.
@@ -61,15 +64,32 @@ function sendHttpResponse(callback) {
   };
 };
 
-
-function injectDependencies() {
+const injectDependencies = (customCustomerDao, customAddressDao, customAddressNormalizeSao) => {
   console.log('Injecting dependencies.');
-  customerDao = new Dao(CUSTOMERS_TABLE_NAME, DYNAMO_DOC_ClIENT);
-  addressDao = new Dao(ADDRESSES_TABLE_NAME, DYNAMO_DOC_ClIENT);
+  dynamoDocClient = new AWS.DynamoDB.DocumentClient();
+  addressSao = new AddressSao({});
 
-  addressSao = new AddressSao(ADDRESS_SAO_HOST, ADDRESS_SAO_AUTH_ID, ADDRESS_SAO_AUTH_ID_TOKEN, HTTPS);
+  if (typeof customCustomerDao !== 'undefined') {
+    customerDao = customCustomerDao
+  } else {
+    customerDao = new Dao(dynamoDocClient, CUSTOMERS_TABLE_NAME);
+  }
+
+  if (typeof customAddressDao !== 'undefined') {
+    addressDao = customAddressDao
+  } else {
+    addressDao = new Dao(dynamoDocClient, ADDRESSES_TABLE_NAME);
+  }
+
+  if( typeof customAddressNormalizeSao !== 'undefined') {
+    addressNormalizerSao = customAddressNormalizeSao;
+  }else{
+    addressNormalizerSao = new AddressNormalizerSao(ADDRESS_SAO_HOST, ADDRESS_SAO_AUTH_ID, ADDRESS_SAO_AUTH_ID_TOKEN, HTTPS);
+  }
+
   addressSerializer = new AddressSerializer();
-  addressNormalizer = new AddressNormalizer(addressSao);
+  addressNormalizer = new AddressNormalizer(addressNormalizerSao);
+
   addressService = new AddressService(
     addressDao,
     addressNormalizer,
@@ -82,7 +102,7 @@ function injectDependencies() {
   );
   customerService = new CustomerService(
     customerDao,
-    addressService
+    addressSao
   );
 
   // CustomersController receives a serializer class as a sort of interface.
@@ -93,14 +113,24 @@ function injectDependencies() {
 
   addressesController = new AddressesController(
     addressService,
-    addressSerializer
+    addressSerializer,
+    customersController
   );
 
+  // Add real values to the SAOs at the end, to overcome circular dependencies.
+  addressSao.addressesController = addressesController;
+  addressSao.addressSerializer = addressSerializer;
+
   console.log('Dependencies injected.');
+  return {addressDao, addressesController, addressSao, addressSerializer,
+    addressSerializer, addressService, customerDao, customersController,
+    customerSerializer, customerService}
 }
-injectDependencies();
+exports.injectDependencies = injectDependencies;
+
 
 exports.customersControllerHandler = (event, context, callback) => {
+  injectDependencies();
   console.log('Received event:', JSON.stringify(event, null, 2));
 
   if (event.operation) {
@@ -133,7 +163,9 @@ exports.customersControllerHandler = (event, context, callback) => {
   }
 };
 
+
 exports.addressesControllerHandler = (event, context, callback) => {
+  injectDependencies();
   console.log('Received event:', JSON.stringify(event, null, 2));
 
   if (event.operation) {

@@ -231,6 +231,7 @@ module.exports = class AddressService {
   update(id, address, callback) {
 
     // This will validate new entries
+    address = this.addressSerializer.deserialize(address);
     var addressModel = this.create(address, true);
     var params = {};
     params.id = id;
@@ -262,8 +263,7 @@ module.exports = class AddressService {
           });
         } else {
           console.log("No update required");
-          callback("No update required");
-          // Throw Exception. Talk to Sarang
+          callback(null, currentAddress);
         }
       }
 

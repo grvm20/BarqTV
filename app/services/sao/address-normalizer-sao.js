@@ -7,7 +7,7 @@ const Utils = require("../../utilities/utils");
 * Address SAO class which handes service call for any address related operations
 * Supports HTTPS. Expects host, authentication Id, authetication token and https object
 ***/
-module.exports = class AddressSao {
+module.exports = class AddressNormalizerSao {
 
   constructor(host, authId, authIdToken, https) {
     this.host = host;
