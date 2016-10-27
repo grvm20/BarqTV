@@ -32,8 +32,7 @@ const isValidPhoneNumber = (phoneNumber) => {
 
 const isValidAddressRef = (addressRef) => {
   var isNotEmpty = !Utils.isEmpty(addressRef);
-  var hasUuidFormat = Utils.VALID_UUID_REGEX.test(addressRef)
-  return isNotEmpty && hasUuidFormat;
+  return isNotEmpty;
 };
 
 module.exports = class Customer {
