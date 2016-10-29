@@ -25,13 +25,11 @@ describe('CustomerService', () => {
         }
       };
 
-      var mockAddressSao = {
-        create: (params, callback) => {
-          expect(params.id).to.equal(mockAddress.id);
+      var mockAddressService = {
+        save: (address, callback) => {
           callback(null, mockAddress);
         },
-        show: (params, callback) => {
-          expect(params.id).to.equal(mockAddress.id);
+        fetch: (key, callback) => {
           callback(null, mockAddress);
         }
       };
@@ -44,7 +42,7 @@ describe('CustomerService', () => {
         address: mockAddress
       });
 
-      var customerService = new CustomerService(mockDao, mockAddressSao);
+      var customerService = new CustomerService(mockDao, mockAddressService);
       customerService.save(customer, done);
     });
 
@@ -75,14 +73,16 @@ describe('CustomerService', () => {
         }
       };
 
-      var mockAddressSao = {
-        show: (params, callback) => {
-          expect(params.id).to.equal(mockAddress.id);
+      var mockAddressService = {
+        create: (address) => {
+          return address;
+        },
+        fetch: (address, callback) => {
           callback(null, mockAddress);
         }
       };
 
-      var customerService = new CustomerService(mockDao, mockAddressSao);
+      var customerService = new CustomerService(mockDao, mockAddressService);
       customerService.save(customer, (err, customer) => {
         console.log(err);
         expect(err).to.exist;
@@ -100,20 +100,18 @@ describe('CustomerService', () => {
 
       var oldCustomerData = {
         id: "myuser@gmail.com",
-        first_name: "Javier",
-        last_name: "Lopez",
-        phone_number: "3327658892",
-        address_ref: "6B8C1303-CC12-4DD0-96DA-D592FB17DD64",
-        deleted: false
+        firstName: "Javier",
+        lastName: "Lopez",
+        phoneNumber: "3327658892",
+        address: "6B8C1303-CC12-4DD0-96DA-D592FB17DD64"
       };
 
       var newCustomerData = {
         id: "myuser@gmail.com",
-        first_name: "Pepe",
-        last_name: "Lopez",
-        phone_number: "3327658892",
-        address_ref: "6B8C1303-CC12-4DD0-96DA-D592FB17DD64",
-        deleted: false
+        firstName: "Pepe",
+        lastName: "Lopez",
+        phoneNumber: "3327658892",
+        address: "6B8C1303-CC12-4DD0-96DA-D592FB17DD64"
       };
 
       var mockAddress = {
@@ -127,19 +125,20 @@ describe('CustomerService', () => {
           callback(null, newCustomerData);
         },
         fetch: (key, callback) => {
-          expect(key.id).to.equal("myuser@gmail.com");
           callback(null, oldCustomerData);
         }
       };
 
-      var mockAddressSao = {
-        show: (params, callback) => {
-          expect(params.id).to.equal(mockAddress.id);
+      var mockAddressService = {
+        create: (address) => {
+          return address;
+        },
+        fetch: (address, callback) => {
           callback(null, mockAddress);
         }
       };
 
-      var customerService = new CustomerService(mockDao, mockAddressSao);
+      var customerService = new CustomerService(mockDao, mockAddressService);
       customerService.update(customer, (err, customer) => {
         console.log(customer);
         done();
