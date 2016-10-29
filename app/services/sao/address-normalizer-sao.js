@@ -7,7 +7,7 @@ const Utils = require("../../utilities/utils");
 * Address SAO class which handes service call for any address related operations
 * Supports HTTPS. Expects host, authentication Id, authetication token and https object
 ***/
-module.exports = class AddressSao {
+module.exports = class AddressNormalizerSao {
 
   constructor(host, authId, authIdToken, https) {
     this.host = host;
@@ -23,7 +23,6 @@ module.exports = class AddressSao {
   * Argument to callback expected of the form(error, data)
   **/
   fetch(address, callback) {
-
     // API expects street to be a combination of number, street and apartment
     var street = address.number + ' ' + address.street + ' ' + address.apt;
 
@@ -35,7 +34,6 @@ module.exports = class AddressSao {
       host: this.host,
       path: path
     }
-
     this.https.get(options, function(res) {
 
       console.log("Response Status Code: " + res.statusCode);
@@ -85,8 +83,7 @@ module.exports = class AddressSao {
         }
         normalizedAddress.number = number;
 
-        callback(null, normalizedAddress);
-        return;
+        return callback(null, normalizedAddress);
 
       });
     }).on('error', function(e) {

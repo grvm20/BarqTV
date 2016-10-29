@@ -1,11 +1,9 @@
 'use strict';
 
 const _ = require('underscore');
-const async = require('async');
 const sprintf = require('sprintf-js').sprintf;
 
 const Customer = require('../models/customer');
-const Address = require('../models/address');
 
 /*
  * TODO: Move these mapping functions to a data layer. The service shouldn't 
@@ -22,11 +20,16 @@ function mapDbObjectToCustomerAttributes (dbObject) {
   };
 }
 
-function createCustomerKey (id) {
-  var key = {
+function createAddressKey (id) {
+  return {
     "id": id
   };
-  return key;
+}
+
+function createCustomerKey (id) {
+  return {
+    "id": id
+  };
 }
 
 function mapCustomerToDbObject (customer) {
@@ -56,9 +59,9 @@ function mapCustomerToDbObject (customer) {
 }
 
 module.exports = class CustomerService {
-  constructor (dao, addressService) {
+  constructor (dao, addressSao) {
     this.dao = dao;
-    this.addressService = addressService;
+    this.addressSao = addressSao;
   }
 
   /**
@@ -70,14 +73,7 @@ module.exports = class CustomerService {
     if (input instanceof Customer) {
       return input;
     } else {
-      var attributes = input;
-      if (attributes.address && !attributes.address instanceof Address) {
-        var addressData = attributes.address;
-        var newAddress = new Address(addressData);
-        attributes.address = newAddress;
-      }
-      var newCustomer = new Customer(attributes);
-      return newCustomer;
+      return new Customer(input);
     }
   }
 
@@ -102,10 +98,11 @@ module.exports = class CustomerService {
         callback({message: sprintf("Email address is already in use.",
           customer.email)});
       } else {
-        this.addressService.save(customer.address, (err, res) => {
+        this.addressSao.create(customer.address, (err, address) => {
           if (err) {
             return callback(err);
           } else {
+            customer.address = address;
             var customerDbObject = mapCustomerToDbObject(customer);
             console.log(sprintf("Ready to persist: %s.",
               JSON  .stringify(customerDbObject)));
@@ -137,22 +134,16 @@ module.exports = class CustomerService {
       // TODO: refactor this part to be DRY, as it is shared.
       var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
       var addressId = customerAttributes.addressRef;
-      this.addressService.fetch(addressId, (err, address) => {
-        if (err) {
-          return callback(err);
-        } else {
-          customerAttributes.address = address;
+      var key = createAddressKey(addressId);
 
-          try {
-            var customer = this.create(customerAttributes);
-          } catch(err) {
-            return callback(err);
-          }
-          
-          console.log("Successfully fetched Customer with id: " + customer.id);
-          callback(null, customer);
-        }
-      });
+      try {
+        var customer = this.create(customerAttributes);
+      } catch(err) {
+        return callback(err);
+      }
+
+      console.log("Successfully fetched Customer with id: " + customer.id);
+      callback(null, customer);
     });
   }
 
@@ -201,16 +192,16 @@ module.exports = class CustomerService {
         if (addressInformationChanged) {
           console.log('Updating its address first.');
           var addressId = currentCustomer.addressRef;
-          this.addressService.update(addressId, newCustomer.address,
-            (err, updatedAddress) => {
-              if (err) {
-                return callback(err);
-              } else {
-                newCustomer.address = updatedAddress;
-                updateCustomer(newCustomer, callback);
-              }
+          var key = createAddressKey(addressId);
+          var params = Object.assign(key, newCustomer.address)
+          this.addressSao.update(params, (err, updatedAddress) => {
+            if (err) {
+              return callback(err);
+            } else {
+              newCustomer.address = updatedAddress;
+              updateCustomer(newCustomer, callback);
             }
-          );
+          });
         } else {
           newCustomer.address = currentCustomer.address;
           updateCustomer(newCustomer, callback);
@@ -241,28 +232,20 @@ module.exports = class CustomerService {
         return callback(err);
       }
           if (_.isEmpty(customerDbObject)) {
-            callback(null, {});
+            return callback(null, {});
           } else {
             var customerAttributes = mapDbObjectToCustomerAttributes(
               customerDbObject);
-            var addressId = customerAttributes.addressRef;
-            this.addressService.fetch(addressId, (err, address) => {
-              if (err) {
-                return callback(err);
-              } else {
-                customerAttributes.address = address;
 
-                try {
-                  var customer = this.create(customerAttributes);
-                } catch(err) {
-                  return callback(err);
-                }
+            try {
+              var customer = this.create(customerAttributes);
+            } catch(err) {
+              return callback(err);
+            }
 
-                console.log("Successfully fetched Customer with id: " +
-                  customer.id);
-                callback(null, customer);
-              }
-            });
+            console.log("Successfully fetched Customer with id: " +
+              customer.id);
+            return callback(null, customer);
           }
       });
 
@@ -271,35 +254,19 @@ module.exports = class CustomerService {
       this.dao.fetch(null, (err, customerDbObjects) => {
         var customers = [];
 
-        var forEachCustomerDbObject = (customerDbObject, innerCallback) => {
-          // TODO: although parallel, this is a n+1 query! Optimize asap.
+        for (var customerDbObject of customerDbObjects) {
           var customerAttributes = mapDbObjectToCustomerAttributes(
             customerDbObject);
-          var addressId = customerAttributes.addressRef;
-          this.addressService.fetch(addressId, (err, address) => {
-            if (err) {
-              return callback(err);
-            } else {
-              customerAttributes.address = address;
-
-              try {
-                var customer = this.create(customerAttributes);
-              } catch(err) {
-                return callback(err);
-              }              
-
-              customers.push(customer);
-              innerCallback();
-            }
-          });
+          try {
+            var customer = this.create(customerAttributes);
+          } catch(err) {
+            return callback(err);
+          }
+          customers.push(customer);
         }
 
-        function done () {
-          console.log("Successfully fetched all Customers.");
-          callback(err, customers);
-        }
-
-        async.each(customerDbObjects, forEachCustomerDbObject, done);
+        console.log("Successfully fetched all Customers.");
+        return callback(err, customers);
       });
     }
   }

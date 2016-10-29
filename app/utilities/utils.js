@@ -1,14 +1,36 @@
 'use strict';
 
 const _ = require('underscore');
+const InvalidInputException = require("../exceptions/invalid-input-exception");
 
 /***
  * Utility class for app
  ***/
+
+var isEmptyObject = (object) => {
+  var doesNotHaveKeys = Object.keys(object).length === 0;
+  return doesNotHaveKeys;
+}
+
 class Utils {
 
-  static isEmpty (val) {
-    return _.isEmpty( (val && val.trim)? val.trim() : val );
+  static isEmpty(val) {
+    var isUndefined = typeof val === 'undefined';
+    var isNull = val === null;
+    var isString = typeof val === 'string';
+    var isObject = typeof val === 'object';
+
+    if (isUndefined ||  isNull) {
+      return true;
+    } else if (isString) {
+      var hasJustSpaces = val.trim().length === 0;
+      return hasJustSpaces;
+    } else if (isObject) {
+      return isEmptyObject(val);
+    } else {
+      // Default case, for the rest of the datatypes.
+      return false;
+    }
   }
 
   static isValid(object) {
@@ -32,19 +54,27 @@ class Utils {
     }
   }
 
-  static validateAttributesNotEmpty(attributeKeys, object){
+  static validateAttributesNotEmpty(attributeKeys, object) {
     _.each(attributeKeys, (attribute) => {
-        var hasAttribute = typeof object[attribute] !== 'undefined';
-        var isValidAttribute = this.isValid(object[attribute]);
-        if (!hasAttribute || !isValidAttribute) {
-          throw new InvalidInputException(attribute);
-        }
+      var hasAttribute = typeof object[attribute] !== 'undefined';
+      var isValidAttribute = this.isValid(object[attribute]);
+      if (!hasAttribute ||  !isValidAttribute) {
+        throw new InvalidInputException(attribute);
+      }
     });
   }
-}
 
+  // Alphabetic strings can contain . and , too.
+  static isAlphabeticString(string) {
+    var isNotEmpty = !Utils.isEmpty(string);
+    var doesNotContainDigits = !Utils.CONTAINS_DIGIT_REGEX.test(string);
+    var doesNotContainInvalidChars = !/[\{\}\(\)_\$#"'@\|!\?\+\*%<>/]/.test(string);
+    return isNotEmpty && doesNotContainDigits && doesNotContainInvalidChars;
+  }
+}
 // Class constants.
 Utils.CONTAINS_DIGIT_REGEX = /.*[0-9].*/;
 Utils.VALID_EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+Utils.VALID_UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 module.exports = Utils;

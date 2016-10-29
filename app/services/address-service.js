@@ -89,10 +89,29 @@ function createPartialAddress(input) {
   return address;
 }
 
+function getUpdationDetails(address, currentAddress) {
+
+  var updateRequired = false;
+
+  _.each(_.keys(address), (key) => {
+    if (!Utils.isEmpty(address[key]) && currentAddress[key] !== address[key]) {
+      currentAddress[key] = address[key];
+      updateRequired = true;
+    }
+  });
+  var updationDetails = {};
+  updationDetails["isUpdateRequired"] = updateRequired;
+  updationDetails["updatedAddress"] = currentAddress;
+  return updationDetails;
+
+}
+
 module.exports = class AddressService {
 
-  constructor(dao) {
+  constructor(dao, addressNormalizer, addressSerializer) {
     this.dao = dao;
+    this.addressNormalizer = addressNormalizer;
+    this.addressSerializer = addressSerializer;
   }
 
   set dao(dao) {
@@ -106,40 +125,50 @@ module.exports = class AddressService {
    * @input - attributes used to build the Address.
    * Throws InputValidationException.
    **/
-  create (input, partialAttributes) {
+  create(input, partialAttributes) {
     if (input instanceof Address) {
       return input;
     } else {
-      if(partialAttributes){
+      if (partialAttributes) {
         return createPartialAddress(input);
-      }else{
+      } else {
         return new Address(input);
       }
     }
   }
 
-  save (address, callback) {
-    if (!(address instanceof Address)) {
-      var addressAttributes = address;
+  save(address, callback) {
+
+    this.addressNormalizer.normalize(address, (err, normalizedAddress) => {
+
+      var addressAttributes = normalizedAddress;
       try {
-        var address = new Address(addressAttributes);
+        normalizedAddress = new Address(addressAttributes);
       } catch (err) {
         console.error(err);
         return callback(err);
       }
-    }
-
-    var key = createAddressKey(address.id);
-    var addressDbModel = mapAddressToDbObject(address);
-    this._dao.persist(key, addressDbModel, (err, persistedObject) => {
 
       if (err) {
-        console.log("Error while trying to save data: " + JSON.stringify(address));
-        return callback(err);
+        console.log("Error while normalizing address");
+        callback(err);
+        return;
       } else {
-        return callback(null, address);
+
+        var key = createAddressKey(normalizedAddress.id);
+        var addressDbModel = mapAddressToDbObject(normalizedAddress);
+
+        this._dao.persist(key, addressDbModel, (err, persistedObject) => {
+
+          if (err) {
+            console.log("Error while trying to save data: " + JSON.stringify(address));
+            return callback(err);
+          } else {
+            return callback(null, normalizedAddress);
+          }
+        });
       }
-    });
+    }, this);
   }
 
   /**
@@ -196,6 +225,48 @@ module.exports = class AddressService {
           }
         }
       }
+    });
+  }
+
+  update(id, address, callback) {
+
+    // This will validate new entries
+    address = this.addressSerializer.deserialize(address);
+    var addressModel = this.create(address, true);
+    var params = {};
+    params.id = id;
+
+    this.fetch(id, (err, currentAddress) => {
+
+      currentAddress = this.addressSerializer.deserialize(this.addressSerializer.serialize(currentAddress));
+
+      if (err) {
+        return callback(err);
+      } else {
+
+        var updationDetails = getUpdationDetails(address, currentAddress);
+        var isUpdationRequired = updationDetails["isUpdateRequired"];
+        if (isUpdationRequired) {
+
+          var params = {};
+          var updatedAddress = updationDetails["updatedAddress"];
+          params["address"] = updatedAddress;
+
+          this.save(updatedAddress, (err, address) => {
+            if (err) {
+              // If get item already exist exception then return updatedAddress
+              return callback(err);
+            } else {
+              // No need to serialize this as this create already returns us serialized object
+              return callback(null, address);
+            }
+          });
+        } else {
+          console.log("No update required");
+          callback(null, currentAddress);
+        }
+      }
+
     });
   }
 }
