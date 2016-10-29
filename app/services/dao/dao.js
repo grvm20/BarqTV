@@ -42,7 +42,7 @@ module.exports = class Dao {
     this.dynamoDocClient.get(params, function(err, data) {
       if (err) {
         console.error("Dynamo failed to persist data " + err);
-        callback(new DataObjectErrorException(err), null);
+        return callback(new DataObjectErrorException(err), null);
       } else {
         if (_.isEmpty(data)) {
           params = _.omit(params, 'Key');
@@ -50,7 +50,7 @@ module.exports = class Dao {
           self.dynamoDocClient.put(params, function(err, persistedData) {
             if (err) {
               console.error("Dynamo failed to persist data " + err);
-              callback(new DataObjectErrorException(err), null);
+              return callback(new DataObjectErrorException(err), null);
             } else {
               console.log("Successfully persited record into dynamo: " + JSON.stringify(item));
               callback(null, item);
@@ -58,7 +58,7 @@ module.exports = class Dao {
           });
         } else {
           var err =  "Item Already Exists";
-          callback(new ObjectExistsException(err),null);
+          return callback(new ObjectExistsException(err),null);
         }
       }
     });
@@ -81,9 +81,16 @@ module.exports = class Dao {
       this.dynamoDocClient.get(params, function(err, data) {
         //Check for console log output here -  based on that (err content basically) switch and send either objectnotfoundexception or daoobjectexception
         if (err) {
-          console.error("Dynamo failed to fetch data " + err);
-          callback(new ObjectNotFoundException(err),null);
+          console.error("Dynamo db error " + err);
+          return callback(new DaoException(err), null);
         } else {
+          if(_.isEmpty(data)) {
+            //This means that Dynamo did not return any data - Hence, we should throw Object Not Found error
+            err = "Object does not exist in DynamoDB "
+            console.error(err);
+            return callback(new ObjectNotFoundException(err),null);
+          }
+
           console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
           var item = data.Item;
           // This is necessary because we dont have a GSI on is_active field.
@@ -102,11 +109,16 @@ module.exports = class Dao {
 
       this.dynamoDocClient.scan(params, function(err, data) {
         if (err) {
-          console.error("Dynamo failed to fetch data " + err);
-          callback(new ObjectNotFoundException(err), null);
+          console.error("Dynamo db error " + err);
+          return callback(new DaoException(err), null);
         } else {
-          console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
-          callback(null, data.Items);
+            if(_.isEmpty(data)) {
+            console.error("Object does not exist in DynamoDB " + err);
+            return callback(new ObjectNotFoundException(err), null);
+            }  
+
+            console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
+            return callback(null, data.Items);
         }
       });
     }
@@ -127,22 +139,30 @@ module.exports = class Dao {
     var self = this;
     this.dynamoDocClient.get(params, function(err, data) {
       if (err) {
-        console.error("Dynamo failed to fetch data " + err);
-        callback(new ObjectNotFoundException(err), null);
+        console.error("Dynamo db error " + err);
+        return callback(new DaoException(err), null);
       } else {
+        if(_.isEmpty(data)) {
+        console.error("Object does not exist in DynamoDB " + err);
+        return callback(new ObjectNotFoundException(err), null);
+        }
+
         console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
 
         // TODO: Check if item.deleted is already true & send ObjectNotFound error
 
-
         var item = data.Item;
+        if(item.deleted == true) {
+          console.error("Object does not exist in DynamoDB " + err);
+          return callback(new ObjectNotFoundException(err), null);
+        }
         item.deleted = true;
         params.Item = item;
 
         self.dynamoDocClient.put(params, function(err, data) {
           if (err) {
             console.error("Dynamo failed to persist data " + err);
-            callback(new DataObjectErrorException(err), null);
+            return callback(new DataObjectErrorException(err), null);
           } else {
             console.log("Successfully deleted record from dynamo: " + JSON.stringify(item));
             callback(null, item);

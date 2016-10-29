@@ -11,17 +11,18 @@ The HTTP Response mapping to individual Exception objects
 /* Required Exception objects for mapping to correct HTTP Response */
 
 const DaoException = require('./app/exceptions/dao-exception');
-const DataObjectErrorException = require('./app/exceptions/dao-object-error-exception');
+const DataObjectErrorException = require('./app/exceptions/data-object-error-exception');
 const MethodNotAllowedException = require('./app/exceptions/method-not-allowed-exception');
 const ObjectExistsException = require('./app/exceptions/object-exists-exception');
 const ObjectNotFoundException = require('./app/exceptions/object-not-found-exception');
-const InvalidInputException = require("./exceptions/invalid-input-exception");
+const InvalidInputException = require("./app/exceptions/invalid-input-exception");
 
 /*------------------------------------------------------------------------------------------*/
 
 module.exports = {
 	sendHttpResponse: function (callback) {
 	  return (err, body) => {
+	  	console.error("Checking value of err: " + err)
 	    var statusCode = '200';
 	    var body = body;
 	    if (err) {
@@ -39,7 +40,7 @@ module.exports = {
 	              statusCode = '500';
 	              break;
 	          default: statusCode ='500';
-	      }
+	      	}
 
 	      body = err.message;
 	      console.error(err);
@@ -53,5 +54,5 @@ module.exports = {
 	      }
 	    });
 	  };
-	};
-}
+	}	
+};

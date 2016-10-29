@@ -231,11 +231,15 @@ module.exports = class CustomerService {
       try {
         var customer = new Customer({id: id});  
       } catch (err) {
+        console.error("Customer Variable creation failed!")
         return callback(err);
       }
       
       var queryResult = this.dao.fetch({id: customer.id},
         (err, customerDbObject) => {
+          if(err){
+        return callback(err);
+      }
           if (_.isEmpty(customerDbObject)) {
             callback(null, {});
           } else {
