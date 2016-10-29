@@ -44,7 +44,7 @@ var mapping = require('./error-mapping');
 
 // Functions.
 
-const injectDependencies = (customCustomerDao, customAddressDao, customAddressNormalizeSao) => {
+function injectDependencies() {
   console.log('Injecting dependencies.');
   customerDao = new Dao(CUSTOMERS_TABLE_NAME, DYNAMO_DOC_ClIENT);
   addressDao = new Dao(ADDRESSES_TABLE_NAME, DYNAMO_DOC_ClIENT);
