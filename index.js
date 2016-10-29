@@ -26,6 +26,7 @@ const ADDRESS_SAO_HOST = 'us-street.api.smartystreets.com';
 const ADDRESS_SAO_AUTH_ID = '10d3d858-072e-fdf3-0c44-a669f2cca11e';
 const ADDRESS_SAO_AUTH_ID_TOKEN = '0gaJxoGO4b3btMZf7X3v';
 
+
 // Singleton variables.
 var dynamoDocClient;
 
