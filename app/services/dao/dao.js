@@ -92,6 +92,8 @@ module.exports = class Dao {
           // So we have to manually filter out the result
           if (!item || (item && item.deleted == true)) {
             item = {}
+            /* Raising Object Not found exception here */
+            return callback(new ObjectNotFoundException(err),null);
           }
           callback(null, item);
         }
@@ -114,6 +116,43 @@ module.exports = class Dao {
       });
     }
   }
+
+
+  /**
+   * Checks id for available id DB
+   * @key - Key on which record needs to be fetched from DB
+   * @callback - Callback function to which either error or data is passed back.
+   * Argument to callback expected of the form(error, data)
+   **/
+  /*check(key, callback) {
+
+    var params = {
+      TableName: this._tableName
+    };
+    if (key != null && key != "") {
+      params.Key = key;
+
+      console.error("Sending for check:" + JSON.stringify(params));
+
+      this._dynamoDocClient.get(params, (err, data) => {
+        if (err) {
+          console.error("Dynamo failed to fetch data " + err);
+          return callback(new DataObjectErrorException(err), null);
+        } else {
+          console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
+          var item = data.Item;
+          // This is necessary because we dont have a GSI on deleted field.
+          // So we have to manually filter out the result
+          if (!item || (item && item.deleted == true)) {
+            item = {}
+          // ID is available so sending it back
+          }
+          callback(null, item);
+        }
+      });
+
+    }
+  }*/
 
   /**
    * Deletes object from DB

@@ -4,6 +4,8 @@ const _ = require('underscore');
 const sprintf = require('sprintf-js').sprintf;
 
 const Customer = require('../models/customer');
+const ObjectNotFoundException = require("../exceptions/object-not-found-exception");
+
 
 /*
  * TODO: Move these mapping functions to a data layer. The service shouldn't 
@@ -103,6 +105,7 @@ module.exports = class CustomerService {
           if (err) {
             return callback(err);
           } else {
+            console.log("Creating address")
             customer.address = address;
             var customerDbObject = mapCustomerToDbObject(customer);
             console.log(sprintf("Ready to persist: %s.",
@@ -131,11 +134,11 @@ module.exports = class CustomerService {
    **/
   delete (customer, callback) {
 
-    try {
+    /*try {
       customer.validate();
     } catch (err) {
       return callback(err);
-    }
+    }*/
 
     console.log(sprintf("Proceeding to delete Customer %s.", customer.id));
     this.dao.delete(createCustomerKey(customer.id), (err, customerDbObject) => {
@@ -306,9 +309,12 @@ module.exports = class CustomerService {
   isIdAvailable (id, callback) {
     this.fetch (id, (err, customer) => {
       if (err) {
-        return callback(err);
-      } else if (_.isEmpty(customer)) {
-        callback(null, true);
+        if(err instanceof ObjectNotFoundException) {
+          console.error("Object does not exist - hence we can create it !")
+          callback(null, true);
+        } else{
+          return callback(err);
+        }
       } else {
         callback(null, false);        
       }
