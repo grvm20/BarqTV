@@ -95,6 +95,7 @@ module.exports = class CustomerService {
       if (err) {
         return callback(err);
       } else if (!idAvailable) {
+        // Confirm if error needs to be thrown here or at DAO
         callback({message: sprintf("Email address is already in use.",
           customer.email)});
       } else {
@@ -129,8 +130,20 @@ module.exports = class CustomerService {
    * @callback - callback function with parameters (err, customer).
    **/
   delete (customer, callback) {
+
+    try {
+      customer.validate();
+    } catch (err) {
+      return callback(err);
+    }
+
     console.log(sprintf("Proceeding to delete Customer %s.", customer.id));
     this.dao.delete(createCustomerKey(customer.id), (err, customerDbObject) => {
+
+       if (err) {
+          return callback(err);
+        }
+
       // TODO: refactor this part to be DRY, as it is shared.
       var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
       var addressId = customerAttributes.addressRef;
@@ -227,6 +240,11 @@ module.exports = class CustomerService {
       
       var queryResult = this.dao.fetch({id: customer.id},
         (err, customerDbObject) => {
+
+          if(err){
+            return callback(err);
+          }
+
           if (_.isEmpty(customerDbObject)) {
             return callback(null, {});
           } else {
@@ -248,6 +266,11 @@ module.exports = class CustomerService {
     } else {
       // Fetch all.
       this.dao.fetch(null, (err, customerDbObjects) => {
+
+        if (err) {
+            return callback(err);
+          }               
+
         var customers = [];
 
         for (var customerDbObject of customerDbObjects) {

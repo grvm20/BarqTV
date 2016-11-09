@@ -7,6 +7,8 @@ module.exports = class AddressSerializer {
   constructor() {}
 
   serialize(address) {
+    //Need to add validation checks here
+
     return {
       id: address.id,
       city: address.city,

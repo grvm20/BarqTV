@@ -3,6 +3,16 @@
 const _ = require('underscore');
 const sprintf = require('sprintf-js').sprintf;
 
+/*
+Initializing Exception Object paths here
+*/
+
+const ObjectNotFoundException = require("../../exceptions/object-not-found-exception");
+const DataObjectErrorException = require("../../exceptions/data-object-error-exception");
+const MethodNotAllowedException = require("../../exceptions/method-not-allowed-exception");
+const ObjectExistsException = require("../../exceptions/object-exists-exception");
+
+
 /***
  * DAO class which handles all data access related operations.
  * Expects a DynamoDB client object and a table name to be injected.
@@ -31,7 +41,7 @@ module.exports = class Dao {
 
       if (err) {
         console.error("Dynamo failed to persist data " + err);
-        callback(err, null);
+        return callback(new DataObjectErrorException(err), null);
       } else {
         if (_.isEmpty(data)) {
           params = _.omit(params, 'Key');
@@ -41,14 +51,15 @@ module.exports = class Dao {
 
             if (err) {
               console.error("Dynamo failed to persist data " + err);
-              callback(err, null);
+              return callback(new DataObjectErrorException(err), null);
             } else {
               console.log("Successfully persited record into dynamo: " + JSON.stringify(item));
               callback(null, item);
             }
           });
         } else {
-          throw "Item Already Exists";
+          var err =  "Item Already Exists";
+          return callback(new ObjectExistsException(err),null);
         }
       }
     });
@@ -68,10 +79,12 @@ module.exports = class Dao {
     if (key != null && key != "") {
       params.Key = key;
 
+      console.error("Sending for fetch:" + JSON.stringify(params));
+
       this._dynamoDocClient.get(params, (err, data) => {
         if (err) {
           console.error("Dynamo failed to fetch data " + err);
-          callback(err, null);
+          return callback(new DataObjectErrorException(err), null);
         } else {
           console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
           var item = data.Item;
@@ -93,7 +106,7 @@ module.exports = class Dao {
 
         if (err) {
           console.error("Dynamo failed to fetch data " + err);
-          callback(err, null);
+          return callback(new DataObjectErrorException(err), null);
         } else {
           console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
           callback(null, data.Items);
@@ -119,8 +132,19 @@ module.exports = class Dao {
 
       if (err) {
         console.error("Dynamo failed to fetch data " + err);
-        callback(err, null);
+        return callback(new DataObjectErrorException(err), null);
       } else {
+
+        //Checking if there is such an object that exists
+
+        if(_.isEmpty(data) || data.Item.deleted == true){
+          /*--This means that such an object doesn't exist (or has already been deleted)
+            In this scenario, we can either through a 404 or a 405 (Object Not Found and method not allowed respectively)
+            Currently going for 404 */
+            err = "Object does not exist."
+            return callback(new ObjectNotFoundException(err),null);
+        }
+
         console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
 
         var item = data.Item;
@@ -132,7 +156,7 @@ module.exports = class Dao {
 
           if (err) {
             console.error("Dynamo failed to persist data " + err);
-            callback(err, null);
+            return callback(new DataObjectErrorException(err), null);
           } else {
             console.log("Successfully deleted record from dynamo: " + JSON.stringify(item));
             callback(null, item);
@@ -159,7 +183,7 @@ module.exports = class Dao {
         if (currentItem && _.isEmpty(currentItem)) {
           var errorMessage = "Unable to update a non-existing item.";
           console.error(errorMessage);
-          callback(errorMessage);
+          return callback(new MethodNotAllowedException(errorMessage));
         } else {
           var i = 0;
           var updateRequired = false;
@@ -196,7 +220,7 @@ module.exports = class Dao {
           this._dynamoDocClient.update(params, (err, data) => {
             if (err) {
               console.error("Dynamo failed to Update data " + err);
-              callback(err, null);
+              return callback(new DataObjectErrorException(err), null);
             } else {
               console.log("Successfully updated record from dynamo: " + JSON.stringify(data));
               callback(null, data.Attributes);

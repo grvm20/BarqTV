@@ -43,26 +43,8 @@ var addressesController;
 var addressSao;
 
 
-// Functions.
-function sendHttpResponse(callback) {
-  return (err, body) => {
-    var statusCode = '200';
-    var body = body;
-    if (err) {
-      statusCode = '400';
-      body = err.message;
-      console.error(err);
-    }
-
-    callback(null, {
-      statusCode: statusCode,
-      body: body,
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-  };
-};
+// Mapping to Error codes
+var mapping = require('./error-mapping');
 
 const injectDependencies = (customCustomerDao, customAddressDao, customAddressNormalizeSao) => {
   console.log('Injecting dependencies.');
@@ -147,16 +129,16 @@ exports.customersControllerHandler = (event, context, callback) => {
   switch (operation) {
     case 'fetchAll':
     case 'fetch':
-      customersController.show(params, sendHttpResponse(callback))
+      customersController.show(params, mapping.sendHttpResponse(callback))
       break;
     case 'create':
-      customersController.create(params, sendHttpResponse(callback))
+      customersController.create(params, mapping.sendHttpResponse(callback))
       break;
     case 'update':
-      customersController.update(params, sendHttpResponse(callback))
+      customersController.update(params, mapping.sendHttpResponse(callback))
       break;
     case 'delete':
-      customersController.delete(params, sendHttpResponse(callback))
+      customersController.delete(params, mapping.sendHttpResponse(callback))
       break;
     default:
       // Unsupported operation.
@@ -176,18 +158,18 @@ exports.addressesControllerHandler = (event, context, callback) => {
 
   var params = _.omit(event, 'operation');
 
-  switch (operation) {
+   switch (operation) {
     case 'fetch':
-      addressesController.show(params, sendHttpResponse(callback))
+      addressesController.show(params, mapping.sendHttpResponse(callback))
       break;
     case 'create':
-      addressesController.create(params, sendHttpResponse(callback))
+      addressesController.create(params, mapping.sendHttpResponse(callback))
       break;
     case 'update':
-      addressesController.update(params, sendHttpResponse(callback))
+      addressesController.update(params, mapping.sendHttpResponse(callback))
       break;
     case 'delete':
-      addressesController.delete(params, sendHttpResponse(callback))
+      addressesController.delete(params, mapping.sendHttpResponse(callback))
       break;
     default:
       // Unsupported operation.
