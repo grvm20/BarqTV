@@ -125,7 +125,7 @@ describe('Customer', () => {
     });
   });
 
-  _.each(['firstName', 'lastName', 'phoneNumber', 'addressRef'], (attribute) => {
+  _.each(['firstName', 'lastName', 'phoneNumber'], (attribute) => {
     describe('#'+attribute, () => {
       it('should update its attribute value', () => {
         var customerData = validCompleteCustomerDataArray[0];

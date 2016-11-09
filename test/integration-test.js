@@ -2,6 +2,7 @@ const _ = require('underscore');
 const expect = require('chai').expect;
 
 // Internal imports.
+const ObjectNotFoundException = require("../app/exceptions/object-not-found-exception");
 const injectDependencies = require('../index').injectDependencies;
 
 describe('Smoke test:', () => {
@@ -90,7 +91,7 @@ describe('Customer Use Cases:', () => {
 
         var mockCustomerDao = {
           fetch: (key, callback) => {
-            callback(null, {});
+            callback(new ObjectNotFoundException(), null);
           },
           persist: (key, newItem, callback) => {
             callback(null, {

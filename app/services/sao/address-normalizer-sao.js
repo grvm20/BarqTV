@@ -83,6 +83,8 @@ module.exports = class AddressNormalizerSao {
         }
         normalizedAddress.number = number;
 
+        // TODO: implement proper error handling for the case when the address
+        // doesn't exist in SmartyStreet.
         return callback(null, normalizedAddress);
 
       });

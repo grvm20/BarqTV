@@ -93,7 +93,7 @@ module.exports = class Dao {
           if (!item || (item && item.deleted == true)) {
             item = {}
             /* Raising Object Not found exception here */
-            return callback(new ObjectNotFoundException(err),null);
+            return callback(new ObjectNotFoundException(), null);
           }
           callback(null, item);
         }

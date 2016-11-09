@@ -1,6 +1,7 @@
 const expect = require('chai').expect;
 const Customer = require('../app/models/customer');
 const CustomerService = require('../app/services/customer-service');
+const ObjectNotFoundException = require("../app/exceptions/object-not-found-exception");
 
 describe('CustomerService', () => {
   describe('#save()', () => {
@@ -21,7 +22,7 @@ describe('CustomerService', () => {
           done();
         },
         fetch: (key, callback) => {
-          callback(null, {});
+          callback(new ObjectNotFoundException(), null);
         }
       };
 
