@@ -16,46 +16,61 @@ const MethodNotAllowedException = require('./app/exceptions/method-not-allowed-e
 const ObjectExistsException = require('./app/exceptions/object-exists-exception');
 const ObjectNotFoundException = require('./app/exceptions/object-not-found-exception');
 const InvalidInputException = require("./app/exceptions/invalid-input-exception");
+const AddressInvalidException = require('./app/exceptions/address-invalid-exception');
+const AddressNotSpecificException = require('./app/exceptions/address-not-specific-exception');
 
 /*------------------------------------------------------------------------------------------*/
 
 module.exports = {
-	sendHttpResponse: function (callback) {
-	  return (err, body) => {
-	  	console.error("Checking value of err: " + err)
-	    var statusCode = '200';
-	    var body = body;
-	    if (err) {
-	      switch (err.constructor) {
-	          case InvalidInputException:
-	              statusCode = '400';
-	              break;
-	          case ObjectNotFoundException:
-	              statusCode = '404';
-	              break;
-	          case MethodNotAllowedException:
-	              statusCode = '405';
-	              break;
-	          case DataObjectErrorException:
-	              statusCode = '500';
-	              break;
-	           case ObjectExistsException:
-	          	  statusCode = '405';
-	          	  break;
-	          default: statusCode ='500';
-	      	}
+  sendHttpResponse: function(callback) {
+    return (err, body) => {
+      console.error("Checking value of err: " + err)
+      var statusCode = '200';
+      var body = body;
+      if (err) {
+        switch (err.constructor) {
+          case InvalidInputException:
+            statusCode = '400';
+            break;
+          case ObjectNotFoundException:
+            statusCode = '404';
+            body = 'Element for the provided id doesnot exist in the system';
+            break;
+          case MethodNotAllowedException:
+            statusCode = '405';
+            body = 'Method is not allowed';
+            break;
+          case DataObjectErrorException:
+            statusCode = '500';
+            body = 'Internal System Failure';
+            break;
+          case ObjectExistsException:
+            statusCode = '405';
+            body = 'This id already exists';
+            break;
+          case AddressInvalidException:
+            statusCode = '400';
+            body = 'Address provided is Invalid';
+            break;
+          case AddressNotSpecificException:
+            statusCode = '400';
+            body = 'Address is not specific enough';
+            break;
+          default:
+            statusCode = '500';
+        }
 
-	      body = err.message;
-	      console.error(err);
-	    }
+        body = err.message;
+        console.error(err);
+      }
 
-	    callback(null, {
-	      statusCode: statusCode,
-	      body: body,
-	      headers: {
-	        'Content-Type': 'application/json',
-	      }
-	    });
-	  };
-	}	
+      callback(null, {
+        statusCode: statusCode,
+        body: body,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+    };
+  }
 };

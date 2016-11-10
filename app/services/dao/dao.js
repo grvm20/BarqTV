@@ -37,30 +37,29 @@ module.exports = class Dao {
       Key: key
     };
 
-    this._dynamoDocClient.get(params, (err, data) => {
-
+    this.fetch(key, (err, data) => {
       if (err) {
-        console.error("Dynamo failed to persist data " + err);
-        return callback(new DataObjectErrorException(err), null);
-      } else {
-        if (_.isEmpty(data)) {
-          params = _.omit(params, 'Key');
-          params.Item = item;
-
-          this._dynamoDocClient.put(params, (err, persistedData) => {
-
-            if (err) {
-              console.error("Dynamo failed to persist data " + err);
-              return callback(new DataObjectErrorException(err), null);
-            } else {
-              console.log("Successfully persited record into dynamo: " + JSON.stringify(item));
-              callback(null, item);
-            }
-          });
-        } else {
-          var err =  "Item Already Exists";
-          return callback(new ObjectExistsException(err),null);
+        if (!(err instanceof ObjectNotFoundException)){
+          console.error("Dynamo failed to persist data " + err);
+          return callback(new DataObjectErrorException(err), null);
         }
+      } 
+      if (_.isEmpty(data)) {
+        params = _.omit(params, 'Key');
+        params.Item = item;
+
+        this._dynamoDocClient.put(params, (err, persistedData) => {
+          if (err) {
+            console.error("Dynamo failed to persist data " + err);
+            return callback(new DataObjectErrorException(err), null);
+          } else {
+            console.log("Successfully persited record into dynamo: " + JSON.stringify(item));
+            callback(null, item);
+          }
+        });
+      } else {
+        var err =  "Item Already Exists";
+        return callback(new ObjectExistsException(err),null);
       }
     });
   }

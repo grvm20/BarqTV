@@ -3,6 +3,8 @@
 const _ = require('underscore');
 const sprintf = require('sprintf-js').sprintf;
 const Utils = require("../../utilities/utils");
+const AddressInvalidException = require('../../exceptions/address-invalid-exception');
+const AddressNotSpecificException = require('../../exceptions/address-not-specific-exception');
 /***
 * Address SAO class which handes service call for any address related operations
 * Supports HTTPS. Expects host, authentication Id, authetication token and https object
@@ -44,9 +46,11 @@ module.exports = class AddressNormalizerSao {
 
         var body = JSON.parse(chunk);
         var sizeOfBody = _.size(body);
-        if (sizeOfBody == 0 || sizeOfBody > 1) {
-          // TODO Better exception class and message
-          throw "Address cannot not be normalized";
+        if (sizeOfBody == 0 ) {
+          return callback(new AddressInvalidException("No such address exists"));
+        }
+        if(sizeOfBody > 1){
+          return callback(new AddressNotSpecificException("Address is not specific enough"));
         }
 
         var addressData = body[0];

@@ -3,6 +3,7 @@
 const _ = require('underscore');
 
 const InputValidationException = require("../exceptions/invalid-input-exception")
+const ObjectNotFoundException = require("../exceptions/object-not-found-exception")
 const Address = require('../models/address');
 const Utils = require("../utilities/utils");
 /*
@@ -140,32 +141,43 @@ module.exports = class AddressService {
   save(address, callback) {
 
     this.addressNormalizer.normalize(address, (err, normalizedAddress) => {
-
-      var addressAttributes = normalizedAddress;
-      try {
-        normalizedAddress = new Address(addressAttributes);
-      } catch (err) {
-        console.error(err);
-        return callback(err);
-      }
-
       if (err) {
         console.log("Error while normalizing address");
         callback(err);
         return;
       } else {
 
-        var key = createAddressKey(normalizedAddress.id);
-        var addressDbModel = mapAddressToDbObject(normalizedAddress);
-
-        this._dao.persist(key, addressDbModel, (err, persistedObject) => {
-
+        var addressAttributes = normalizedAddress;
+        try {
+          normalizedAddress = new Address(addressAttributes);
+        } catch (err) {
+          console.error(err);
+          return callback(err);
+        }
+        this.fetch(normalizedAddress.id, (err, currentAddress) => {
           if (err) {
-            console.log("Error while trying to save data: " + JSON.stringify(address));
-            return callback(err);
+            if (err instanceof ObjectNotFoundException) {
+
+              var key = createAddressKey(normalizedAddress.id);
+              var addressDbModel = mapAddressToDbObject(normalizedAddress);
+
+              this._dao.persist(key, addressDbModel, (err, persistedObject) => {
+
+                if (err) {
+                  console.log("Error while trying to save data: " + JSON.stringify(address));
+                  return callback(err);
+                } else {
+                  return callback(null, normalizedAddress);
+                }
+              });
+
+            } else {
+              callback(err);
+            }
           } else {
-            return callback(null, normalizedAddress);
+            callback(null, currentAddress);
           }
+
         });
       }
     }, this);
@@ -251,7 +263,6 @@ module.exports = class AddressService {
           var params = {};
           var updatedAddress = updationDetails["updatedAddress"];
           params["address"] = updatedAddress;
-
           this.save(updatedAddress, (err, address) => {
             if (err) {
               // If get item already exist exception then return updatedAddress
