@@ -310,7 +310,7 @@ module.exports = class CustomerService {
     this.fetch (id, (err, customer) => {
       if (err) {
         if(err instanceof ObjectNotFoundException) {
-          console.error("Object does not exist - hence we can create it !")
+          console.log("Object does not exist - hence we can create it !")
           callback(null, true);
         } else{
           return callback(err);

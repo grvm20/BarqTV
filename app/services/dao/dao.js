@@ -176,9 +176,7 @@ module.exports = class Dao {
         //Checking if there is such an object that exists
 
         if(_.isEmpty(data) || data.Item.deleted == true){
-          /*--This means that such an object doesn't exist (or has already been deleted)
-            In this scenario, we can either through a 404 or a 405 (Object Not Found and method not allowed respectively)
-            Currently going for 404 */
+          /*--This means that such an object doesn't exist (or has already been deleted)*/
             err = "Object does not exist."
             return callback(new ObjectNotFoundException(err),null);
         }

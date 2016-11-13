@@ -64,32 +64,6 @@ function mapAddressToDbObject(address) {
   return item;
 }
 
-function createPartialAddress(input) {
-
-  var address = new Address();
-
-  if (input.city) {
-    address.city = input.city;
-  }
-  if (input.state) {
-    address.state = input.state;
-  }
-  if (input.apt) {
-    address.apt = input.apt;
-  }
-  if (input.number) {
-    address.number = input.number;
-  }
-  if (input.street) {
-    address.street = input.street;
-  }
-  if (input.zipCode) {
-    address.zipCode = input.zipCode;
-  }
-
-  return address;
-}
-
 function getUpdationDetails(address, currentAddress) {
 
   var updateRequired = false;
@@ -126,15 +100,11 @@ module.exports = class AddressService {
    * @input - attributes used to build the Address.
    * Throws InputValidationException.
    **/
-  create(input, partialAttributes) {
+  create(input) {
     if (input instanceof Address) {
       return input;
     } else {
-      if (partialAttributes) {
-        return createPartialAddress(input);
-      } else {
         return new Address(input);
-      }
     }
   }
 
