@@ -49,56 +49,50 @@ module.exports = class AddressController {
         return fetchAddress(null, callback);
       }
     } else {
-      // Invalid params.
-      // Raise error.
+      return callback("Null Object Passed which trying to show data");
     }
   }
 
   create(params, callback) {
-    if (areValidParams(params) && areValidParams(params.address)) {
+
+    if (areValidParams(params) && params.address) {
+
       var address = this.addressSerializer.deserialize(params.address);
+
       this.addressService.save(address, (err, savedAddress) => {
         if (err) {
           console.log("Error while trying to save address information: " + JSON.stringify(params.address))
-          callback(err);
+          return callback(err);
+
         } else {
-          this.addressSerializer.render(savedAddress, callback);
+          return this.addressSerializer.render(savedAddress, callback);
         }
       });
     } else {
-      // raise error
+      callback("Null or Empty object passed while trying to save data");
     }
   }
 
   update(params, callback) {
-    var id = params.id;
-    var address = params.address;
-    if (!Utils.isEmpty(id) && areValidParams(address)) {
+
+    if (areValidParams(params) && !Utils.isEmpty(params.id) && params.address) {
+
+      var id = params.id;
+      var address = params.address;
+
       this.addressService.update(id, address, (err, updatedAddress) => {
         if (err) {
+          console.log("Error while trying to save address information: " + JSON.stringify(params.address))
           callback(err);
+          return;
+
         } else {
           this.addressSerializer.render(updatedAddress, callback);
+          return;
         }
       });
     } else {
-      // raise error
-    }
-  }
-
-  delete(params, callback) {
-    if (areValidParams(params)) {
-      var id = params.id;
-      this.addressService.delete(id, (err, address) => {
-        if (err) {
-          console.log("Error while trying to delete address information for id: " + id);
-          callback(err);
-        } else {
-          this.addressSerializer.render(address, callback);
-        }
-      });
-    } else {
-      // raise error
+      callback("Null or empty id or empty address sent for updation");
     }
   }
 };

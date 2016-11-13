@@ -2,70 +2,96 @@ const _ = require('underscore');
 const expect = require('chai').expect;
 
 // Internal imports.
-const Customer = require('../app/models/customer');
-const CustomerService = require('../app/services/customer-service');
-const CustomerSerializer = require('../app/views/customer-serializer');
-const CustomersController = require('../app/controllers/customers-controller');
+const ObjectNotFoundException = require("../app/exceptions/object-not-found-exception");
+const injectDependencies = require('../index').injectDependencies;
 
-const Address = require('../app/models/address');
-const AddressesController = require('../app/controllers/addresses-controller');
-const AddressService = require('../app/services/address-service');
-const AddressSerializer = require('../app/views/address-serializer');
+describe('Smoke test:', () => {
+  describe('Dependency injection', () => {
+    it('should correctly inject DAO dependencies', () => {
+      var graphObject = injectDependencies();
+      expect(graphObject.customerDao._tableName).to.exist;
+      expect(graphObject.customerDao._dynamoDocClient).to.exist;
+      expect(graphObject.addressDao._tableName).to.exist;
+      expect(graphObject.addressDao._dynamoDocClient).to.exist;
+    });
+  });
+});
 
-// Singleton variables.
-var customersController;
-var addressesController;
+describe('Customer Use Cases:', () => {
+  describe('Get all Customers', () => {
+    it('should return all Customers when params is an empty object', (done) => {
+      var params = {};
+      var customersDataObjects = [{
+        id: "biteme11@spn.com",
+        address_ref: "85e855b5-b86c-47fa-9da9-e75ca6ab11e0",
+        deleted: false,
+        first_name: "Dean",
+        last_name: "Winchester",
+        phone_number: "9118114444",
+      }, {
+        id: "josruice@gmail.com",
+        address_ref: "e7a02e34-371f-41f7-81f7-ca3f4be9c546",
+        deleted: false,
+        first_name: "Jose",
+        last_name: "Ruiz",
+        phone_number: "7653329876"
+      }, {
+        id: "api_gateway_test@gmail.com",
+        address_ref: "4b9c1d76-b054-4478-ab82-75812581abd7",
+        deleted: false,
+        first_name: "Michael",
+        last_name: "Gateway",
+        phone_number: "9281234476"
+      }];
 
-function injectDependencies(customerDao, addressDao) {
-  var addressService = new AddressService(
-    addressDao
-  );
+      var mockCustomerDao = {
+        fetch: (key, callback) => {
+          expect(key).to.not.exist;
+          callback(null, customersDataObjects);
+        }
+      };
 
-  var addressSerializer = new AddressSerializer();
-  var customerSerializer = new CustomerSerializer(
-    addressSerializer
-  );
-  var customerService = new CustomerService(
-    customerDao,
-    addressService
-  );
+      var graphNodes = injectDependencies(mockCustomerDao, null);
+      var customersController = graphNodes.customersController;
+      customersController.show(params, (err, customersData) => {
+        expect(err).to.not.exist;
+        for (var i = 0; i < customersDataObjects.length; ++i) {
+          var customerData = customersData[i];
+          var customerDataObject = customersDataObjects[i];
 
-  // CustomersController receives a serializer class as a sort of interface.
-  customersController = new CustomersController(
-    customerService,
-    customerSerializer
-  );
+          expect(customerData.id).to.equal(customerDataObject.email);
+          expect(customerData.address).to.equal(customerDataObject.address_ref);
+          expect(customerData.first_name).to.equal(customerDataObject.first_name);
+          expect(customerData.last_name).to.equal(customerDataObject.last_name);
+          expect(customerData.phone_number).to.equal(customerDataObject.phone_number);
+          expect(customerData.deleted).to.not.exist;
+        }
+        done();
+      });
+    });
+  });
 
-  var addressSerializer = new AddressSerializer();
-  addressesController = new AddressesController(
-    addressService,
-    addressSerializer,
-    customersController
-  );
-}
-
-describe('Customer Use Cases', () => {
   describe('Save customer', () => {
     it('should save the Customer',
       (done) => {
         var params = {
-          "last_name" : "Gateway",
-          "first_name" : "API",
-          "email" : "api_gateway_test@gmail.com",
-          "phone_number" : "9281234476",
-          "address" : {
-            "city" : "Champaign",
-            "state" : "IL",
-            "apt" : "52",
-            "street" : "Main St",
-            "number" : "22",
-            "zip_code" : "68080"
+          "last_name": "Gateway",
+          "first_name": "API",
+          "email": "api_gateway_test@gmail.com",
+          "phone_number": "9281234476",
+          "address": {
+            "city": "Champaign",
+            "state": "IL",
+            "apt": "52",
+            "street": "Main St",
+            "number": "22",
+            "zip_code": "68080"
           }
         }
 
         var mockCustomerDao = {
           fetch: (key, callback) => {
-            callback(null, {});
+            callback(new ObjectNotFoundException(), null);
           },
           persist: (key, newItem, callback) => {
             callback(null, {
@@ -105,7 +131,13 @@ describe('Customer Use Cases', () => {
           }
         };
 
-        injectDependencies(mockCustomerDao, mockAddressDao);
+        var mockAddressNormalizerSao = {
+          fetch: (address, callback) => {
+            callback(null, address);
+          }
+        }
+        var graphNodes = injectDependencies(mockCustomerDao, mockAddressDao, mockAddressNormalizerSao);
+        var customersController = graphNodes.customersController;
         customersController.create(params, (err, customer) => {
           // Assert staff.
           done(err);
@@ -117,17 +149,17 @@ describe('Customer Use Cases', () => {
       // WIP
       (done) => {
         var params = {
-          "last_name" : "Gateway",
-          "first_name" : "API",
-          "email" : "api_gateway_test@gmail.com",
-          "phone_number" : "9281234476",
-          "address" : {
-            "city" : "Champaign",
-            "state" : "IL",
-            "apt" : "52",
-            "street" : "Main St",
-            "number" : "22",
-            "zip_code" : "68080"
+          "last_name": "Gateway",
+          "first_name": "API",
+          "email": "api_gateway_test@gmail.com",
+          "phone_number": "9281234476",
+          "address": {
+            "city": "Champaign",
+            "state": "IL",
+            "apt": "52",
+            "street": "Main St",
+            "number": "22",
+            "zip_code": "68080"
           }
         }
 
@@ -170,7 +202,8 @@ describe('Customer Use Cases', () => {
           }
         };
 
-        injectDependencies(mockCustomerDao, mockAddressDao);
+        var graphNodes = injectDependencies(mockCustomerDao, mockAddressDao);
+        var customersController = graphNodes.customersController;
         customersController.create(params, (err, customer) => {
           expect(err).to.exist;
           done();
@@ -183,17 +216,17 @@ describe('Customer Use Cases', () => {
     it('should update an existing Customer (only Customer fields updated)',
       (done) => {
         var params = {
-          "last_name" : "",
-          "first_name" : "Jose",
-          "email" : "josruice@gmail.com",
-          "phone_number" : "",
-          "address" : {
-            "city" : "",
-            "state" : "",
-            "apt" : "",
-            "street" : "",
-            "number" : "",
-            "zip_code" : ""
+          "last_name": "",
+          "first_name": "Jose",
+          "email": "josruice@gmail.com",
+          "phone_number": "",
+          "address": {
+            "city": "",
+            "state": "",
+            "apt": "",
+            "street": "",
+            "number": "",
+            "zip_code": ""
           }
         }
 
@@ -246,7 +279,14 @@ describe('Customer Use Cases', () => {
           }
         };
 
-        injectDependencies(mockCustomerDao, mockAddressDao);
+        var mockAddressNormalizerSao = {
+          fetch: (address, callback) => {
+            callback(null, address);
+          }
+        }
+
+        var graphNodes = injectDependencies(mockCustomerDao, mockAddressDao, mockAddressNormalizerSao);
+        var customersController = graphNodes.customersController;
         customersController.update(params, (err, customer) => {
           done(err);
         });
@@ -255,18 +295,18 @@ describe('Customer Use Cases', () => {
   });
 });
 
-describe('Address Use Cases', () => {
+describe('Address Use Cases:', () => {
   describe('Save address', () => {
     it('should save the Address',
       (done) => {
         var params = {
-          "address" : {
-            "city" : "Las Vegas",
-            "state" : "NV",
-            "apt" : "190",
-            "street" : "Second Street",
-            "number" : "890",
-            "zip_code" : "43090"
+          "address": {
+            "city": "Las Vegas",
+            "state": "NV",
+            "apt": "190",
+            "street": "Second Street",
+            "number": "890",
+            "zip_code": "43090"
           }
         }
 
@@ -288,7 +328,14 @@ describe('Address Use Cases', () => {
           }
         };
 
-        injectDependencies(null, mockAddressDao);
+        var mockAddressNormalizerSao = {
+          fetch: (address, callback) => {
+            callback(null, address);
+          }
+        }
+
+        var graphNodes = injectDependencies(null, mockAddressDao, mockAddressNormalizerSao);
+        var addressesController = graphNodes.addressesController;
         addressesController.create(params, (err, address) => {
           done(err);
         });
@@ -300,9 +347,9 @@ describe('Address Use Cases', () => {
     it('should update an existing Address',
       (done) => {
         var params = {
-          "id" : "e7a02e34-371f-41f7-81f7-ca3f4be9c546",
-          "address" : {
-            "number" : "112"
+          "id": "e7a02e34-371f-41f7-81f7-ca3f4be9c546",
+          "address": {
+            "number": "112"
           }
         }
 
@@ -331,10 +378,20 @@ describe('Address Use Cases', () => {
               street: "Main St",
               zip_code: "68080"
             });
+          },
+          persist : (key, item, callback) => {
+            callback(null, item);
           }
         };
 
-        injectDependencies(null, mockAddressDao);
+        var mockAddressNormalizerSao = {
+          fetch: (address, callback) => {
+            callback(null, address);
+          }
+        }
+
+        var graphNodes = injectDependencies(null, mockAddressDao, mockAddressNormalizerSao);
+        var addressesController = graphNodes.addressesController;
         addressesController.update(params, (err, address) => {
           done(err);
         });
@@ -345,38 +402,34 @@ describe('Address Use Cases', () => {
   describe('Get all Addresses', () => {
     it('should return all Addresses when params is an empty object', (done) => {
       var params = {};
-      var addressesDataObjects = [
-        {
-          id: "ed7888cd-30d0-4208-8491-6aa5f416c12f",
-          apt: "N/A",
-          residential_city: "Washington",
-          deleted: false,
-          building: "1600",
-          residential_state: "DC",
-          street: "Pennsylvania Ave",
-          zip_code: "20500"
-        },
-        {
-          id: "41f87ef3-48bd-4721-a250-d4fa2f11afa2",
-          apt: "2A",
-          residential_city: "San Francisco",
-          deleted: false,
-          building: "550 W",
-          residential_state: "CA",
-          street: "Market Street",
-          zip_code: "15009"
-        },
-        {
-          id: "0671d16b-a925-4526-90cb-508257192d15",
-          apt: "60",
-          residential_city: "Chicago",
-          deleted: false,
-          building: "433 N",
-          residential_state: "IL",
-          street: "Main St.",
-          zip_code: "68155"
-        }
-      ];
+      var addressesDataObjects = [{
+        id: "ed7888cd-30d0-4208-8491-6aa5f416c12f",
+        apt: "N/A",
+        residential_city: "Washington",
+        deleted: false,
+        building: "1600",
+        residential_state: "DC",
+        street: "Pennsylvania Ave",
+        zip_code: "20500"
+      }, {
+        id: "41f87ef3-48bd-4721-a250-d4fa2f11afa2",
+        apt: "2A",
+        residential_city: "San Francisco",
+        deleted: false,
+        building: "550 W",
+        residential_state: "CA",
+        street: "Market Street",
+        zip_code: "15009"
+      }, {
+        id: "0671d16b-a925-4526-90cb-508257192d15",
+        apt: "60",
+        residential_city: "Chicago",
+        deleted: false,
+        building: "433 N",
+        residential_state: "IL",
+        street: "Main St.",
+        zip_code: "68155"
+      }];
 
       var mockAddressDao = {
         fetch: (key, callback) => {
@@ -385,7 +438,14 @@ describe('Address Use Cases', () => {
         }
       };
 
-      injectDependencies(null, mockAddressDao);
+      var mockAddressNormalizerSao = {
+        fetch: (address, callback) => {
+          callback(null, address);
+        }
+      }
+
+      var graphNodes = injectDependencies(null, mockAddressDao, mockAddressNormalizerSao);
+      var addressesController = graphNodes.addressesController;
       addressesController.show(params, (err, addressesData) => {
         expect(err).to.not.exist;
         for (var i = 0; i < addressesDataObjects.length; ++i) {
@@ -429,7 +489,14 @@ describe('Address Use Cases', () => {
         }
       };
 
-      injectDependencies(null, mockAddressDao);
+      var mockAddressNormalizerSao = {
+        fetch: (address, callback) => {
+          callback(null, address);
+        }
+      }
+
+      var graphNodes = injectDependencies(null, mockAddressDao, mockAddressNormalizerSao);
+      var addressesController = graphNodes.addressesController;
       addressesController.show(params, (err, addressData) => {
         expect(err).to.not.exist;
         expect(addressData.id).to.equal(addressDataObject.id);
@@ -484,7 +551,14 @@ describe('Address Use Cases', () => {
         }
       };
 
-      injectDependencies(mockCustomerDao, mockAddressDao);
+      var mockAddressNormalizerSao = {
+        fetch: (address, callback) => {
+          callback(null, address);
+        }
+      }
+
+      var graphNodes = injectDependencies(mockCustomerDao, mockAddressDao, mockAddressNormalizerSao);
+      var addressesController = graphNodes.addressesController;
       addressesController.show(params, (err, addressData) => {
         expect(err).to.not.exist;
         expect(addressData.id).to.equal(addressDataObject.id);

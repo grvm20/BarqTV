@@ -32,10 +32,10 @@ const validCustomerData = {
     "9291234321",
     "663823344"
   ],
-  address: [
-    {},
-    {isValid: ()=>{return true}},
-    {validate: ()=>{return true}}
+  addressRef: [
+    "4ed3377e-fcb7-43b8-be8f-d31a5eda6ba7",
+    "d3ffee36-7190-4556-b4ad-61adf6b7c7ff",
+    "8f521b80-30cf-4f47-befa-2b0307c8c624"
   ]
 }
 
@@ -65,9 +65,9 @@ const invalidCustomerData = {
     "178236781623871628736781268376123123123123123123123",
     "3.14"
   ],
-  address: [
-    {isValid: ()=>{return false}},
-    {validate: ()=>{return false}}
+  addressRef: [
+    "aosdkoakwdasodloawkodaw",
+    "email@domain.com"
   ]
 };
 
@@ -77,7 +77,7 @@ const validCompleteCustomerDataArray = _.range(10).map(function(index) {
     firstName: pickModIndex(validCustomerData.firstName, index),
     lastName: pickModIndex(validCustomerData.lastName, index),
     phoneNumber: pickModIndex(validCustomerData.phoneNumber, index),
-    address: pickModIndex(validCustomerData.address, index)
+    addressRef: pickModIndex(validCustomerData.addressRef, index)
   };
 });
 
@@ -94,7 +94,7 @@ const invalidCompleteCustomerDataArray = _.range(10).map(function(index) {
     firstName: pickModIndex(invalidCustomerData.firstName, index),
     lastName: pickModIndex(invalidCustomerData.lastName, index),
     phoneNumber: pickModIndex(invalidCustomerData.phoneNumber, index),
-    address: pickModIndex(invalidCustomerData.address, index)
+    addressRef: pickModIndex(invalidCustomerData.addressRef, index)
   }
 });;
 
@@ -125,7 +125,7 @@ describe('Customer', () => {
     });
   });
 
-  _.each(['firstName', 'lastName', 'phoneNumber', 'address'], (attribute) => {
+  _.each(['firstName', 'lastName', 'phoneNumber'], (attribute) => {
     describe('#'+attribute, () => {
       it('should update its attribute value', () => {
         var customerData = validCompleteCustomerDataArray[0];

@@ -1,23 +1,27 @@
 'use strict';
 
 const _ = require('underscore');
-const AWS = require('aws-sdk');
 const sprintf = require('sprintf-js').sprintf;
 
-const dynamoDocClient = new AWS.DynamoDB.DocumentClient();
+/*
+Initializing Exception Object paths here
+*/
+
+const ObjectNotFoundException = require("../../exceptions/object-not-found-exception");
+const DataObjectErrorException = require("../../exceptions/data-object-error-exception");
+const MethodNotAllowedException = require("../../exceptions/method-not-allowed-exception");
+const ObjectExistsException = require("../../exceptions/object-exists-exception");
 
 
 /***
  * DAO class which handles all data access related operations.
- * Expects table name to be injected to each object of the class through constructor.
- *
- * To access database initialize an object with the table name and call the required operation 
- * passing the necessary parameters and callbacks
+ * Expects a DynamoDB client object and a table name to be injected.
  ***/
 module.exports = class Dao {
 
-  constructor(tableName) {
-    this.tableName = tableName;
+  constructor(dynamoDocClient, tableName) {
+    this._tableName = tableName;
+    this._dynamoDocClient = dynamoDocClient
   }
 
   /**
@@ -29,29 +33,33 @@ module.exports = class Dao {
   persist(key, item, callback) {
 
     var params = {
-      TableName: this.tableName,
+      TableName: this._tableName,
       Key: key
     };
-    dynamoDocClient.get(params, function(err, data) {
+
+    this.fetch(key, (err, data) => {
       if (err) {
-        console.error("Dynamo failed to persist data " + err);
-        callback(err, null);
-      } else {
-        if (_.isEmpty(data)) {
-          params = _.omit(params, 'Key');
-          params.Item = item;
-          dynamoDocClient.put(params, function(err, persistedData) {
-            if (err) {
-              console.error("Dynamo failed to persist data " + err);
-              callback(err, null);
-            } else {
-              console.log("Successfully persited record into dynamo: " + JSON.stringify(item));
-              callback(null, item);
-            }
-          });
-        } else {
-          throw "Item Already Exists";
+        if (!(err instanceof ObjectNotFoundException)){
+          console.error("Dynamo failed to persist data " + err);
+          return callback(new DataObjectErrorException(err), null);
         }
+      } 
+      if (_.isEmpty(data)) {
+        params = _.omit(params, 'Key');
+        params.Item = item;
+
+        this._dynamoDocClient.put(params, (err, persistedData) => {
+          if (err) {
+            console.error("Dynamo failed to persist data " + err);
+            return callback(new DataObjectErrorException(err), null);
+          } else {
+            console.log("Successfully persited record into dynamo: " + JSON.stringify(item));
+            callback(null, item);
+          }
+        });
+      } else {
+        var err =  "Item Already Exists";
+        return callback(new ObjectExistsException(err),null);
       }
     });
   }
@@ -65,22 +73,26 @@ module.exports = class Dao {
   fetch(key, callback) {
 
     var params = {
-      TableName: this.tableName
+      TableName: this._tableName
     };
     if (key != null && key != "") {
       params.Key = key;
 
-      dynamoDocClient.get(params, function(err, data) {
+      console.error("Sending for fetch:" + JSON.stringify(params));
+
+      this._dynamoDocClient.get(params, (err, data) => {
         if (err) {
           console.error("Dynamo failed to fetch data " + err);
-          callback(err, null);
+          return callback(new DataObjectErrorException(err), null);
         } else {
           console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
           var item = data.Item;
-          // This is necessary because we dont have a GSI on is_active field.
+          // This is necessary because we dont have a GSI on deleted field.
           // So we have to manually filter out the result
           if (!item || (item && item.deleted == true)) {
             item = {}
+            /* Raising Object Not found exception here */
+            return callback(new ObjectNotFoundException(), null);
           }
           callback(null, item);
         }
@@ -91,10 +103,11 @@ module.exports = class Dao {
       params.FilterExpression = "deleted = :value";
       params.ExpressionAttributeValues = { ":value": false };
 
-      dynamoDocClient.scan(params, function(err, data) {
+      this._dynamoDocClient.scan(params, (err, data) => {
+
         if (err) {
           console.error("Dynamo failed to fetch data " + err);
-          callback(err, null);
+          return callback(new DataObjectErrorException(err), null);
         } else {
           console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
           callback(null, data.Items);
@@ -102,6 +115,43 @@ module.exports = class Dao {
       });
     }
   }
+
+
+  /**
+   * Checks id for available id DB
+   * @key - Key on which record needs to be fetched from DB
+   * @callback - Callback function to which either error or data is passed back.
+   * Argument to callback expected of the form(error, data)
+   **/
+  /*check(key, callback) {
+
+    var params = {
+      TableName: this._tableName
+    };
+    if (key != null && key != "") {
+      params.Key = key;
+
+      console.error("Sending for check:" + JSON.stringify(params));
+
+      this._dynamoDocClient.get(params, (err, data) => {
+        if (err) {
+          console.error("Dynamo failed to fetch data " + err);
+          return callback(new DataObjectErrorException(err), null);
+        } else {
+          console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
+          var item = data.Item;
+          // This is necessary because we dont have a GSI on deleted field.
+          // So we have to manually filter out the result
+          if (!item || (item && item.deleted == true)) {
+            item = {}
+          // ID is available so sending it back
+          }
+          callback(null, item);
+        }
+      });
+
+    }
+  }*/
 
   /**
    * Deletes object from DB
@@ -112,25 +162,37 @@ module.exports = class Dao {
   delete(key, callback) {
 
     var params = {
-      TableName: this.tableName,
+      TableName: this._tableName,
       Key: key
     };
 
-    dynamoDocClient.get(params, function(err, data) {
+    this._dynamoDocClient.get(params, (err, data) => {
+
       if (err) {
         console.error("Dynamo failed to fetch data " + err);
-        callback(err, null);
+        return callback(new DataObjectErrorException(err), null);
       } else {
+
+        //Checking if there is such an object that exists
+
+        if(_.isEmpty(data) || data.Item.deleted == true){
+          /*--This means that such an object doesn't exist (or has already been deleted)*/
+            err = "Object does not exist."
+            return callback(new ObjectNotFoundException(err),null);
+        }
+
         console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
 
         var item = data.Item;
         item.deleted = true;
         params.Item = item;
 
-        dynamoDocClient.put(params, function(err, data) {
+
+        this._dynamoDocClient.put(params, (err, data) => {
+
           if (err) {
             console.error("Dynamo failed to persist data " + err);
-            callback(err, null);
+            return callback(new DataObjectErrorException(err), null);
           } else {
             console.log("Successfully deleted record from dynamo: " + JSON.stringify(item));
             callback(null, item);
@@ -157,7 +219,7 @@ module.exports = class Dao {
         if (currentItem && _.isEmpty(currentItem)) {
           var errorMessage = "Unable to update a non-existing item.";
           console.error(errorMessage);
-          callback(errorMessage);
+          return callback(new MethodNotAllowedException(errorMessage));
         } else {
           var i = 0;
           var updateRequired = false;
@@ -184,17 +246,17 @@ module.exports = class Dao {
 
           console.log(sprintf("Using update expression: %s.", updateExpression));
           var params = {
-            TableName: this.tableName,
+            TableName: this._tableName,
             Key: key,
             UpdateExpression: updateExpression,
             ExpressionAttributeValues: expressionAttributeValues,
             ReturnValues: "ALL_NEW"
           };
 
-          dynamoDocClient.update(params, function(err, data) {
+          this._dynamoDocClient.update(params, (err, data) => {
             if (err) {
               console.error("Dynamo failed to Update data " + err);
-              callback(err, null);
+              return callback(new DataObjectErrorException(err), null);
             } else {
               console.log("Successfully updated record from dynamo: " + JSON.stringify(data));
               callback(null, data.Attributes);

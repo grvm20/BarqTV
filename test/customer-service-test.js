@@ -1,6 +1,7 @@
 const expect = require('chai').expect;
 const Customer = require('../app/models/customer');
 const CustomerService = require('../app/services/customer-service');
+const ObjectNotFoundException = require("../app/exceptions/object-not-found-exception");
 
 describe('CustomerService', () => {
   describe('#save()', () => {
@@ -21,15 +22,17 @@ describe('CustomerService', () => {
           done();
         },
         fetch: (key, callback) => {
-          callback(null, {});
+          callback(new ObjectNotFoundException(), null);
         }
       };
 
-      var mockAddressService = {
-        save: (address, callback) => {
+      var mockAddressSao = {
+        create: (params, callback) => {
+          expect(params.id).to.equal(mockAddress.id);
           callback(null, mockAddress);
         },
-        fetch: (key, callback) => {
+        show: (params, callback) => {
+          expect(params.id).to.equal(mockAddress.id);
           callback(null, mockAddress);
         }
       };
@@ -42,7 +45,7 @@ describe('CustomerService', () => {
         address: mockAddress
       });
 
-      var customerService = new CustomerService(mockDao, mockAddressService);
+      var customerService = new CustomerService(mockDao, mockAddressSao);
       customerService.save(customer, done);
     });
 
@@ -73,16 +76,14 @@ describe('CustomerService', () => {
         }
       };
 
-      var mockAddressService = {
-        create: (address) => {
-          return address;
-        },
-        fetch: (address, callback) => {
+      var mockAddressSao = {
+        show: (params, callback) => {
+          expect(params.id).to.equal(mockAddress.id);
           callback(null, mockAddress);
         }
       };
 
-      var customerService = new CustomerService(mockDao, mockAddressService);
+      var customerService = new CustomerService(mockDao, mockAddressSao);
       customerService.save(customer, (err, customer) => {
         console.log(err);
         expect(err).to.exist;
@@ -100,18 +101,20 @@ describe('CustomerService', () => {
 
       var oldCustomerData = {
         id: "myuser@gmail.com",
-        firstName: "Javier",
-        lastName: "Lopez",
-        phoneNumber: "3327658892",
-        address: "6B8C1303-CC12-4DD0-96DA-D592FB17DD64"
+        first_name: "Javier",
+        last_name: "Lopez",
+        phone_number: "3327658892",
+        address_ref: "6B8C1303-CC12-4DD0-96DA-D592FB17DD64",
+        deleted: false
       };
 
       var newCustomerData = {
         id: "myuser@gmail.com",
-        firstName: "Pepe",
-        lastName: "Lopez",
-        phoneNumber: "3327658892",
-        address: "6B8C1303-CC12-4DD0-96DA-D592FB17DD64"
+        first_name: "Pepe",
+        last_name: "Lopez",
+        phone_number: "3327658892",
+        address_ref: "6B8C1303-CC12-4DD0-96DA-D592FB17DD64",
+        deleted: false
       };
 
       var mockAddress = {
@@ -125,20 +128,19 @@ describe('CustomerService', () => {
           callback(null, newCustomerData);
         },
         fetch: (key, callback) => {
+          expect(key.id).to.equal("myuser@gmail.com");
           callback(null, oldCustomerData);
         }
       };
 
-      var mockAddressService = {
-        create: (address) => {
-          return address;
-        },
-        fetch: (address, callback) => {
+      var mockAddressSao = {
+        show: (params, callback) => {
+          expect(params.id).to.equal(mockAddress.id);
           callback(null, mockAddress);
         }
       };
 
-      var customerService = new CustomerService(mockDao, mockAddressService);
+      var customerService = new CustomerService(mockDao, mockAddressSao);
       customerService.update(customer, (err, customer) => {
         console.log(customer);
         done();

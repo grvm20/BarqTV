@@ -3,6 +3,7 @@
 const _ = require('underscore');
 
 const InputValidationException = require("../exceptions/invalid-input-exception")
+const ObjectNotFoundException = require("../exceptions/object-not-found-exception")
 const Address = require('../models/address');
 const Utils = require("../utilities/utils");
 /*
@@ -63,10 +64,29 @@ function mapAddressToDbObject(address) {
   return item;
 }
 
+function getUpdationDetails(address, currentAddress) {
+
+  var updateRequired = false;
+
+  _.each(_.keys(address), (key) => {
+    if (!Utils.isEmpty(address[key]) && currentAddress[key] !== address[key]) {
+      currentAddress[key] = address[key];
+      updateRequired = true;
+    }
+  });
+  var updationDetails = {};
+  updationDetails["isUpdateRequired"] = updateRequired;
+  updationDetails["updatedAddress"] = currentAddress;
+  return updationDetails;
+
+}
+
 module.exports = class AddressService {
 
-  constructor(dao) {
+  constructor(dao, addressNormalizer, addressSerializer) {
     this.dao = dao;
+    this.addressNormalizer = addressNormalizer;
+    this.addressSerializer = addressSerializer;
   }
 
   set dao(dao) {
@@ -80,41 +100,57 @@ module.exports = class AddressService {
    * @input - attributes used to build the Address.
    * Throws InputValidationException.
    **/
-  create (input) {
+  create(input) {
     if (input instanceof Address) {
       return input;
     } else {
-      return new Address(input);
+        return new Address(input);
     }
   }
 
-  save (address, callback) {
-    if (!(address instanceof Address)) {
-      var addressAttributes = address;
-      if (!addressAttributes.id) {
-        var id = Utils.generateGuid();
-        addressAttributes.id = id;
-      }
+  save(address, callback) {
 
-      try {
-        var address = new Address(addressAttributes);
-      } catch (err) {
-        console.error(err);
-        return callback(err);
-      }
-    }
-
-    var key = createAddressKey(address.id);
-    var addressDbModel = mapAddressToDbObject(address);
-    this._dao.persist(key, addressDbModel, (err, persistedObject) => {
-
+    this.addressNormalizer.normalize(address, (err, normalizedAddress) => {
       if (err) {
-        console.log("Error while trying to save data: " + JSON.stringify(address));
-        return callback(err);
+        console.log("Error while normalizing address");
+        callback(err);
+        return;
       } else {
-        return callback(null, address);
+
+        var addressAttributes = normalizedAddress;
+        try {
+          normalizedAddress = new Address(addressAttributes);
+        } catch (err) {
+          console.error(err);
+          return callback(err);
+        }
+        this.fetch(normalizedAddress.id, (err, currentAddress) => {
+          if (err) {
+            if (err instanceof ObjectNotFoundException) {
+
+              var key = createAddressKey(normalizedAddress.id);
+              var addressDbModel = mapAddressToDbObject(normalizedAddress);
+
+              this._dao.persist(key, addressDbModel, (err, persistedObject) => {
+
+                if (err) {
+                  console.log("Error while trying to save data: " + JSON.stringify(address));
+                  return callback(err);
+                } else {
+                  return callback(null, normalizedAddress);
+                }
+              });
+
+            } else {
+              callback(err);
+            }
+          } else {
+            callback(null, currentAddress);
+          }
+
+        });
       }
-    });
+    }, this);
   }
 
   /**
@@ -174,66 +210,44 @@ module.exports = class AddressService {
     });
   }
 
-  /**
-   * Deletes data from db.
-   * @id - Id corresponding to row that needs to be deleted.
-   * @callback - callback function
-   **/
-  delete(id, callback) {
-    if (!Utils.isEmpty(id)) {
-      var key = createAddressKey(id);
-
-      this._dao.delete(key, (err, deletedAddress) => {
-        if (err) {
-          console.error(err);
-          return callback(err);
-        } else {
-          var addressAttributes = mapDbObjectToAddressAttributes(deletedAddress);
-
-          try {
-            var address = new Address(addressAttributes);
-          } catch (err) {
-            console.log("Error while trying to delete data: " + id);
-            return callback(err);
-          }
-          return callback(null, address);
-        }
-      });
-    } else {
-      throw new InputValidationException('id');
-    }
-  }
-
-  /**
-   * Updates data of db.
-   * @id - Id corresponding to row that needs to be updated.
-   * @address - address objects which has data that needs to be updated
-   * @callback - callback function
-   **/
   update(id, address, callback) {
-    if (!Utils.isEmpty(id)) {
-      var key = createAddressKey(id);
-      var updatableAddressDbModel = mapAddressToDbObject(address);
 
-      this._dao.update(key, updatableAddressDbModel, (err, deletedAddress) => {
-        if (err) {
-          console.error(err);
-          return callback(err);
+    // This will validate new entries
+    address = this.addressSerializer.deserialize(address);
+    var addressModel = this.create(address, true);
+    var params = {};
+    params.id = id;
+
+    this.fetch(id, (err, currentAddress) => {
+
+      currentAddress = this.addressSerializer.deserialize(this.addressSerializer.serialize(currentAddress));
+
+      if (err) {
+        return callback(err);
+      } else {
+
+        var updationDetails = getUpdationDetails(address, currentAddress);
+        var isUpdationRequired = updationDetails["isUpdateRequired"];
+        if (isUpdationRequired) {
+
+          var params = {};
+          var updatedAddress = updationDetails["updatedAddress"];
+          params["address"] = updatedAddress;
+          this.save(updatedAddress, (err, address) => {
+            if (err) {
+              // If get item already exist exception then return updatedAddress
+              return callback(err);
+            } else {
+              // No need to serialize this as this create already returns us serialized object
+              return callback(null, address);
+            }
+          });
         } else {
-
-          var addressAttributes = mapDbObjectToAddressAttributes(deletedAddress);
-
-          try {
-            var address = new Address(addressAttributes);
-          } catch (err) {
-            console.log("Error while trying to update data: " + id + ", address: " + JSON.stringify(address));
-            return callback(err);
-          }
-          return callback(null, address);
+          console.log("No update required");
+          callback(null, currentAddress);
         }
-      });
-    } else {
-      throw new InputValidationException('id');
-    }
+      }
+
+    });
   }
 }

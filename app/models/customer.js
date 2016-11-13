@@ -9,7 +9,6 @@ const VALID_CUSTOMER_REQUIRED_ATTRIBUTES = [
   "firstName",
   "lastName",
   "phoneNumber",
-  "address",
   "deleted"
 ];
 
@@ -20,10 +19,7 @@ const isValidId = (id) => {
 }
 
 const isValidName = (name) => {
-  var isNotEmpty = !Utils.isEmpty(name);
-  var doesNotContainDigits = !Utils.CONTAINS_DIGIT_REGEX.test(name);
-  var doesNotContainInvalidChars = !/[\{\}\(\)_\$#"'@\|!\?\+\*%<>]/.test(name);
-  return isNotEmpty && doesNotContainDigits && doesNotContainInvalidChars;
+  return Utils.isAlphabeticString(name);
 };
 
 const isValidPhoneNumber = (phoneNumber) => {
@@ -34,56 +30,62 @@ const isValidPhoneNumber = (phoneNumber) => {
   return isNotEmpty && containsDigits && isLongEnough && isNotTooLong;
 };
 
+const isValidAddressRef = (addressRef) => {
+  var isNotEmpty = !Utils.isEmpty(addressRef);
+  return isNotEmpty;
+};
+
 module.exports = class Customer {
-  constructor (attributes) {
+  constructor(attributes) {
     this.id = attributes.id || attributes.email;
     this.firstName = attributes.firstName;
     this.lastName = attributes.lastName;
     this.phoneNumber = attributes.phoneNumber;
     this.address = attributes.address;
+    this.addressRef = attributes.addressRef;
     this.deleted = attributes.deleted || false;
   }
 
-  set id (id){
+  set id(id) {
     if (id) {
-      if (isValidId(id)){
+      if (isValidId(id)) {
         this._id = id;
       } else {
         throw new InvalidInputException("id")
       }
     }
   }
-  get id () {
+  get id() {
     return this._id;
   }
 
-  set firstName (firstName) {
+  set firstName(firstName) {
     if (firstName) {
-      if (isValidName(firstName)){
+      if (isValidName(firstName)) {
         this._firstName = firstName;
       } else {
         throw new InvalidInputException("first name")
       }
     }
   }
-  get firstName () {
+  get firstName() {
     return this._firstName;
   }
 
-  set lastName (lastName) {
+  set lastName(lastName) {
     if (lastName) {
-      if (isValidName(lastName)){
+      if (isValidName(lastName)) {
         this._lastName = lastName;
       } else {
         throw new InvalidInputException("last name")
       }
     }
   }
-  get lastName () {
+  get lastName() {
     return this._lastName;
   }
 
-  set address (address) {
+  set address(address) {
     if (address) {
       if (Utils.isValid(address)) {
         this._address = address;
@@ -92,42 +94,52 @@ module.exports = class Customer {
       }
     }
   }
-  get address () {
+  get address() {
     return this._address;
   }
 
-  get addressRef () {
+  set addressRef(addressRef) {
+    var hasNoAddress = !this.address;
+    if (hasNoAddress && addressRef) {
+      if (isValidAddressRef(addressRef)) {
+        this._addressRef = addressRef;
+      } else {
+        throw new InvalidInputException("address reference")
+      }
+    }
+  }
+  get addressRef() {
     if (this.address) {
-      return this._address.id;  
+      return this.address.id;
     } else {
-      return null;
+      return this._addressRef;
     }
   }
 
-  set phoneNumber (phoneNumber) {
+  set phoneNumber(phoneNumber) {
     if (phoneNumber) {
-      if (isValidPhoneNumber(phoneNumber)){
+      if (isValidPhoneNumber(phoneNumber)) {
         this._phoneNumber = phoneNumber;
       } else {
         throw new InvalidInputException("phone number")
       }
     }
   }
-  get phoneNumber () {
+  get phoneNumber() {
     return this._phoneNumber;
   }
 
-  set deleted (deleted) {
+  set deleted(deleted) {
     if (typeof deleted === 'boolean') {
-      this._deleted = deleted;  
+      this._deleted = deleted;
     }
   }
-  get deleted () {
+  get deleted() {
     return this._deleted;
   }
 
   // Id aliases.
-  set email (email) {
+  set email(email) {
     if (email) {
       try {
         this.id = email
@@ -136,21 +148,19 @@ module.exports = class Customer {
       }
     }
   }
-  get email () {
+  get email() {
     return this.id;
   }
 
   // To be valid, it must contain all required attributes.
-  validate () {
+  validate() {
     _.each(VALID_CUSTOMER_REQUIRED_ATTRIBUTES, (attribute) => {
       var hasAttribute = typeof this[attribute] !== 'undefined';
       var isValidAttribute = Utils.isValid(this[attribute]);
-      if (!hasAttribute || !isValidAttribute) {
+      if (!hasAttribute || !isValidAttribute) {
         throw new InvalidInputException(attribute);
       }
     });
-
     return true;
   }
 }
-
