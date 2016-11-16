@@ -37,25 +37,21 @@ paths:
           headers:
             404:
               type: "string"
-        405:
-          description: "405 response"
-          headers:
-            405:
-              type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
-        httpMethod: "POST"
         requestTemplates:
           application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
             \ : \"fetch\"\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
         responses:
+          \[404\].*:
+            statusCode: "404"
           default:
             statusCode: "200"
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
-              application/json: "#set($inputRoot = $input.path('$.body'))\n[\n#foreach($address\
+              application/json: "#set($inputRoot = $input.path('$'))\n[\n#foreach($address\
                 \ in $inputRoot)\n    {\n        \"id\" : \"$address.id\",\n     \
                 \   \"city\" : \"$address.city\",\n        \"state\" : \"$address.state\"\
                 ,\n        \"apt\" : \"$address.apt\",\n        \"number\" : \"$address.number\"\
@@ -63,15 +59,12 @@ paths:
                 \ : \"$address.zip_code\",\n        \"self\" : {\n            \"href\"\
                 \ : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$customer.email\"\
                 \n        }\n    }#if($foreach.hasNext),#end\n\n#end\n]"
-          .*Invalid.*:
-            statusCode: "400"
-          .*found.*:
-            statusCode: "404"
-          .*object.*:
+          \[500\].*:
             statusCode: "500"
-          method not allowed*:
-            statusCode: "405"
+          \[400\].*:
+            statusCode: "400"
         passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
         type: "aws"
     post:
       consumes:
@@ -99,42 +92,37 @@ paths:
               type: "string"
         500:
           description: "500 response"
-        404:
-          description: "404 response"
-        405:
-          description: "405 response"
+          headers:
+            500:
+              type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
-        httpMethod: "POST"
         requestTemplates:
           application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
             \ : \"create\",\n  \"address\" : {\n    \"city\" : \"$inputRoot.city\"\
             ,\n    \"state\" : \"$inputRoot.state\",\n    \"apt\" : \"$inputRoot.apt\"\
             ,\n    \"street\" : \"$inputRoot.street\",\n    \"number\" : \"$inputRoot.number\"\
             ,\n    \"zip_code\" : \"$inputRoot.zip_code\"\n    }\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
         responses:
           default:
             statusCode: "200"
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
-              application/json: "#set($inputRoot = $input.path('$.body'))\n{\n  \"\
-                id\" : \"$inputRoot.id\",\n  \"city\" : \"$inputRoot.city\",\n  \"\
-                state\" : \"$inputRoot.state\",\n  \"apt\" : \"$inputRoot.apt\",\n\
-                \  \"number\" : \"$inputRoot.number\",\n  \"street\" : \"$inputRoot.street\"\
-                ,\n  \"zip_code\" : \"$inputRoot.zip_code\",\n  \"self\" : {\n   \
-                \ \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.id\"\
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"id\"\
+                \ : \"$inputRoot.id\",\n  \"city\" : \"$inputRoot.city\",\n  \"state\"\
+                \ : \"$inputRoot.state\",\n  \"apt\" : \"$inputRoot.apt\",\n  \"number\"\
+                \ : \"$inputRoot.number\",\n  \"street\" : \"$inputRoot.street\",\n\
+                \  \"zip_code\" : \"$inputRoot.zip_code\",\n  \"self\" : {\n    \"\
+                href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.id\"\
                 \n  }\n}"
-          .*Invalid.*:
-            statusCode: "400"
-          .*found.*:
-            statusCode: "404"
-          data object error*:
+          \[500\].*:
             statusCode: "500"
-          method not allowed*:
-            statusCode: "405"
+          \[400\].*:
+            statusCode: "400"
         passthroughBehavior: "when_no_templates"
+        httpMethod: "POST"
         type: "aws"
     options:
       consumes:
@@ -185,27 +173,48 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
-        httpMethod: "POST"
         requestTemplates:
           application/json: "{\n    \"operation\" : \"fetch\",\n    \"id\": \"$input.params('id')\"\
             \ \n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
         responses:
+          \[404\].*:
+            statusCode: "404"
           default:
             statusCode: "200"
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
-              application/json: "#set($inputRoot = $input.path('$.body'))\n{\n  \"\
-                id\" : \"$inputRoot.id\",\n  \"city\" : \"$inputRoot.city\",\n  \"\
-                state\" : \"$inputRoot.state\",\n  \"apt\" : \"$inputRoot.apt\",\n\
-                \  \"number\" : \"$inputRoot.number\",\n  \"street\" : \"$inputRoot.street\"\
-                ,\n  \"zip_code\" : \"$inputRoot.zip_code\",\n  \"self\" : {\n   \
-                \ \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.id\"\
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"id\"\
+                \ : \"$inputRoot.id\",\n  \"city\" : \"$inputRoot.city\",\n  \"state\"\
+                \ : \"$inputRoot.state\",\n  \"apt\" : \"$inputRoot.apt\",\n  \"number\"\
+                \ : \"$inputRoot.number\",\n  \"street\" : \"$inputRoot.street\",\n\
+                \  \"zip_code\" : \"$inputRoot.zip_code\",\n  \"self\" : {\n    \"\
+                href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.id\"\
                 \n  }\n}"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
         passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
         type: "aws"
     put:
       consumes:
@@ -230,10 +239,18 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
-        httpMethod: "POST"
         requestTemplates:
           application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
             \ : \"update\",\n  \"id\" : \"$input.params('id')\",\n  \"address\" :\
@@ -241,20 +258,26 @@ paths:
             ,\n    \"apt\" : \"$inputRoot.apt\",\n    \"number\" : \"$inputRoot.number\"\
             ,\n    \"street\" : \"$inputRoot.street\",\n    \"zip_code\" : \"$inputRoot.zip_code\"\
             \n  }\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
         responses:
           default:
             statusCode: "200"
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
-              application/json: "#set($inputRoot = $input.path('$.body'))\n{\n  \"\
-                id\" : \"$inputRoot.id\",\n  \"city\" : \"$inputRoot.city\",\n  \"\
-                state\" : \"$inputRoot.state\",\n  \"apt\" : \"$inputRoot.apt\",\n\
-                \  \"number\" : \"$inputRoot.number\",\n  \"street\" : \"$inputRoot.street\"\
-                ,\n  \"zip_code\" : \"$inputRoot.zip_code\",\n  \"self\" : {\n   \
-                \ \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.id\"\
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"id\"\
+                \ : \"$inputRoot.id\",\n  \"city\" : \"$inputRoot.city\",\n  \"state\"\
+                \ : \"$inputRoot.state\",\n  \"apt\" : \"$inputRoot.apt\",\n  \"number\"\
+                \ : \"$inputRoot.number\",\n  \"street\" : \"$inputRoot.street\",\n\
+                \  \"zip_code\" : \"$inputRoot.zip_code\",\n  \"self\" : {\n    \"\
+                href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.id\"\
                 \n  }\n}"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
         passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
         type: "aws"
     delete:
       consumes:
@@ -276,33 +299,44 @@ paths:
               type: "string"
         400:
           description: "400 response"
+          headers:
+            400:
+              type: "string"
         500:
           description: "500 response"
+          headers:
+            500:
+              type: "string"
         404:
           description: "404 response"
-        405:
-          description: "405 response"
+          headers:
+            404:
+              type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
-        httpMethod: "POST"
         requestTemplates:
           application/json: "{\n    \"operation\" : \"delete\",\n    \"id\": \"$input.params('id')\"\
             \ \n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
         responses:
+          \[404\].*:
+            statusCode: "404"
           default:
             statusCode: "200"
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
-              application/json: "#set($inputRoot = $input.path('$.body'))\n{\n  \"\
-                id\" : \"$inputRoot.id\",\n  \"city\" : \"$inputRoot.city\",\n  \"\
-                state\" : \"$inputRoot.state\",\n  \"apt\" : \"$inputRoot.apt\",\n\
-                \  \"number\" : \"$inputRoot.number\",\n  \"street\" : \"$inputRoot.street\"\
-                ,\n  \"zip_code\" : \"$inputRoot.zip_code\"\n}"
-          .*found.*:
-            statusCode: "404"
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"id\"\
+                \ : \"$inputRoot.id\",\n  \"city\" : \"$inputRoot.city\",\n  \"state\"\
+                \ : \"$inputRoot.state\",\n  \"apt\" : \"$inputRoot.apt\",\n  \"number\"\
+                \ : \"$inputRoot.number\",\n  \"street\" : \"$inputRoot.street\",\n\
+                \  \"zip_code\" : \"$inputRoot.zip_code\"\n}"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
         passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
         type: "aws"
     options:
       consumes:
@@ -353,27 +387,34 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
-        httpMethod: "POST"
         requestTemplates:
           application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
             \ : \"fetch\"\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
         responses:
           default:
             statusCode: "200"
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
-              application/json: "#set($inputRoot = $input.path('$.body'))\n[\n#foreach($customer\
+              application/json: "#set($inputRoot = $input.path('$'))\n[\n#foreach($customer\
                 \ in $inputRoot)\n    {\n        \"email\" : \"$customer.email\",\n\
                 \        \"first_name\" : \"$customer.first_name\",\n        \"last_name\"\
                 \ : \"$customer.last_name\",\n        \"phone_number\" : \"$customer.phone_number\"\
                 ,\n        \"address\" : {\n            \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$customer.address\"\
                 \n        },\n        \"self\" : {\n            \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/customers/$customer.email\"\
                 \n        }\n    }#if($foreach.hasNext),#end\n\n#end\n]"
+          \[500\].*:
+            statusCode: "500"
         passthroughBehavior: "when_no_templates"
+        httpMethod: "POST"
         type: "aws"
     post:
       consumes:
@@ -396,10 +437,21 @@ paths:
               type: "string"
         400:
           description: "400 response"
+          headers:
+            400:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+        409:
+          description: "409 response"
+          headers:
+            404:
+              type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
-        httpMethod: "POST"
         requestTemplates:
           application/json: "#set($inputRoot = $input.path('$'))\n#set($inputAddress\
             \ = $input.path('$.address'))\n{\n  \"operation\" : \"create\",\n  \"\
@@ -410,20 +462,28 @@ paths:
             $inputAddress.state\",\n      \"apt\" : \"$inputAddress.apt\",\n     \
             \ \"street\" : \"$inputAddress.street\",\n      \"number\" : \"$inputAddress.number\"\
             ,\n      \"zip_code\" : \"$inputAddress.zip_code\"\n    }\n  }\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
         responses:
           default:
             statusCode: "200"
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
-              application/json: "#set($inputRoot = $input.path('$.body'))\n{\n   \
-                \ \"email\" : \"$inputRoot.email\",\n    \"first_name\" : \"$inputRoot.first_name\"\
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n    \"email\"\
+                \ : \"$inputRoot.email\",\n    \"first_name\" : \"$inputRoot.first_name\"\
                 ,\n    \"last_name\" : \"$inputRoot.last_name\",\n    \"phone_number\"\
                 \ : \"$inputRoot.phone_number\",\n    \"address\" : {\n        \"\
                 href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.address\"\
                 \n    },\n    \"self\" : {\n        \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/customers/$inputRoot.email\"\
                 \n    }\n}"
+          \[409\].*:
+            statusCode: "409"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
         passthroughBehavior: "when_no_templates"
+        httpMethod: "POST"
         type: "aws"
     options:
       consumes:
@@ -477,7 +537,7 @@ paths:
         400:
           description: "400 response"
           headers:
-            Access-Control-Allow-Origin:
+            400:
               type: "string"
         500:
           description: "500 response"
@@ -489,32 +549,33 @@ paths:
           headers:
             404:
               type: "string"
-        405:
-          description: "405 response"
-          headers:
-            405:
-              type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
-        httpMethod: "POST"
         requestTemplates:
           application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
             \ : \"fetch\",\n  \"email\" : \"$input.params('email')\"\n}\n"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
         responses:
+          \[404\].*:
+            statusCode: "404"
           default:
             statusCode: "200"
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
-              application/json: "#set($inputRoot = $input.path('$.body'))\n{\n   \
-                \ \"email\" : \"$inputRoot.email\",\n    \"first_name\" : \"$inputRoot.first_name\"\
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n    \"email\"\
+                \ : \"$inputRoot.email\",\n    \"first_name\" : \"$inputRoot.first_name\"\
                 ,\n    \"last_name\" : \"$inputRoot.last_name\",\n    \"phone_number\"\
                 \ : \"$inputRoot.phone_number\",\n    \"address\" : {\n        \"\
                 href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.address\"\
                 \n    },\n    \"self\" : {\n        \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/customers/$inputRoot.email\"\
                 \n    }\n}"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
         passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
         type: "aws"
     put:
       consumes:
@@ -539,10 +600,23 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
-        httpMethod: "POST"
         requestTemplates:
           application/json: "#set($inputRoot = $input.path('$'))\n#set($inputAddress\
             \ = $input.path('$.address'))\n{\n  \"operation\" : \"update\",\n  \"\
@@ -553,20 +627,28 @@ paths:
             $inputAddress.state\",\n      \"apt\" : \"$inputAddress.apt\",\n     \
             \ \"street\" : \"$inputAddress.street\",\n      \"number\" : \"$inputAddress.number\"\
             ,\n      \"zip_code\" : \"$inputAddress.zip_code\"\n    }\n  }\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
         responses:
+          \[404\].*:
+            statusCode: "404"
           default:
             statusCode: "200"
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
-              application/json: "#set($inputRoot = $input.path('$.body'))\n{\n   \
-                \ \"email\" : \"$inputRoot.email\",\n    \"first_name\" : \"$inputRoot.first_name\"\
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n    \"email\"\
+                \ : \"$inputRoot.email\",\n    \"first_name\" : \"$inputRoot.first_name\"\
                 ,\n    \"last_name\" : \"$inputRoot.last_name\",\n    \"phone_number\"\
                 \ : \"$inputRoot.phone_number\",\n    \"address\" : {\n        \"\
                 href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.address\"\
                 \n    },\n    \"self\" : {\n        \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/customers/$inputRoot.email\"\
                 \n    }\n}"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
         passthroughBehavior: "when_no_templates"
+        httpMethod: "POST"
         type: "aws"
     delete:
       consumes:
@@ -586,26 +668,47 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
-        httpMethod: "POST"
         requestTemplates:
           application/json: "{\n  \"operation\" : \"delete\",\n  \"customer\" : {\n\
             \    \"email\" : \"$input.params().get('path').get('email')\"\n  }\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
         responses:
+          \[404\].*:
+            statusCode: "404"
           default:
             statusCode: "200"
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
-              application/json: "#set($inputRoot = $input.path('$.body'))\n{\n   \
-                \ \"email\" : \"$inputRoot.email\",\n    \"first_name\" : \"$inputRoot.first_name\"\
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n    \"email\"\
+                \ : \"$inputRoot.email\",\n    \"first_name\" : \"$inputRoot.first_name\"\
                 ,\n    \"last_name\" : \"$inputRoot.last_name\",\n    \"phone_number\"\
                 \ : \"$inputRoot.phone_number\",\n    \"address\" : {\n        \"\
                 href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.address\"\
                 \n    }\n}"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
         passthroughBehavior: "when_no_templates"
+        httpMethod: "POST"
         type: "aws"
     options:
       consumes:
@@ -661,27 +764,48 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
-        httpMethod: "POST"
         requestTemplates:
           application/json: "{\n    \"operation\" : \"fetch\",\n    \"email\": \"\
             $input.params('email')\" \n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
         responses:
+          \[404\].*:
+            statusCode: "404"
           default:
             statusCode: "200"
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
-              application/json: "#set($inputRoot = $input.path('$.body'))\n{\n  \"\
-                id\" : \"$inputRoot.id\",\n  \"city\" : \"$inputRoot.city\",\n  \"\
-                state\" : \"$inputRoot.state\",\n  \"apt\" : \"$inputRoot.apt\",\n\
-                \  \"number\" : \"$inputRoot.number\",\n  \"street\" : \"$inputRoot.street\"\
-                ,\n  \"zip_code\" : \"$inputRoot.zip_code\",\n  \"self\" : {\n   \
-                \ \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.id\"\
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"id\"\
+                \ : \"$inputRoot.id\",\n  \"city\" : \"$inputRoot.city\",\n  \"state\"\
+                \ : \"$inputRoot.state\",\n  \"apt\" : \"$inputRoot.apt\",\n  \"number\"\
+                \ : \"$inputRoot.number\",\n  \"street\" : \"$inputRoot.street\",\n\
+                \  \"zip_code\" : \"$inputRoot.zip_code\",\n  \"self\" : {\n    \"\
+                href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.id\"\
                 \n  }\n}"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
         passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
         type: "aws"
     options:
       consumes:
