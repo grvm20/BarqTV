@@ -27,34 +27,36 @@ module.exports = {
       console.error("Checking value of err: " + err)
       var statusCode = '200';
       var body = body;
+      var errorMessage = '';
       if (err) {
         switch (err.constructor) {
           case InvalidInputException:
             statusCode = '400';
+            errorMessage = "Invalid Input"
             break;
           case ObjectNotFoundException:
             statusCode = '404';
-            body = 'Element for the provided id doesnot exist in the system';
+            errorMessage = 'Element for the provided id does not exist in the system';
             break;
           case MethodNotAllowedException:
             statusCode = '405';
-            body = 'Method is not allowed';
+            errorMessage = 'Method is not allowed';
             break;
           case DataObjectErrorException:
             statusCode = '500';
-            body = 'Internal System Failure';
+            errorMessage = 'Internal System Failure';
             break;
           case ObjectExistsException:
             statusCode = '405';
-            body = 'This id already exists';
+            errorMessage = 'This id already exists';
             break;
           case AddressInvalidException:
             statusCode = '400';
-            body = 'Address provided is Invalid';
+            errorMessage = 'Address provided is Invalid';
             break;
           case AddressNotSpecificException:
             statusCode = '400';
-            body = 'Address is not specific enough';
+            errorMessage = 'Address is not specific enough';
             break;
           default:
             statusCode = '500';
@@ -62,11 +64,13 @@ module.exports = {
 
         body = err.message;
         console.error(err);
+        callback(err);
       }
 
       callback(null, {
         statusCode: statusCode,
         body: body,
+        errorMessage: errorMessage,
         headers: {
           'Content-Type': 'application/json',
         }
