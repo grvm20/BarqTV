@@ -24,6 +24,7 @@ const AddressNotSpecificException = require('./app/exceptions/address-not-specif
 module.exports = {
   sendHttpResponse: function(callback) {
     return (err, body) => {
+      console.error("Checking value of err: " + err)
       var body = body;
       var errorMessage = '';
       if (err) {
