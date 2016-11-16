@@ -27,15 +27,21 @@ paths:
           headers:
             400:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         500:
           description: "500 response"
           headers:
             500:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         404:
           description: "404 response"
           headers:
             404:
+              type: "string"
+            Access-Control-Allow-Origin:
               type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
@@ -61,8 +67,12 @@ paths:
                 \n        }\n    }#if($foreach.hasNext),#end\n\n#end\n]"
           \[500\].*:
             statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
           \[400\].*:
             statusCode: "400"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         httpMethod: "POST"
         type: "aws"
@@ -90,10 +100,14 @@ paths:
           headers:
             400:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         500:
           description: "500 response"
           headers:
             500:
+              type: "string"
+            Access-Control-Allow-Origin:
               type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
@@ -119,8 +133,12 @@ paths:
                 \n  }\n}"
           \[500\].*:
             statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
           \[400\].*:
             statusCode: "400"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_templates"
         httpMethod: "POST"
         type: "aws"
@@ -178,15 +196,21 @@ paths:
           headers:
             400:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         500:
           description: "500 response"
           headers:
             500:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         404:
           description: "404 response"
           headers:
             404:
+              type: "string"
+            Access-Control-Allow-Origin:
               type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
@@ -197,6 +221,8 @@ paths:
         responses:
           \[404\].*:
             statusCode: "404"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
           default:
             statusCode: "200"
             responseParameters:
@@ -211,8 +237,12 @@ paths:
                 \n  }\n}"
           \[500\].*:
             statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
           \[400\].*:
             statusCode: "400"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         httpMethod: "POST"
         type: "aws"
@@ -244,10 +274,14 @@ paths:
           headers:
             400:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         500:
           description: "500 response"
           headers:
             500:
+              type: "string"
+            Access-Control-Allow-Origin:
               type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
@@ -274,8 +308,12 @@ paths:
                 \n  }\n}"
           \[500\].*:
             statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
           \[400\].*:
             statusCode: "400"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         httpMethod: "POST"
         type: "aws"
@@ -302,15 +340,21 @@ paths:
           headers:
             400:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         500:
           description: "500 response"
           headers:
             500:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         404:
           description: "404 response"
           headers:
             404:
+              type: "string"
+            Access-Control-Allow-Origin:
               type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
@@ -333,8 +377,12 @@ paths:
                 \  \"zip_code\" : \"$inputRoot.zip_code\"\n}"
           \[500\].*:
             statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
           \[400\].*:
             statusCode: "400"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         httpMethod: "POST"
         type: "aws"
@@ -392,6 +440,8 @@ paths:
           headers:
             500:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
         requestTemplates:
@@ -413,6 +463,8 @@ paths:
                 \n        }\n    }#if($foreach.hasNext),#end\n\n#end\n]"
           \[500\].*:
             statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_templates"
         httpMethod: "POST"
         type: "aws"
@@ -440,15 +492,21 @@ paths:
           headers:
             400:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         500:
           description: "500 response"
           headers:
             500:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         409:
           description: "409 response"
           headers:
             404:
+              type: "string"
+            Access-Control-Allow-Origin:
               type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
@@ -478,10 +536,16 @@ paths:
                 \n    }\n}"
           \[409\].*:
             statusCode: "409"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
           \[500\].*:
             statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
           \[400\].*:
             statusCode: "400"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_templates"
         httpMethod: "POST"
         type: "aws"
@@ -539,15 +603,21 @@ paths:
           headers:
             400:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         500:
           description: "500 response"
           headers:
             500:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         404:
           description: "404 response"
           headers:
             404:
+              type: "string"
+            Access-Control-Allow-Origin:
               type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
@@ -572,8 +642,12 @@ paths:
                 \n    }\n}"
           \[500\].*:
             statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
           \[400\].*:
             statusCode: "400"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         httpMethod: "POST"
         type: "aws"
@@ -605,15 +679,21 @@ paths:
           headers:
             400:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         500:
           description: "500 response"
           headers:
             500:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         404:
           description: "404 response"
           headers:
             404:
+              type: "string"
+            Access-Control-Allow-Origin:
               type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
@@ -645,8 +725,12 @@ paths:
                 \n    }\n}"
           \[500\].*:
             statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
           \[400\].*:
             statusCode: "400"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_templates"
         httpMethod: "POST"
         type: "aws"
@@ -673,15 +757,21 @@ paths:
           headers:
             400:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         500:
           description: "500 response"
           headers:
             500:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         404:
           description: "404 response"
           headers:
             404:
+              type: "string"
+            Access-Control-Allow-Origin:
               type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
@@ -705,8 +795,12 @@ paths:
                 \n    }\n}"
           \[500\].*:
             statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
           \[400\].*:
             statusCode: "400"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_templates"
         httpMethod: "POST"
         type: "aws"
@@ -769,15 +863,21 @@ paths:
           headers:
             400:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         500:
           description: "500 response"
           headers:
             500:
               type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
         404:
           description: "404 response"
           headers:
             404:
+              type: "string"
+            Access-Control-Allow-Origin:
               type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
@@ -802,8 +902,12 @@ paths:
                 \n  }\n}"
           \[500\].*:
             statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
           \[400\].*:
             statusCode: "400"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         httpMethod: "POST"
         type: "aws"
