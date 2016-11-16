@@ -25,7 +25,6 @@ module.exports = {
   sendHttpResponse: function(callback) {
     return (err, body) => {
       console.error("Checking value of err: " + err)
-      var statusCode = '200';
       var body = body;
       var errorMessage = '';
       if (err) {
@@ -55,18 +54,10 @@ module.exports = {
             errorMessage = "Internal Server Error!"
         }
 
-        body = err.message;
         callback(errorMessage);
       }
 
-      callback(null, {
-        statusCode: statusCode,
-        body: body,
-        errorMessage: errorMessage,
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
+      callback(null, body);
     };
   }
 };
