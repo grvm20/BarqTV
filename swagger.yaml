@@ -1,9 +1,9 @@
 ---
 swagger: "2.0"
 info:
-  version: "1.0.0"
-  title: "coms6998-test-beta"
-host: "iwa2t350f7.execute-api.us-west-2.amazonaws.com"
+  version: "1.0"
+  title: "coms6998"
+host: "j3z4xwt1ch.execute-api.us-west-2.amazonaws.com"
 basePath: "/prod"
 schemes:
 - "https"
@@ -44,10 +44,11 @@ paths:
               type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
+        httpMethod: "POST"
         requestTemplates:
           application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
             \ : \"fetch\"\n}"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
         responses:
           default:
             statusCode: "200"
@@ -60,18 +61,17 @@ paths:
                 ,\n        \"apt\" : \"$address.apt\",\n        \"number\" : \"$address.number\"\
                 ,\n        \"street\" : \"$address.street\",\n        \"zip_code\"\
                 \ : \"$address.zip_code\",\n        \"self\" : {\n            \"href\"\
-                \ : \"https://iwa2t350f7.execute-api.us-west-2.amazonaws.com/prod/addresses/$customer.email\"\
+                \ : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$customer.email\"\
                 \n        }\n    }#if($foreach.hasNext),#end\n\n#end\n]"
-          object not found*:
-            statusCode: "404"
-          data object error*:
-            statusCode: "500"
-          input invalid exception*:
+          .*Invalid.*:
             statusCode: "400"
+          .*found.*:
+            statusCode: "404"
+          .*object.*:
+            statusCode: "500"
           method not allowed*:
             statusCode: "405"
         passthroughBehavior: "when_no_match"
-        httpMethod: "POST"
         type: "aws"
     post:
       consumes:
@@ -79,8 +79,8 @@ paths:
       produces:
       - "application/json"
       parameters:
-      - name: "AddressPostRequest"
-        in: "body"
+      - in: "body"
+        name: "AddressPostRequest"
         required: true
         schema:
           $ref: "#/definitions/AddressPostRequest"
@@ -94,6 +94,9 @@ paths:
               type: "string"
         400:
           description: "400 response"
+          headers:
+            400:
+              type: "string"
         500:
           description: "500 response"
         404:
@@ -102,13 +105,14 @@ paths:
           description: "405 response"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
+        httpMethod: "POST"
         requestTemplates:
           application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
             \ : \"create\",\n  \"address\" : {\n    \"city\" : \"$inputRoot.city\"\
             ,\n    \"state\" : \"$inputRoot.state\",\n    \"apt\" : \"$inputRoot.apt\"\
             ,\n    \"street\" : \"$inputRoot.street\",\n    \"number\" : \"$inputRoot.number\"\
             ,\n    \"zip_code\" : \"$inputRoot.zip_code\"\n    }\n}"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
         responses:
           default:
             statusCode: "200"
@@ -120,18 +124,17 @@ paths:
                 state\" : \"$inputRoot.state\",\n  \"apt\" : \"$inputRoot.apt\",\n\
                 \  \"number\" : \"$inputRoot.number\",\n  \"street\" : \"$inputRoot.street\"\
                 ,\n  \"zip_code\" : \"$inputRoot.zip_code\",\n  \"self\" : {\n   \
-                \ \"href\" : \"https://iwa2t350f7.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.id\"\
+                \ \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.id\"\
                 \n  }\n}"
-          object not found*:
-            statusCode: "404"
-          invalid input exception*:
+          .*Invalid.*:
             statusCode: "400"
+          .*found.*:
+            statusCode: "404"
           data object error*:
             statusCode: "500"
           method not allowed*:
             statusCode: "405"
         passthroughBehavior: "when_no_templates"
-        httpMethod: "POST"
         type: "aws"
     options:
       consumes:
@@ -159,8 +162,7 @@ paths:
             statusCode: "200"
             responseParameters:
               method.response.header.Access-Control-Allow-Methods: "'POST,GET,OPTIONS'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Origin,\
-                \ X-Requested-With,Accept,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         type: "mock"
@@ -185,10 +187,11 @@ paths:
               type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
+        httpMethod: "POST"
         requestTemplates:
           application/json: "{\n    \"operation\" : \"fetch\",\n    \"id\": \"$input.params('id')\"\
             \ \n}"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
         responses:
           default:
             statusCode: "200"
@@ -200,10 +203,9 @@ paths:
                 state\" : \"$inputRoot.state\",\n  \"apt\" : \"$inputRoot.apt\",\n\
                 \  \"number\" : \"$inputRoot.number\",\n  \"street\" : \"$inputRoot.street\"\
                 ,\n  \"zip_code\" : \"$inputRoot.zip_code\",\n  \"self\" : {\n   \
-                \ \"href\" : \"https://iwa2t350f7.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.id\"\
+                \ \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.id\"\
                 \n  }\n}"
         passthroughBehavior: "when_no_match"
-        httpMethod: "POST"
         type: "aws"
     put:
       consumes:
@@ -215,8 +217,8 @@ paths:
         in: "path"
         required: true
         type: "string"
-      - name: "AddressPutRequest"
-        in: "body"
+      - in: "body"
+        name: "AddressPutRequest"
         required: true
         schema:
           $ref: "#/definitions/AddressPutRequest"
@@ -230,6 +232,8 @@ paths:
               type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
+        httpMethod: "POST"
         requestTemplates:
           application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
             \ : \"update\",\n  \"id\" : \"$input.params('id')\",\n  \"address\" :\
@@ -237,7 +241,6 @@ paths:
             ,\n    \"apt\" : \"$inputRoot.apt\",\n    \"number\" : \"$inputRoot.number\"\
             ,\n    \"street\" : \"$inputRoot.street\",\n    \"zip_code\" : \"$inputRoot.zip_code\"\
             \n  }\n}"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
         responses:
           default:
             statusCode: "200"
@@ -249,10 +252,9 @@ paths:
                 state\" : \"$inputRoot.state\",\n  \"apt\" : \"$inputRoot.apt\",\n\
                 \  \"number\" : \"$inputRoot.number\",\n  \"street\" : \"$inputRoot.street\"\
                 ,\n  \"zip_code\" : \"$inputRoot.zip_code\",\n  \"self\" : {\n   \
-                \ \"href\" : \"https://iwa2t350f7.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.id\"\
+                \ \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.id\"\
                 \n  }\n}"
         passthroughBehavior: "when_no_match"
-        httpMethod: "POST"
         type: "aws"
     delete:
       consumes:
@@ -282,10 +284,11 @@ paths:
           description: "405 response"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
+        httpMethod: "POST"
         requestTemplates:
           application/json: "{\n    \"operation\" : \"delete\",\n    \"id\": \"$input.params('id')\"\
             \ \n}"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
         responses:
           default:
             statusCode: "200"
@@ -297,10 +300,9 @@ paths:
                 state\" : \"$inputRoot.state\",\n  \"apt\" : \"$inputRoot.apt\",\n\
                 \  \"number\" : \"$inputRoot.number\",\n  \"street\" : \"$inputRoot.street\"\
                 ,\n  \"zip_code\" : \"$inputRoot.zip_code\"\n}"
-          object not found*:
+          .*found.*:
             statusCode: "404"
         passthroughBehavior: "when_no_match"
-        httpMethod: "POST"
         type: "aws"
     options:
       consumes:
@@ -332,9 +334,8 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'POST,GET,OPTIONS'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Origin,\
-                \ X-Requested-With,Accept,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,OPTIONS,PUT'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         type: "mock"
@@ -354,10 +355,11 @@ paths:
               type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
+        httpMethod: "POST"
         requestTemplates:
           application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
             \ : \"fetch\"\n}"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
         responses:
           default:
             statusCode: "200"
@@ -368,11 +370,10 @@ paths:
                 \ in $inputRoot)\n    {\n        \"email\" : \"$customer.email\",\n\
                 \        \"first_name\" : \"$customer.first_name\",\n        \"last_name\"\
                 \ : \"$customer.last_name\",\n        \"phone_number\" : \"$customer.phone_number\"\
-                ,\n        \"address\" : {\n            \"href\" : \"https://iwa2t350f7.execute-api.us-west-2.amazonaws.com/prod/addresses/$customer.address\"\
-                \n        },\n        \"self\" : {\n            \"href\" : \"https://iwa2t350f7.execute-api.us-west-2.amazonaws.com/prod/customers/$customer.email\"\
+                ,\n        \"address\" : {\n            \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$customer.address\"\
+                \n        },\n        \"self\" : {\n            \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/customers/$customer.email\"\
                 \n        }\n    }#if($foreach.hasNext),#end\n\n#end\n]"
         passthroughBehavior: "when_no_templates"
-        httpMethod: "POST"
         type: "aws"
     post:
       consumes:
@@ -380,8 +381,8 @@ paths:
       produces:
       - "application/json"
       parameters:
-      - name: "CustomerPostRequest"
-        in: "body"
+      - in: "body"
+        name: "CustomerPostRequest"
         required: true
         schema:
           $ref: "#/definitions/CustomerPostRequest"
@@ -397,6 +398,8 @@ paths:
           description: "400 response"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
+        httpMethod: "POST"
         requestTemplates:
           application/json: "#set($inputRoot = $input.path('$'))\n#set($inputAddress\
             \ = $input.path('$.address'))\n{\n  \"operation\" : \"create\",\n  \"\
@@ -407,7 +410,6 @@ paths:
             $inputAddress.state\",\n      \"apt\" : \"$inputAddress.apt\",\n     \
             \ \"street\" : \"$inputAddress.street\",\n      \"number\" : \"$inputAddress.number\"\
             ,\n      \"zip_code\" : \"$inputAddress.zip_code\"\n    }\n  }\n}"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
         responses:
           default:
             statusCode: "200"
@@ -418,11 +420,10 @@ paths:
                 \ \"email\" : \"$inputRoot.email\",\n    \"first_name\" : \"$inputRoot.first_name\"\
                 ,\n    \"last_name\" : \"$inputRoot.last_name\",\n    \"phone_number\"\
                 \ : \"$inputRoot.phone_number\",\n    \"address\" : {\n        \"\
-                href\" : \"https://iwa2t350f7.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.address\"\
-                \n    },\n    \"self\" : {\n        \"href\" : \"https://iwa2t350f7.execute-api.us-west-2.amazonaws.com/prod/customers/$inputRoot.email\"\
+                href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.address\"\
+                \n    },\n    \"self\" : {\n        \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/customers/$inputRoot.email\"\
                 \n    }\n}"
         passthroughBehavior: "when_no_templates"
-        httpMethod: "POST"
         type: "aws"
     options:
       consumes:
@@ -470,25 +471,50 @@ paths:
           description: "200 response"
           schema:
             $ref: "#/definitions/CustomerDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
+        405:
+          description: "405 response"
+          headers:
+            405:
+              type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
+        httpMethod: "POST"
         requestTemplates:
           application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
             \ : \"fetch\",\n  \"email\" : \"$input.params('email')\"\n}\n"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
         responses:
           default:
             statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
               application/json: "#set($inputRoot = $input.path('$.body'))\n{\n   \
                 \ \"email\" : \"$inputRoot.email\",\n    \"first_name\" : \"$inputRoot.first_name\"\
                 ,\n    \"last_name\" : \"$inputRoot.last_name\",\n    \"phone_number\"\
                 \ : \"$inputRoot.phone_number\",\n    \"address\" : {\n        \"\
-                href\" : \"https://iwa2t350f7.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.address\"\
-                \n    },\n    \"self\" : {\n        \"href\" : \"https://iwa2t350f7.execute-api.us-west-2.amazonaws.com/prod/customers/$inputRoot.email\"\
+                href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.address\"\
+                \n    },\n    \"self\" : {\n        \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/customers/$inputRoot.email\"\
                 \n    }\n}"
         passthroughBehavior: "when_no_match"
-        httpMethod: "POST"
         type: "aws"
     put:
       consumes:
@@ -500,8 +526,8 @@ paths:
         in: "path"
         required: true
         type: "string"
-      - name: "CustomerPutRequest"
-        in: "body"
+      - in: "body"
+        name: "CustomerPutRequest"
         required: true
         schema:
           $ref: "#/definitions/CustomerPutRequest"
@@ -510,8 +536,13 @@ paths:
           description: "200 response"
           schema:
             $ref: "#/definitions/CustomerDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
+        httpMethod: "POST"
         requestTemplates:
           application/json: "#set($inputRoot = $input.path('$'))\n#set($inputAddress\
             \ = $input.path('$.address'))\n{\n  \"operation\" : \"update\",\n  \"\
@@ -522,20 +553,20 @@ paths:
             $inputAddress.state\",\n      \"apt\" : \"$inputAddress.apt\",\n     \
             \ \"street\" : \"$inputAddress.street\",\n      \"number\" : \"$inputAddress.number\"\
             ,\n      \"zip_code\" : \"$inputAddress.zip_code\"\n    }\n  }\n}"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
         responses:
           default:
             statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
               application/json: "#set($inputRoot = $input.path('$.body'))\n{\n   \
                 \ \"email\" : \"$inputRoot.email\",\n    \"first_name\" : \"$inputRoot.first_name\"\
                 ,\n    \"last_name\" : \"$inputRoot.last_name\",\n    \"phone_number\"\
                 \ : \"$inputRoot.phone_number\",\n    \"address\" : {\n        \"\
-                href\" : \"https://iwa2t350f7.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.address\"\
-                \n    },\n    \"self\" : {\n        \"href\" : \"https://iwa2t350f7.execute-api.us-west-2.amazonaws.com/prod/customers/$inputRoot.email\"\
+                href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.address\"\
+                \n    },\n    \"self\" : {\n        \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/customers/$inputRoot.email\"\
                 \n    }\n}"
         passthroughBehavior: "when_no_templates"
-        httpMethod: "POST"
         type: "aws"
     delete:
       consumes:
@@ -552,24 +583,29 @@ paths:
           description: "200 response"
           schema:
             $ref: "#/definitions/CustomerDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
+        httpMethod: "POST"
         requestTemplates:
           application/json: "{\n  \"operation\" : \"delete\",\n  \"customer\" : {\n\
             \    \"email\" : \"$input.params().get('path').get('email')\"\n  }\n}"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:customersController/invocations"
         responses:
           default:
             statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
               application/json: "#set($inputRoot = $input.path('$.body'))\n{\n   \
                 \ \"email\" : \"$inputRoot.email\",\n    \"first_name\" : \"$inputRoot.first_name\"\
                 ,\n    \"last_name\" : \"$inputRoot.last_name\",\n    \"phone_number\"\
                 \ : \"$inputRoot.phone_number\",\n    \"address\" : {\n        \"\
-                href\" : \"https://iwa2t350f7.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.address\"\
+                href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.address\"\
                 \n    }\n}"
         passthroughBehavior: "when_no_templates"
-        httpMethod: "POST"
         type: "aws"
     options:
       consumes:
@@ -601,9 +637,8 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'POST,GET,OPTIONS'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Origin,\
-                \ X-Requested-With,Accept,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,OPTIONS,PUT'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         type: "mock"
@@ -628,10 +663,11 @@ paths:
               type: "string"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
-        requestTemplates:
-          application/json: "{\n    \"operation\" : \"fetch\",\n    \"email\": \"$input.params('email')\"\
-            \ \n}"
         uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:addressController/invocations"
+        httpMethod: "POST"
+        requestTemplates:
+          application/json: "{\n    \"operation\" : \"fetch\",\n    \"email\": \"\
+            $input.params('email')\" \n}"
         responses:
           default:
             statusCode: "200"
@@ -643,10 +679,9 @@ paths:
                 state\" : \"$inputRoot.state\",\n  \"apt\" : \"$inputRoot.apt\",\n\
                 \  \"number\" : \"$inputRoot.number\",\n  \"street\" : \"$inputRoot.street\"\
                 ,\n  \"zip_code\" : \"$inputRoot.zip_code\",\n  \"self\" : {\n   \
-                \ \"href\" : \"https://iwa2t350f7.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.id\"\
+                \ \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/addresses/$inputRoot.id\"\
                 \n  }\n}"
         passthroughBehavior: "when_no_match"
-        httpMethod: "POST"
         type: "aws"
     options:
       consumes:
@@ -678,13 +713,11 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'POST,GET,OPTIONS'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Origin,\
-                \ X-Requested-With,Accept,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         type: "mock"
-
 definitions:
   Empty:
     title: "Empty Schema"
@@ -881,5 +914,3 @@ definitions:
         $ref: "#/definitions/CustomerLastName"
       phone_number:
         $ref: "#/definitions/CustomerPhoneNumber"
-  
-
