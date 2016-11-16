@@ -11,7 +11,7 @@ const ObjectNotFoundException = require("../exceptions/object-not-found-exceptio
  * TODO: Move these mapping functions to a data layer. The service shouldn't 
  * know about them.
  */
-function mapDbObjectToCustomerAttributes (dbObject) {
+function mapDbObjectToCustomerAttributes(dbObject) {
   return {
     id: dbObject.id,
     firstName: dbObject.first_name,
@@ -22,19 +22,19 @@ function mapDbObjectToCustomerAttributes (dbObject) {
   };
 }
 
-function createAddressKey (id) {
+function createAddressKey(id) {
   return {
     "id": id
   };
 }
 
-function createCustomerKey (id) {
+function createCustomerKey(id) {
   return {
     "id": id
   };
 }
 
-function mapCustomerToDbObject (customer) {
+function mapCustomerToDbObject(customer) {
   var result = {
     id: customer.id
   }
@@ -61,7 +61,7 @@ function mapCustomerToDbObject (customer) {
 }
 
 module.exports = class CustomerService {
-  constructor (dao, addressSao) {
+  constructor(dao, addressSao) {
     this.dao = dao;
     this.addressSao = addressSao;
   }
@@ -71,7 +71,7 @@ module.exports = class CustomerService {
    * @input - attributes used to build the Customer.
    * Throws InputValidationException.
    **/
-  create (input) {
+  create(input) {
     if (input instanceof Customer) {
       return input;
     } else {
@@ -85,7 +85,7 @@ module.exports = class CustomerService {
    * @callback - callback function with parameters (err, customer).
    * Throws InputValidationException.
    **/
-  save (customer, callback) {
+  save(customer, callback) {
     try {
       customer.validate();
     } catch (err) {
@@ -93,36 +93,26 @@ module.exports = class CustomerService {
     }
     console.log(sprintf("Proceeding to save Customer %s.",
       JSON.stringify(customer)));
-    this.isIdAvailable(customer.id, (err, idAvailable) => {
+    this.addressSao.create(customer.address, (err, address) => {
       if (err) {
         return callback(err);
-      } else if (!idAvailable) {
-        // Confirm if error needs to be thrown here or at DAO
-        callback({message: sprintf("Email address is already in use.",
-          customer.email)});
       } else {
-        this.addressSao.create(customer.address, (err, address) => {
-          if (err) {
-            return callback(err);
-          } else {
-            console.log("Creating address")
-            customer.address = address;
-            var customerDbObject = mapCustomerToDbObject(customer);
-            console.log(sprintf("Ready to persist: %s.",
-              JSON  .stringify(customerDbObject)));
+        console.log("Creating address")
+        customer.address = address;
+        var customerDbObject = mapCustomerToDbObject(customer);
+        console.log(sprintf("Ready to persist: %s.",
+          JSON.stringify(customerDbObject)));
 
-            this.dao.persist(createCustomerKey(customer.id), customerDbObject,
-              (err, item) => {
-                if (err) {
-                  console.log(sprintf("Error while trying to persist: %s.",
-                    JSON.stringify(customerDbObject)));
-                  return callback(err);
-                } else {
-                  callback(null, customer);
-                }
-              });
-          }
-        });
+        this.dao.persist(createCustomerKey(customer.id), customerDbObject,
+          (err, item) => {
+            if (err) {
+              console.log(sprintf("Error while trying to persist: %s.",
+                JSON.stringify(customerDbObject)));
+              return callback(err);
+            } else {
+              callback(null, customer);
+            }
+          });
       }
     });
   }
@@ -132,7 +122,7 @@ module.exports = class CustomerService {
    * @customer - a Customer object.
    * @callback - callback function with parameters (err, customer).
    **/
-  delete (customer, callback) {
+  delete(customer, callback) {
 
     /*try {
       customer.validate();
@@ -143,9 +133,9 @@ module.exports = class CustomerService {
     console.log(sprintf("Proceeding to delete Customer %s.", customer.id));
     this.dao.delete(createCustomerKey(customer.id), (err, customerDbObject) => {
 
-       if (err) {
-          return callback(err);
-        }
+      if (err) {
+        return callback(err);
+      }
 
       // TODO: refactor this part to be DRY, as it is shared.
       var customerAttributes = mapDbObjectToCustomerAttributes(customerDbObject);
@@ -154,7 +144,7 @@ module.exports = class CustomerService {
 
       try {
         var customer = this.create(customerAttributes);
-      } catch(err) {
+      } catch (err) {
         return callback(err);
       }
 
@@ -168,7 +158,7 @@ module.exports = class CustomerService {
    * @newCustomer - a Customer object.
    * @callback - callback function with parameters (err, completeCustomer).
    **/
-  update (newCustomer, callback) {
+  update(newCustomer, callback) {
     console.log(sprintf("Proceeding to update Customer %s.", newCustomer.id));
 
     var updateCustomer = (customerToUpdate, callback) => {
@@ -189,10 +179,10 @@ module.exports = class CustomerService {
 
           try {
             var newCompleteCustomer = this.create(customerAttributes);
-          } catch(err) {
+          } catch (err) {
             return callback(err);
           }
-          
+
           console.log("Successfully updated Customer with id: " +
             newCompleteCustomer.id);
           return callback(null, newCompleteCustomer);
@@ -223,7 +213,7 @@ module.exports = class CustomerService {
           updateCustomer(newCustomer, callback);
         }
       }
-    }); 
+    });
   }
 
   /**
@@ -232,19 +222,19 @@ module.exports = class CustomerService {
    * If nothing is provided then it returns all Customers.
    * @callback - callback function with parameters (err, customers).
    **/
-  fetch (id, callback) {
+  fetch(id, callback) {
     if (id) {
       // Fetch just one.
       try {
-        var customer = new Customer({id: id});  
+        var customer = new Customer({ id: id });
       } catch (err) {
         return callback(err);
       }
-      
-      var queryResult = this.dao.fetch({id: customer.id},
+
+      var queryResult = this.dao.fetch({ id: customer.id },
         (err, customerDbObject) => {
 
-          if(err){
+          if (err) {
             return callback(err);
           }
 
@@ -256,7 +246,7 @@ module.exports = class CustomerService {
 
             try {
               var customer = this.create(customerAttributes);
-            } catch(err) {
+            } catch (err) {
               return callback(err);
             }
 
@@ -264,15 +254,15 @@ module.exports = class CustomerService {
               customer.id);
             return callback(null, customer);
           }
-      });
+        });
 
     } else {
       // Fetch all.
       this.dao.fetch(null, (err, customerDbObjects) => {
 
         if (err) {
-            return callback(err);
-          }               
+          return callback(err);
+        }
 
         var customers = [];
 
@@ -281,7 +271,7 @@ module.exports = class CustomerService {
             customerDbObject);
           try {
             var customer = this.create(customerAttributes);
-          } catch(err) {
+          } catch (err) {
             return callback(err);
           }
           customers.push(customer);
@@ -296,8 +286,8 @@ module.exports = class CustomerService {
   /**
    * Alias for isIdAvailable();
    **/
-  isEmailAvailable (email, callback) {
-    isIdAvailable (email, callback);
+  isEmailAvailable(email, callback) {
+    isIdAvailable(email, callback);
   }
 
   /**
@@ -306,17 +296,17 @@ module.exports = class CustomerService {
    * @callback - callback function with parameters (err, isAvailable), where 
    * isAvailable is a boolean.
    **/
-  isIdAvailable (id, callback) {
-    this.fetch (id, (err, customer) => {
+  isIdAvailable(id, callback) {
+    this.fetch(id, (err, customer) => {
       if (err) {
-        if(err instanceof ObjectNotFoundException) {
+        if (err instanceof ObjectNotFoundException) {
           console.log("Object does not exist - hence we can create it !")
           callback(null, true);
-        } else{
+        } else {
           return callback(err);
         }
       } else {
-        callback(null, false);        
+        callback(null, false);
       }
     });
   }
