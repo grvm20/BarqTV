@@ -30,28 +30,28 @@ module.exports = {
       if (err) {
         switch (err.constructor) {
           case InvalidInputException:
-            errorMessage = "Invalid Input"
+            errorMessage = '[400] Invalid Input';
             break;
           case ObjectNotFoundException:
-             errorMessage = 'Element for the provided id does not exist in the system';
+            errorMessage = '[404] Element for the provided id does not exist in the system';
             break;
           case MethodNotAllowedException:
-            errorMessage = 'Method is not allowed';
+            errorMessage = '[405] Method is not allowed';
             break;
           case DataObjectErrorException:
-            errorMessage = 'Internal System Failure';
+            errorMessage = '[500] Internal System Failure';
             break;
           case ObjectExistsException:
-            errorMessage = 'This id already exists';
+            errorMessage = '[409] This id already exists';
             break;
           case AddressInvalidException:
-            errorMessage = 'Address provided is Invalid';
+            errorMessage = '[400] Address provided is invalid';
             break;
           case AddressNotSpecificException:
-            errorMessage = 'Address is not specific enough';
+            errorMessage = '[400] Address is not specific enough';
             break;
           default:
-            errorMessage = "Internal Server Error!"
+            errorMessage = '[500] Internal Server Error';
         }
 
         callback(errorMessage);
