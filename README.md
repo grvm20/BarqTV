@@ -9,3 +9,5 @@ Known members of this fabulous team are (in no particular order):
 - Jose Ruiz ([jr3660@columbia.edu](mailto:jr3660@columbia.edu))
 - Sarang Karpate ([sjk2218@columbia.edu](mailto:sjk2218@columbia.edu))
 - Xi Zhang ([zhang.xi@columbia.edu](mailto:zhang.xi@columbia.edu))
+
+Tiny URL: http://tinyurl.com/ju7o96s
