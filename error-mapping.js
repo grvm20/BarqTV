@@ -30,7 +30,7 @@ module.exports = {
       if (err) {
         switch (err.constructor) {
           case InvalidInputException:
-            errorMessage = '[400] Invalid Input';
+            errorMessage = '[400] ' + err.message;
             break;
           case ObjectNotFoundException:
             errorMessage = '[404] Element for the provided id does not exist in the system';
@@ -45,7 +45,7 @@ module.exports = {
             errorMessage = '[409] This id already exists';
             break;
           case AddressInvalidException:
-            errorMessage = '[400] Address provided is invalid';
+            errorMessage = '[400] No such address exist';
             break;
           case AddressNotSpecificException:
             errorMessage = '[400] Address is not specific enough';
