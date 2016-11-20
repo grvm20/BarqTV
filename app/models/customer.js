@@ -110,7 +110,7 @@ module.exports = class Customer {
   }
   get addressRef() {
     if (this.address) {
-      return this.address.id;
+      return this._address.id;
     } else {
       return this._addressRef;
     }

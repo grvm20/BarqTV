@@ -1,6 +1,6 @@
 const expect = require('chai').expect;
 const InvalidInputException = require("../app/exceptions/invalid-input-exception");
-var Address = require('../app/models/address');
+const Address = require('../app/models/address');
 
 describe('Address', () => {
   describe('#constructor', () => {

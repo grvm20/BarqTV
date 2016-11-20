@@ -71,6 +71,14 @@ class Utils {
     var doesNotContainInvalidChars = !/[\{\}\(\)_\$#"'@\|!\?\+\*%<>/]/.test(string);
     return isNotEmpty && doesNotContainDigits && doesNotContainInvalidChars;
   }
+
+  static isUuidString(string) {
+    return Utils.VALID_UUID_REGEX.test(string);
+  }
+
+  static isEmailString(string) {
+    return Utils.VALID_EMAIL_REGEX.test(string);
+  }
 }
 // Class constants.
 Utils.CONTAINS_DIGIT_REGEX = /.*[0-9].*/;
