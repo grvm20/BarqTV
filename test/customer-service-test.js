@@ -2,6 +2,7 @@ const expect = require('chai').expect;
 const Customer = require('../app/models/customer');
 const CustomerService = require('../app/services/customer-service');
 const ObjectNotFoundException = require("../app/exceptions/object-not-found-exception");
+const ObjectExistsException = require("../app/exceptions/object-exists-exception");
 
 describe('CustomerService', () => {
   describe('#save()', () => {
@@ -55,7 +56,8 @@ describe('CustomerService', () => {
         first_name: "Javier",
         last_name: "Lopez",
         phone_number: "3327658892",
-        address_ref: "6B8C1303-CC12-4DD0-96DA-D592FB17DD64"
+        address_ref: "6B8C1303-CC12-4DD0-96DA-D592FB17DD64",
+        deleted: false
       };
 
       var mockAddress = {
@@ -72,7 +74,23 @@ describe('CustomerService', () => {
 
       var mockDao = {
         fetch: function(key, callback) {
-          callback(null, dbCustomer);
+          if (key.id === dbCustomer.id) {
+            callback(null, dbCustomer);
+          } else if (key.id === mockAddress.id) {
+            callback(new ObjectNotFoundException());
+          } else {
+            callback(new Error("shouldn't get here"));
+          }
+        },
+        persist: function(key, item, callback) {
+          if (key.id === dbCustomer.id) {
+            var err =  "Item Already Exists";
+            callback(new ObjectExistsException(err));
+          } else if (key.id === mockAddress.id) {
+            callback(null, mockAddress);
+          } else {
+            callback(new Error("shouldn't get here"));
+          }
         }
       };
 
@@ -80,13 +98,16 @@ describe('CustomerService', () => {
         show: (params, callback) => {
           expect(params.id).to.equal(mockAddress.id);
           callback(null, mockAddress);
+        },
+        create: (params, callback) => {
+          callback(null, mockAddress);
         }
       };
 
       var customerService = new CustomerService(mockDao, mockAddressSao);
       customerService.save(customer, (err, customer) => {
-        console.log(err);
-        expect(err).to.exist;
+        console.error(err);
+        expect(err).to.be.an.instanceof(ObjectExistsException);
         done();
       });
     });
