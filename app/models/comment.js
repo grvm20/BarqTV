@@ -1,8 +1,8 @@
 'use strict';
 
-const _ = require('underscore');
-const InvalidInputException = require("../exceptions/invalid-input-exception");
-const Utils = require("../utilities/utils");
+const APP_PATH = '..';
+const InvalidInputException = require(`${APP_PATH}/exceptions/invalid-input-exception`);
+const Utils = require(`${APP_PATH}/utilities/utils`);
 
 const VALID_COMMENT_REQUIRED_ATTRIBUTES = [
   "id",
@@ -11,18 +11,6 @@ const VALID_COMMENT_REQUIRED_ATTRIBUTES = [
   "text",
   "deleted"
 ];
-
-const isValidId = (id) => {
-  return Utils.isUuidString(id);
-}
-
-const isValidCustomerRef = (customerRef) => {
-  return Utils.isEmailString(customerRef);
-};
-
-const isValidContentRef = (contentRef) => {
-  return Utils.isUuidString(contentRef);
-};
 
 module.exports = class Customer {
   constructor(attributes) {
@@ -35,10 +23,10 @@ module.exports = class Customer {
 
   set id(id) {
     if (id) {
-      if (isValidId(id)) {
+      if (this.constructor.isValidId(id)) {
         this._id = id;
       } else {
-        throw new InvalidInputException("id")
+        throw new InvalidInputException("id");
       }
     }
   }
@@ -97,4 +85,16 @@ module.exports = class Customer {
     }
     return true;
   }
-}
+
+  static isValidId(id) {
+    return Utils.isUuidString(id);
+  }
+};
+
+const isValidCustomerRef = (customerRef) => {
+  return Utils.isEmailString(customerRef);
+};
+
+const isValidContentRef = (contentRef) => {
+  return Utils.isUuidString(contentRef);
+};

@@ -37,4 +37,29 @@ describe('Comment', () => {
       expect(() => {new Comment(commentData)}).to.throw(InvalidInputException);
     });
   });
+
+  describe('#isValidId()', () => {
+    it('should return true when the given id is an UUID', () => {
+      expect(Comment.isValidId(
+        '5c28dd5d-0dc3-477d-a0b2-0eb7815361d6')).to.be.true;
+      expect(Comment.isValidId(
+        '5f49e638-d528-4177-a8ef-9dac7bb8bf81')).to.be.true;
+      expect(Comment.isValidId(
+        '72350dbe-0cc0-4fee-8e83-5889cf6a379a')).to.be.true;
+      expect(Comment.isValidId(
+        '5C28DD5D-0DC3-477D-A0B2-0EB7815361D6')).to.be.true;
+    });
+
+    it('should return false otherwise', () => {
+      expect(Comment.isValidId('5c28dd5d-0dc3-477d-a0b2-0eb7861d6')).to.be.false;
+      expect(Comment.isValidId(
+        '5f49e638-d528-4177-a8ef-9dag7bb8bf81')).to.be.false;
+      expect(Comment.isValidId('')).to.be.false;
+      expect(Comment.isValidId('just a string')).to.be.false;
+      expect(Comment.isValidId({
+        id: '500dd257-a523-4b27-843f-2af85997d08c'
+      })).to.be.false;
+      expect(Comment.isValidId({})).to.be.false;
+    });
+  });
 });
