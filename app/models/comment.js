@@ -14,7 +14,7 @@ const VALID_COMMENT_REQUIRED_ATTRIBUTES = [
 
 module.exports = class Customer {
   constructor(attributes) {
-    this.id = attributes.id || attributes.email;
+    this.id = attributes.id || Utils.generateUuid();
     this.customerRef = attributes.customerRef;
     this.contentRef = attributes.contentRef;
     this.text = attributes.text;
@@ -35,10 +35,12 @@ module.exports = class Customer {
   }
 
   set customerRef(customerRef) {
-    if (isValidCustomerRef(customerRef)) {
-      this._customerRef = customerRef;
-    } else {
-      throw new InvalidInputException("customer reference")
+    if (customerRef) {
+      if (isValidCustomerRef(customerRef)) {
+        this._customerRef = customerRef;
+      } else {
+        throw new InvalidInputException("customer reference")
+      }
     }
   }
   get customerRef() {
@@ -46,10 +48,12 @@ module.exports = class Customer {
   }
 
   set contentRef(contentRef) {
-    if (isValidContentRef(contentRef)) {
-      this._contentRef = contentRef;
-    } else {
-      throw new InvalidInputException("content reference")
+    if (contentRef) {
+      if (isValidContentRef(contentRef)) {
+        this._contentRef = contentRef;
+      } else {
+        throw new InvalidInputException("content reference")
+      }
     }
   }
   get contentRef() {
@@ -57,8 +61,12 @@ module.exports = class Customer {
   }
 
   set text(text) {
-    if (typeof text === 'string') {
-      this._text = text;
+    if (text) {
+      if (typeof text === 'string') {
+        this._text = text;
+      } else {
+        throw new InvalidInputException("text")
+      }
     }
   }
   get text() {

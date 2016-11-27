@@ -4,7 +4,7 @@ const Comment = require('../app/models/comment');
 
 describe('Comment', () => {
   describe('#constructor', () => {
-    it('should create a Comment object when input is valid', () => {
+    it('should create a Comment when input is complete and valid', () => {
       var comment = new Comment({
         id: "4e6f9a3a-cb8b-4a95-913c-98b5964abe10",
         customerRef: "test@mocha.com",
@@ -13,6 +13,16 @@ describe('Comment', () => {
         deleted: false
       });
       expect(comment).to.be.an.instanceof(Comment);
+    });
+
+    it('should create a Comment with a valid id when id is not provided', () => {
+      var comment = new Comment({
+        customerRef: "super-customer@myapp.com",
+        contentRef: "a7c6617d-3e69-43df-93ce-2cb656bf2aeb",
+        text: "This is yet another awesome comment for testing purposes :D",
+      });
+      expect(comment.id).to.exist;
+      expect(Comment.isValidId(comment.id)).to.be.true;
     });
 
     it('should fail when using an invalid Customer reference', () => {
@@ -32,6 +42,17 @@ describe('Comment', () => {
         customerRef: "test@mocha.com",
         contentRef: "yeah, my content is reference is here... somewhere...",
         text: "This is another awesome comment for testing purposes :D",
+        deleted: false
+      };
+      expect(() => {new Comment(commentData)}).to.throw(InvalidInputException);
+    });
+
+    it('should fail when a non-string text is given', () => {
+      var commentData = {
+        id: "4e6f9a3a-cb8b-4a95-913c-98b5964abe10",
+        customerRef: "test@mocha.com",
+        contentRef: "25f92fd4-ea7c-4bba-9b1b-3f8f2b6ebe56",
+        text: 42, // The answer to the universe? OMG!
         deleted: false
       };
       expect(() => {new Comment(commentData)}).to.throw(InvalidInputException);

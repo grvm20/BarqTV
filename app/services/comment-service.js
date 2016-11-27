@@ -11,6 +11,15 @@ module.exports = class CommentService {
     this._dao = dao;
   }
 
+  set dao(dao) {
+    if (dao) {
+      this._dao = dao;
+    }
+  }
+  get dao() {
+    return this._dao;
+  }
+
   fetch(id, queryParams, callback) {
     if (id) {
       var invalidId = !Comment.isValidId(id);
@@ -19,12 +28,12 @@ module.exports = class CommentService {
       }
 
       var commentKey = createCommentKey(id);
-      this._dao.fetch(commentKey, (err, commentDbObject) => {
+      this.dao.fetch(commentKey, (err, commentDbObject) => {
         if (err) return callback(err);
         var attributes = mapDbObjectToCommentAttributes(commentDbObject);
         createComment(attributes, (err, comment) => {
           if (err) return callback(err);
-          Logger.log("Successfully fetched Comment with id: %s", comment.id);
+          Logger.log(`Successfully fetched Comment with id: ${comment.id}`);
           return callback(null, comment);
         });
       });
@@ -33,7 +42,26 @@ module.exports = class CommentService {
     }
   }
 
-  save(comment, callback) {}
+  save(comment, callback) {
+    try {
+      comment.validate();
+    } catch (err) {
+      return callback(err);
+    }
+
+    var commentString = JSON.stringify(comment);
+    Logger.log(`Proceeding to save Comment ${commentString}.`);
+    var key = createCommentKey(comment.id);
+    var commentDbObject = mapCommentToDbObject(comment);
+    this.dao.persist(key, commentDbObject, (err, item) => {
+      if (err) {
+        var commentDbObjectString = JSON.stringify(commentDbObject)
+        Logger.log(`Error while trying to persist: ${commentDbObjectString}.`);
+        return callback(err);
+      }
+      callback(null, comment);
+    });
+  }
 
   delete(id, callback) {}
 
@@ -63,4 +91,27 @@ function mapDbObjectToCommentAttributes(dbObject) {
     text: dbObject.text,
     deleted: dbObject.deleted
   };
+}
+
+function mapCommentToDbObject(comment) {
+  var result = {
+    id: comment.id
+  }
+
+  // Using loose equality check (==) instead of strict (===) as explained in:
+  // http://stackoverflow.com/questions/2559318/how-to-check-for-an-undefined-or-null-variable-in-javascript
+  if (comment.customerRef != null) {
+    result.customer_ref = comment.customerRef;
+  }
+  if (comment.contentRef != null) {
+    result.content_ref = comment.contentRef;
+  }
+  if (comment.text != null) {
+    result.text = comment.text;
+  }
+  if (comment.deleted != null) {
+    result.deleted = comment.deleted;
+  }
+
+  return result;
 }

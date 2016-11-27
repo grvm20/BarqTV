@@ -108,4 +108,15 @@ describe('Utils', () => {
         "¢¢®œå∫ƒß#¢å∑")).to.be.false;
     });
   });
+
+  describe ('#generateUuid()', () => {
+    it('should return an UUID (RFC4122) string', () => {
+      expect(Utils.isUuidString(Utils.generateUuid())).to.be.true;
+      expect(Utils.isUuidString(Utils.generateUuid())).to.be.true;
+      expect(Utils.isUuidString(Utils.generateUuid())).to.be.true;
+      expect(Utils.isUuidString(Utils.generateUuid())).to.be.true;
+      expect(Utils.isUuidString(Utils.generateUuid())).to.be.true;
+      expect(Utils.isUuidString(Utils.generateUuid())).to.be.true;
+    });
+  });
 });
