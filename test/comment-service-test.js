@@ -102,6 +102,20 @@ describe('CommentService', () => {
           }
           callback(null, updatedCommentDbInfo)
         }
+      },
+      delete: (key, callback) => {
+        if (key.id == validCommentData.id) {
+          var commentDbInfo = {
+            id: validCommentData.id,
+            customer_ref: validCommentData.customerRef,
+            content_ref: validCommentData.contentRef,
+            text: validCommentData.text,
+            deleted: true
+          }
+          callback(null, commentDbInfo);
+        } else {
+          callback(new ObjectNotFoundException());
+        }
       }
     };
     commentService = new CommentService(mockDao);
@@ -167,9 +181,25 @@ describe('CommentService', () => {
   });
 
   describe('#delete()', () => {
-    it.skip('should return the deleted Comment with given id if it exists', (done) => {
+    it('should return the deleted Comment with given id if it exists', (done) => {
+      var id = validCommentData.id;
+      commentService.delete(id, (err, comment) => {
+        expect(err).to.not.exist;
+        expect(comment).to.be.an.instanceof(Comment);
+        expect(comment.id).to.equal(validCommentData.id);
+        expect(comment.customerRef).to.equal(validCommentData.customerRef);
+        expect(comment.contentRef).to.equal(validCommentData.contentRef);
+        expect(comment.text).to.equal(validCommentData.text);
+        done();
+      });
     });
-    it.skip('should return an exception if no Comment exists with the given id', (done) => {
+    it('should return an exception if no Comment exists with the given id', (done) => {
+      var id = validPartialComment.id;
+      commentService.delete(id, (err, comment) => {
+        expect(err).to.exist;
+        expect(err).to.be.an.instanceof(ObjectNotFoundException);
+        done();
+      });
     });
   });
 

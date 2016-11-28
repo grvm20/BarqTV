@@ -63,7 +63,19 @@ module.exports = class CommentService {
     });
   }
 
-  delete(id, callback) {}
+  delete(id, callback) {
+    Logger.log(`Proceeding to delete Comment ${id}.`);
+    var key = createCommentKey(id);
+    this.dao.delete(key, (err, commentDbObject) => {
+      if (err) return callback(err);
+      var attributes = mapDbObjectToCommentAttributes(commentDbObject);
+      createComment(attributes, (err, deletedComment) => {
+        if (err) return callback(err);
+        Logger.log(`Successfully deleted Comment with id: ${deletedComment.id}`);
+        return callback(null, deletedComment);
+      });
+    });
+  }
 
   update(id, comment, callback) {
     Logger.log(`Proceeding to update Comment ${id}.`);
