@@ -119,4 +119,28 @@ describe('Utils', () => {
       expect(Utils.isUuidString(Utils.generateUuid())).to.be.true;
     });
   });
+
+  describe ('#omit()', () => {
+    it('should return a copy of the object without the filtered key', () => {
+      var someObject = {
+        a: 0,
+        b: 1,
+        c: 2
+      }
+      expect(Utils.omit(someObject, 'a')['a']).to.not.exist;
+      expect(Utils.omit(someObject, 'a')['b']).to.equal(1);
+      expect(Utils.omit(someObject, 'a')['c']).to.equal(2);
+    });
+
+    it('should return a copy of the object without the filtered keys', () => {
+      var someObject = {
+        a: 0,
+        b: 1,
+        c: 2
+      }
+      expect(Utils.omit(someObject, ['a', 'c'])['a']).to.not.exist;
+      expect(Utils.omit(someObject, ['a', 'c'])['b']).to.equal(1);
+      expect(Utils.omit(someObject, ['a', 'c'])['c']).to.not.exist;
+    });
+  });
 });

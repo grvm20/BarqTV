@@ -90,6 +90,10 @@ class Utils {
 
     return id;
   }
+
+  static omit() {
+    return _.omit.apply(_, arguments);
+  }
 }
 // Class constants.
 Utils.CONTAINS_DIGIT_REGEX = /.*[0-9].*/;

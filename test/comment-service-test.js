@@ -16,9 +16,12 @@ describe('CommentService', () => {
   var validCommentPartialData;
   var invalidPartialCommentData;
   var validCommentData;
+  var validCommentDataToUpdate;
+  var validCommentDataUpdated;
   var validPartialComment;
   var invalidPartialComment;
   var validComment;
+  var validCommentToUpdate;
   var mockDao;
   var commentService;
 
@@ -40,6 +43,19 @@ describe('CommentService', () => {
       deleted: false
     }
 
+    validCommentDataToUpdate = {
+      id: "db93b284-4ae7-47b2-9ded-0e447a401ab9",
+      text: "Changed my mind, I now want this to be this way"
+    }
+
+    validCommentDataUpdated = {
+      id: "db93b284-4ae7-47b2-9ded-0e447a401ab9",
+      customerRef: "email@domain.com",
+      contentRef: "49feafac-494b-4da3-8e23-09ebc6e069b1",
+      text: "Changed my mind, I now want this to be this way",
+      deleted: false
+    }
+
     invalidPartialCommentData = {
       contentRef: "e80c316f-5f1f-4d2f-879e-11f286a1901b",
       text: "Winter is com... wait...",
@@ -48,6 +64,7 @@ describe('CommentService', () => {
     // This might fail if the definition of Comment changes.
     validPartialComment = new Comment(validCommentPartialData);
     validComment = new Comment(validCommentData);
+    validCommentToUpdate = new Comment(validCommentDataToUpdate);
     invalidPartialComment = new Comment(invalidPartialCommentData);
 
     mockDao = {
@@ -72,6 +89,19 @@ describe('CommentService', () => {
         expect(item.text).to.equal(validCommentPartialData.text);
         expect(item.deleted).to.be.false;
         callback(null, item);
+      },
+      update: (key, newItem, callback) => {
+        if (key.id == validCommentDataToUpdate.id) {
+          expect(newItem.text).to.equal(validCommentDataUpdated.text);
+          var updatedCommentDbInfo = {
+            id: validCommentDataUpdated.id,
+            customer_ref: validCommentDataUpdated.customerRef,
+            content_ref: validCommentDataUpdated.contentRef,
+            text: validCommentDataUpdated.text,
+            deleted: validCommentDataUpdated.deleted
+          }
+          callback(null, updatedCommentDbInfo)
+        }
       }
     };
     commentService = new CommentService(mockDao);
@@ -144,11 +174,24 @@ describe('CommentService', () => {
   });
 
   describe('#update()', () => {
-    it.skip('should return the updated Comment with given id if it exists and parameters are valid', (done) => {
+    it('should return the updated Comment with given id if it exists and parameters are valid', (done) => {
+      var id = validCommentToUpdate.id;
+      commentService.update(id, validCommentToUpdate, (err, comment) => {
+        expect(err).to.not.exist;
+        expect(comment).to.be.an.instanceof(Comment);
+        expect(comment.customerRef).to.equal(validComment.customerRef);
+        expect(comment.contentRef).to.equal(validComment.contentRef);
+        expect(comment.text).to.equal(validCommentToUpdate.text);
+        done();
+      });
     });
-    it.skip('should return an exception if invalid comment parameters are given', (done) => {
-    });
-    it.skip('should return an exception if no Comment exists with the given id', (done) => {
+    it('should return an exception if no Comment exists with the given id', (done) => {
+      var id = validPartialComment.id;
+      commentService.update(id, validPartialComment, (err, comment) => {
+        expect(err).to.exist;
+        expect(err).to.be.an.instanceof(ObjectNotFoundException);
+        done();
+      });
     });
   });
 });

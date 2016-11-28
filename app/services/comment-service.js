@@ -65,7 +65,29 @@ module.exports = class CommentService {
 
   delete(id, callback) {}
 
-  update(id, comment, callback) {} 
+  update(id, comment, callback) {
+    Logger.log(`Proceeding to update Comment ${id}.`);
+    this.fetch(id, null, (err, currentComment) => {
+      if (err) return callback(err);
+      var commentDbObject = mapCommentToDbObject(comment);
+      var key = createCommentKey(id);
+      var attributesToUpdate = Utils.omit(commentDbObject, 'id');
+      Logger.log(`Ready to update: ${JSON.stringify(commentDbObject)}`);
+      this.dao.update(key, attributesToUpdate, (err, commentDbObject) => {
+        if (err) {
+          Logger.log(`Error while trying to update: ` +
+            `${JSON.stringify(commentDbObject)}`);
+          return callback(err);
+        }
+        var attributes = mapDbObjectToCommentAttributes(commentDbObject);
+        createComment(attributes, (err, updatedComment) => {
+          if (err) return callback(err);
+          Logger.log(`Successfully updated Comment with id: ${updatedComment.id}`);
+          return callback(null, updatedComment);
+        });
+      });
+    })
+  }
 }
 
 function createComment(attributes, callback) {
