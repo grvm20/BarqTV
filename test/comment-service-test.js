@@ -101,6 +101,8 @@ describe('CommentService', () => {
             deleted: validCommentDataUpdated.deleted
           }
           callback(null, updatedCommentDbInfo)
+        } else {
+          callback(new ObjectNotFoundException());
         }
       },
       delete: (key, callback) => {
@@ -171,7 +173,7 @@ describe('CommentService', () => {
         done();
       });
     });
-    it('should return an exception if the given Comment is not complete', (done) => {
+    it('should return an InvalidInputException if the given Comment is not complete', (done) => {
       commentService.save(invalidPartialComment, (err, comment) => {
         expect(err).to.exist;
         expect(err).to.be.an.instanceof(InvalidInputException);
@@ -193,7 +195,7 @@ describe('CommentService', () => {
         done();
       });
     });
-    it('should return an exception if no Comment exists with the given id', (done) => {
+    it('should return an ObjectNotFoundException if no Comment exists with the given id', (done) => {
       var id = validPartialComment.id;
       commentService.delete(id, (err, comment) => {
         expect(err).to.exist;
@@ -215,7 +217,7 @@ describe('CommentService', () => {
         done();
       });
     });
-    it('should return an exception if no Comment exists with the given id', (done) => {
+    it('should return an ObjectNotFoundException if no Comment exists with the given id', (done) => {
       var id = validPartialComment.id;
       commentService.update(id, validPartialComment, (err, comment) => {
         expect(err).to.exist;

@@ -143,4 +143,23 @@ describe('Utils', () => {
       expect(Utils.omit(someObject, ['a', 'c'])['c']).to.not.exist;
     });
   });
+
+  describe ('#isArray()', () => {
+    it('should return a return true when the object is an array', () => {
+      expect(Utils.isArray([])).to.be.true;
+      expect(Utils.isArray([1,2,3,4])).to.be.true;
+      expect(Utils.isArray([null])).to.be.true;
+      expect(Utils.isArray([undefined])).to.be.true;
+      expect(Utils.isArray([1,,1])).to.be.true;
+      expect(Utils.isArray(["aasd",,"olda",""])).to.be.true;
+    });
+
+    it('should return false otherwise', () => {
+      expect(Utils.isArray("hi")).to.be.false;
+      expect(Utils.isArray({a: 1, b: 2})).to.be.false;
+      expect(Utils.isArray({})).to.be.false;
+      expect(Utils.isArray(15)).to.be.false;
+      expect(Utils.isArray(0.4)).to.be.false;
+    });
+  });
 });

@@ -94,6 +94,10 @@ class Utils {
   static omit() {
     return _.omit.apply(_, arguments);
   }
+
+  static isArray() {
+    return _.isArray.apply(_, arguments);
+  }
 }
 // Class constants.
 Utils.CONTAINS_DIGIT_REGEX = /.*[0-9].*/;

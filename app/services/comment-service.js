@@ -8,16 +8,7 @@ const InvalidInputException = require(`${APP_PATH}/exceptions/invalid-input-exce
 
 module.exports = class CommentService {
   constructor(dao) {
-    this._dao = dao;
-  }
-
-  set dao(dao) {
-    if (dao) {
-      this._dao = dao;
-    }
-  }
-  get dao() {
-    return this._dao;
+    this.dao = dao;
   }
 
   fetch(id, queryParams, callback) {
@@ -79,26 +70,21 @@ module.exports = class CommentService {
 
   update(id, comment, callback) {
     Logger.log(`Proceeding to update Comment ${id}.`);
-    this.fetch(id, null, (err, currentComment) => {
-      if (err) return callback(err);
-      var commentDbObject = mapCommentToDbObject(comment);
-      var key = createCommentKey(id);
-      var attributesToUpdate = Utils.omit(commentDbObject, 'id');
-      Logger.log(`Ready to update: ${JSON.stringify(commentDbObject)}`);
-      this.dao.update(key, attributesToUpdate, (err, commentDbObject) => {
-        if (err) {
-          Logger.log(`Error while trying to update: ` +
-            `${JSON.stringify(commentDbObject)}`);
-          return callback(err);
-        }
-        var attributes = mapDbObjectToCommentAttributes(commentDbObject);
-        createComment(attributes, (err, updatedComment) => {
-          if (err) return callback(err);
-          Logger.log(`Successfully updated Comment with id: ${updatedComment.id}`);
-          return callback(null, updatedComment);
-        });
+    var commentDbObject = mapCommentToDbObject(comment);
+    var key = createCommentKey(id);
+    var attributesToUpdate = Utils.omit(commentDbObject, 'id');
+    this.dao.update(key, attributesToUpdate, (err, commentDbObject) => {
+      if (err) {
+        Logger.log(`Error while trying to update: ${JSON.stringify(commentDbObject)}`);
+        return callback(err);
+      }
+      var attributes = mapDbObjectToCommentAttributes(commentDbObject);
+      createComment(attributes, (err, updatedComment) => {
+        if (err) return callback(err);
+        Logger.log(`Successfully updated Comment with id: ${updatedComment.id}`);
+        return callback(null, updatedComment);
       });
-    })
+    });
   }
 }
 
