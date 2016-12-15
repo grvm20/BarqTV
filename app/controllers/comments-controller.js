@@ -5,6 +5,8 @@ const Utils = require(`${APP_PATH}/utilities/utils`);
 const Logger = require(`${APP_PATH}/utilities/logger`);
 const Comment = require(`${APP_PATH}/models/comment`);
 
+const ALLOWED_QUERY_PARAMS = ['content_ref'];
+
 module.exports = class CommentsController {
   constructor(commentService, commentSerializer) {
     this.commentService = commentService;
@@ -15,10 +17,10 @@ module.exports = class CommentsController {
     Logger.log(`Params received in CommentsController#show(): `+
       `${JSON.stringify(params)}`);
     var id = params.id;
-    var queryParams = Utils.omit(params, id);
-    this.commentService.fetch(id, queryParams, (err, comment) => {
+    var queryParams = extractQueryParams(params);
+    this.commentService.fetch(id, queryParams, (err, comments) => {
       if (err) return callback(err);
-      this.commentSerializer.render(comment, callback);
+      this.commentSerializer.render(comments, callback);
     });
   }
 
@@ -58,6 +60,7 @@ module.exports = class CommentsController {
   }
 
   buildCommentFromParams(params, callback) {
+    if (params.comment) params = params.comment;
     var attributes = this.commentSerializer.deserialize(params);
     Logger.log(`Comment attributes received: ${JSON.stringify(attributes)}`);
 
@@ -68,4 +71,17 @@ module.exports = class CommentsController {
       return callback(err);
     }
   }
+}
+
+function extractQueryParams(params) {
+  if (params.comment) params = params.comment;
+  var queryParams = {}
+  for (let paramKey of Object.keys(params)) {
+    let allowedParam = ALLOWED_QUERY_PARAMS.indexOf(paramKey) !== -1;
+    let nonEmptyParam = !Utils.isEmpty(params[paramKey]);
+    if (allowedParam && nonEmptyParam) {
+      queryParams[paramKey] = params[paramKey];
+    }
+  }
+  return queryParams;
 }

@@ -12,25 +12,30 @@ module.exports = class CommentService {
   }
 
   fetch(id, queryParams, callback) {
+    var key = null;
+    var singleResult = false;
+    var hasQueryParams = !Utils.isEmpty(queryParams);
     if (id) {
       var invalidId = !Comment.isValidId(id);
       if (invalidId) {
         return callback(new InvalidInputException("id"));
       }
-
-      var commentKey = createCommentKey(id);
-      this.dao.fetch(commentKey, (err, commentDbObject) => {
-        if (err) return callback(err);
-        var attributes = mapDbObjectToCommentAttributes(commentDbObject);
-        createComment(attributes, (err, comment) => {
-          if (err) return callback(err);
-          Logger.log(`Successfully fetched Comment with id: ${comment.id}`);
-          return callback(null, comment);
-        });
-      });
-    } else {
-      return callback(new InvalidInputException("id"));
+      key = createCommentKey(id);
+      singleResult = true;
+    } else if (hasQueryParams) {
+      key = queryParams;
     }
+
+    this.dao.fetch(key, (err, dbResult) => {
+      if (err) return callback(err);
+      Logger.log(`Successfully fetched Comments: ${JSON.stringify(dbResult)}`);
+
+      if (singleResult) {
+        return createCommentFromDbObject(dbResult, callback);
+      } else {
+        return createCommentsFromDbObject(dbResult, callback);
+      }
+    });
   }
 
   save(comment, callback) {
@@ -59,8 +64,7 @@ module.exports = class CommentService {
     var key = createCommentKey(id);
     this.dao.delete(key, (err, commentDbObject) => {
       if (err) return callback(err);
-      var attributes = mapDbObjectToCommentAttributes(commentDbObject);
-      createComment(attributes, (err, deletedComment) => {
+      createCommentFromDbObject(commentDbObject, (err, deletedComment) => {
         if (err) return callback(err);
         Logger.log(`Successfully deleted Comment with id: ${deletedComment.id}`);
         return callback(null, deletedComment);
@@ -78,8 +82,7 @@ module.exports = class CommentService {
         Logger.log(`Error while trying to update: ${JSON.stringify(commentDbObject)}`);
         return callback(err);
       }
-      var attributes = mapDbObjectToCommentAttributes(commentDbObject);
-      createComment(attributes, (err, updatedComment) => {
+      createCommentFromDbObject(commentDbObject, (err, updatedComment) => {
         if (err) return callback(err);
         Logger.log(`Successfully updated Comment with id: ${updatedComment.id}`);
         return callback(null, updatedComment);
@@ -88,13 +91,34 @@ module.exports = class CommentService {
   }
 }
 
+function createCommentsFromDbObject(commentsDbObject, callback) {
+  var comments = [];
+  for (let commentDbObject of commentsDbObject) {
+    try {
+      var comment = createCommentFromDbObject(commentDbObject);
+    } catch (err) {
+      return callback(err);
+    }
+    comments.push(comment);
+  }
+  if (callback) return callback(null, comments);
+  return comments;
+}
+
+function createCommentFromDbObject(commentDbObject, callback) {
+  var attributes = mapDbObjectToCommentAttributes(commentDbObject);
+  return createComment(attributes, callback);
+}
+
 function createComment(attributes, callback) {
   try {
     var comment = new Comment(attributes);
-    return callback(null, comment);
   } catch (err) {
-    return callback(err);
+    if (callback) return callback(err);
+    throw err;
   }
+  if (callback) return callback(null, comment);
+  return comment;
 }
 
 function createCommentKey(id) {

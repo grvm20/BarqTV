@@ -19,9 +19,10 @@ const ObjectExistsException = require("../../exceptions/object-exists-exception"
  ***/
 module.exports = class Dao {
 
-  constructor(dynamoDocClient, tableName) {
+  constructor(dynamoDocClient, tableName, indexName) {
     this._tableName = tableName;
-    this._dynamoDocClient = dynamoDocClient
+    this._dynamoDocClient = dynamoDocClient;
+    this._indexName = indexName;
   }
 
   /**
@@ -75,11 +76,11 @@ module.exports = class Dao {
     var params = {
       TableName: this._tableName
     };
-    if (key != null && key != "") {
+
+    if (key && key.id) {
+      // Get by id.
       params.Key = key;
-
       console.error("Sending for fetch:" + JSON.stringify(params));
-
       this._dynamoDocClient.get(params, (err, data) => {
         if (err) {
           console.error("Dynamo failed to fetch data " + err);
@@ -97,9 +98,38 @@ module.exports = class Dao {
           callback(null, item);
         }
       });
+    } else if (_.isObject(key)) {
+      // Get by index.
+      var existingValueKeys = _.keys(key);
+      params.KeyConditionExpression = existingValueKeys[0] + '= :parentid'
+      params.ExpressionAttributeValues = {
+        ':parentid': key[existingValueKeys],
+        ':value': false
+      }
+      params.FilterExpression = "deleted = :value";
+      params.IndexName = this._indexName
 
+      console.log("Sending for fetch:" + JSON.stringify(params));
+
+      this._dynamoDocClient.query(params, (err, data) => {
+        if (err) {
+          console.error("Dynamo failed to fetch data " + err);
+          return callback(new DataObjectErrorException(err), null);
+        } else {
+          console.log("Successfully fetched record from dynamo: " + JSON.stringify(data));
+          var item = data.Items;
+          // This is necessary because we dont have a GSI on deleted field.
+          // So we have to manually filter out the result
+          if (!item || (item && item.deleted == true)) {
+            item = {}
+            /* Raising Object Not found exception here */
+            return callback(new ObjectNotFoundException(), null);
+          }
+          callback(null, item);
+        }
+      });
     } else {
-
+      // Get all.
       params.FilterExpression = "deleted = :value";
       params.ExpressionAttributeValues = { ":value": false };
 

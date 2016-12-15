@@ -32,6 +32,7 @@ const CommentsController = require(`${APP_PATH}/controllers/comments-controller`
 const CUSTOMERS_TABLE_NAME = 'customers';
 const ADDRESSES_TABLE_NAME = 'addresses';
 const COMMENTS_TABLE_NAME = 'comments';
+const COMMENTS_INDEX_NAME = 'content_ref-index';
 const ADDRESS_SAO_HOST = 'us-street.api.smartystreets.com';
 const ADDRESS_SAO_AUTH_ID = '10d3d858-072e-fdf3-0c44-a669f2cca11e';
 const ADDRESS_SAO_AUTH_ID_TOKEN = '0gaJxoGO4b3btMZf7X3v';
@@ -61,8 +62,9 @@ var commentsController;
 // Mapping to Error codes
 var mapping = require('./error-mapping');
 
-const injectDependencies = (customObjects={}) => {
+const injectDependencies = (customObjects) => {
   console.log('Injecting dependencies.');
+  if (!customObjects) customObjects = {};
   dynamoDocClient = new AWS.DynamoDB.DocumentClient();
 
   // DAOs
@@ -77,7 +79,7 @@ const injectDependencies = (customObjects={}) => {
     ADDRESS_SAO_HOST, ADDRESS_SAO_AUTH_ID, ADDRESS_SAO_AUTH_ID_TOKEN, HTTPS);
 
   commentDao = customObjects.commentDao ? customObjects.commentDao :
-    new Dao(dynamoDocClient, COMMENTS_TABLE_NAME);
+    new Dao(dynamoDocClient, COMMENTS_TABLE_NAME, COMMENTS_INDEX_NAME);
 
   // Serializers and normalizers.
   addressSerializer = new AddressSerializer();
@@ -160,8 +162,9 @@ function extractOperationAndParams(event, callback) {
   }
 }
 
-function callController(event, controller, callback) {
-  injectDependencies();
+function callController(event, controllerName, callback) {
+  var objectsGraph = injectDependencies();
+  var controller = objectsGraph[controllerName];
   extractOperationAndParams(event, (err, operation, params) => {
     switch (operation) {
       case 'fetchAll':
@@ -185,13 +188,13 @@ function callController(event, controller, callback) {
 }
 
 exports.customersControllerHandler = (event, context, callback) => {
-  callController(event, customersController);
+  callController(event, 'customersController', callback);
 };
 
 exports.addressesControllerHandler = (event, context, callback) => {
-  callController(event, addressesController);
+  callController(event, 'addressesController', callback);
 };
 
 exports.commentsControllerHandler = (event, context, callback) => {
-  callController(event, commentsController);
+  callController(event, 'commentsController', callback);
 };

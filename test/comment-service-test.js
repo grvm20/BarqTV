@@ -12,10 +12,12 @@ const InvalidInputException =
 
 describe('CommentService', () => {
   var unexistingCommentId;
+  var unexistingContentRef;
   var invalidCommentId;
   var validCommentPartialData;
   var invalidPartialCommentData;
   var validCommentData;
+  var validCommentsDataSameContent;
   var validCommentDataToUpdate;
   var validCommentDataUpdated;
   var validPartialComment;
@@ -27,6 +29,7 @@ describe('CommentService', () => {
 
   before(() => {
     unexistingCommentId = "b21223f4-0444-417b-b81e-4ee398a2d1d0";
+    unexistingContentRef = "4d551e55-7820-49e5-828b-8c8fc2b21531";
     invalidCommentId = "this is definitely not valid";
 
     validCommentPartialData = {
@@ -42,6 +45,24 @@ describe('CommentService', () => {
       text: "Another crappy comment that should be stored!",
       deleted: false
     }
+
+    validCommentsDataSameContent = [
+      {
+        id: "db93b284-4ae7-47b2-9ded-0e447a401ab9",
+        customerRef: "email@domain.com",
+        contentRef: "49feafac-494b-4da3-8e23-09ebc6e069b1",
+        text: "Another crappy comment that should be stored!",
+        deleted: false
+      },
+      {
+        id: "bbaaf044-2c64-4ff7-aa12-ab816dba5137",
+        customerRef: "new-email@domain.com",
+        contentRef: "49feafac-494b-4da3-8e23-09ebc6e069b1",
+        text: "I changed my mind, I love it! :D (L) :) <3",
+        deleted: false
+      }
+    ];
+
 
     validCommentDataToUpdate = {
       id: "db93b284-4ae7-47b2-9ded-0e447a401ab9",
@@ -75,9 +96,29 @@ describe('CommentService', () => {
           content_ref: validCommentData.contentRef,
           text: validCommentData.text,
           deleted: validCommentData.deleted
-        }
+        };
+
+        var commentsSameContentInfo = [
+          {
+            id: validCommentsDataSameContent[0].id,
+            customer_ref: validCommentsDataSameContent[0].customerRef,
+            content_ref: validCommentsDataSameContent[0].contentRef,
+            text: validCommentsDataSameContent[0].text,
+            deleted: validCommentsDataSameContent[0].deleted
+          },
+          {
+            id: validCommentsDataSameContent[1].id,
+            customer_ref: validCommentsDataSameContent[1].customerRef,
+            content_ref: validCommentsDataSameContent[1].contentRef,
+            text: validCommentsDataSameContent[1].text,
+            deleted: validCommentsDataSameContent[1].deleted
+          }
+        ];
+
         if (key.id == validCommentData.id) {
           callback(null, commentDbInfo);
+        } else if (key.content_ref == validCommentsDataSameContent[0].contentRef) {
+          callback(null, commentsSameContentInfo);
         } else {
           callback(new ObjectNotFoundException());
         }
@@ -135,9 +176,29 @@ describe('CommentService', () => {
         done();
       });
     });
-    it.skip('should return all Comments of a Content if its id is given as a query parameter', (done) => {
+    it('should return all Comments of a Content if its id is given as a query parameter', (done) => {
+      var params = {content_ref: validCommentsDataSameContent[0].contentRef};
+      commentService.fetch(null, params, (err, comments) => {
+        expect(err).to.not.exist;
+        for (let i = 0; i < comments.length; ++i) {
+          let comment = comments[i];
+          let validCommentData = validCommentsDataSameContent[i];
+          expect(comment).to.be.an.instanceof(Comment);
+          expect(comment.id).to.equal(validCommentData.id);
+          expect(comment.customerRef).to.equal(validCommentData.customerRef);
+          expect(comment.contentRef).to.equal(validCommentData.contentRef);
+          expect(comment.text).to.equal(validCommentData.text);
+        }
+        done();
+      });
     });
-    it.skip('should return an exception if the given Content id does not exist', (done) => {
+    it('should return an ObjectNotFoundException if the given Content id does not exist', (done) => {
+      var params = {content_ref: unexistingContentRef};
+      commentService.fetch(null, params, (err, comments) => {
+        expect(err).to.exist;
+        expect(err).to.be.an.instanceof(ObjectNotFoundException);
+        done();
+      });
     });
     it('should return an InvalidInputException if no Comment id is given', (done) => {
       commentService.fetch(null, null, (err, comment) => {
