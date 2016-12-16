@@ -187,7 +187,7 @@ paths:
         200:
           description: "200 response"
           schema:
-            $ref: "#/definitions/AddressDataResponse"
+            $ref: "#/definitions/Empty"
           headers:
             Access-Control-Allow-Origin:
               type: "string"
@@ -1349,6 +1349,1436 @@ paths:
           application/json: "{\"statusCode\": 200}"
         passthroughBehavior: "when_no_match"
         type: "mock"
+  /content-catalog:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/ContentCatalogsDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        405:
+          description: "405 response"
+          headers:
+            405:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        409:
+          description: "409 response"
+          headers:
+            409:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          \[404\].*:
+            statusCode: "404"
+          default:
+            statusCode: "200"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
+        requestTemplates:
+          application/json: "{\n    \"operation\" : \"fetchAll\",\n    \"type\" :\
+            \ \"content_catalog\"\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:Content/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "ContentCatalogPostRequest"
+        required: true
+        schema:
+          $ref: "#/definitions/ContentCatalogPostRequest"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/ContentCatalogDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        405:
+          description: "405 response"
+          headers:
+            405:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        409:
+          description: "409 response"
+          headers:
+            409:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          \[404\].*:
+            statusCode: "404"
+          default:
+            statusCode: "200"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
+        requestTemplates:
+          application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
+            \ : \"create\",\n  \"type\" : \"content_catalog\",\n  \"content\" : {\n\
+            \    \"name\" : \"$inputRoot.name\"\n  }\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:Content/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"  
+  /content-catalog/{cid}:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "cid"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/ContentCatalogDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        405:
+          description: "405 response"
+          headers:
+            405:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        409:
+          description: "409 response"
+          headers:
+            409:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          \[404\].*:
+            statusCode: "404"
+          default:
+            statusCode: "200"
+          \[405\].*:
+            statusCode: "405"
+          \[409\].*:
+            statusCode: "409"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
+        requestTemplates:
+          application/json: "{\n    \"operation\" : \"fetch\",\n    \"type\" : \"\
+            content_catalog\",\n    \"id\": \"$input.params('cid')\" \n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:Content/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "cid"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /property:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "cid"
+        in: "query"
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/PropertiesDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        405:
+          description: "405 response"
+          headers:
+            405:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        409:
+          description: "409 response"
+          headers:
+            409:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          \[404\].*:
+            statusCode: "404"
+          default:
+            statusCode: "200"
+          \[405\].*:
+            statusCode: "405"
+          \[409\].*:
+            statusCode: "409"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
+        requestTemplates:
+          application/json: "{\n    \"operation\" : \"fetchAll\",\n    \"type\" :\
+            \ \"property\",\n    \"cid\" : \"$input.params('cid')\"\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:Content/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "PropertyPostRequest"
+        required: true
+        schema:
+          $ref: "#/definitions/PropertyPostRequest"
+      
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        404:
+          description: "404 response"
+        405:
+          description: "405 response"
+        409:
+          description: "409 response"
+      x-amazon-apigateway-integration:
+        responses:
+          \[404\].*:
+            statusCode: "404"
+          default:
+            statusCode: "200"
+          \[405\].*:
+            statusCode: "405"
+          \[409\].*:
+            statusCode: "409"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
+        requestTemplates:
+          application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
+            \ : \"create\",\n  \"type\" : \"property\",\n  \"content\" : {\n    \"\
+            name\" : \"$inputRoot.name\",\n    \"cid\" : \"$input.params('cid')\"\n\
+            \  }\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:Content/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    options:
+      parameters:
+      - name: "cid"
+        in: "query"
+        required: false
+        type: "string"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /property/{pid}:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "pid"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/PropertyDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        405:
+          description: "405 response"
+          headers:
+            405:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        409:
+          description: "409 response"
+          headers:
+            409:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          \[404\].*:
+            statusCode: "404"
+          default:
+            statusCode: "200"
+          \[405\].*:
+            statusCode: "405"
+          \[409\].*:
+            statusCode: "409"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
+        requestTemplates:
+          application/json: "{\n    \"operation\" : \"fetch\",\n    \"type\" : \"\
+            property\",\n    \"id\": \"$input.params('pid')\" \n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:Content/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "pid"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /franchise:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "pid"
+        in: "query"
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/FranchisesDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        405:
+          description: "405 response"
+          headers:
+            405:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        409:
+          description: "409 response"
+          headers:
+            409:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          \[404\].*:
+            statusCode: "404"
+          default:
+            statusCode: "200"
+          \[405\].*:
+            statusCode: "405"
+          \[409\].*:
+            statusCode: "409"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
+        requestTemplates:
+          application/json: "{\n    \"operation\" : \"fetchAll\",\n    \"type\" :\
+            \ \"franchise\",\n    \"pid\" : \"$input.params('pid')\"\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:Content/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "FranchisePostRequest"
+        required: true
+        schema:
+          $ref: "#/definitions/FranchisePostRequest"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/FranchisesDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        405:
+          description: "405 response"
+          headers:
+            405:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        409:
+          description: "409 response"
+          headers:
+            409:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          \[404\].*:
+            statusCode: "404"
+          default:
+            statusCode: "200"
+          \[405\].*:
+            statusCode: "405"
+          \[409\].*:
+            statusCode: "409"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
+        requestTemplates:
+          application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
+            \ : \"create\",\n  \"type\" : \"franchise\",\n  \"content\" : {\n    \"\
+            name\" : \"$inputRoot.name\",\n    \"pid\" : \"$input.params('pid')\"\n\
+            \  }\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:Content/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /franchise/{fid}:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fid"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/FranchiseDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        405:
+          description: "405 response"
+          headers:
+            405:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        409:
+          description: "409 response"
+          headers:
+            409:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          \[404\].*:
+            statusCode: "404"
+          default:
+            statusCode: "200"
+          \[405\].*:
+            statusCode: "405"
+          \[409\].*:
+            statusCode: "409"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
+        requestTemplates:
+          application/json: "{\n    \"operation\" : \"fetch\",\n    \"type\" : \"\
+            franchise\",\n    \"id\": \"$input.params('fid')\" \n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:Content/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fid"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /series:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fid"
+        in: "query"
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/SeriesesDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        405:
+          description: "405 response"
+          headers:
+            405:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        409:
+          description: "409 response"
+          headers:
+            409:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          \[404\].*:
+            statusCode: "404"
+          default:
+            statusCode: "200"
+          \[405\].*:
+            statusCode: "405"
+          \[409\].*:
+            statusCode: "409"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
+        requestTemplates:
+          application/json: "{\n    \"operation\" : \"fetchAll\",\n    \"type\" :\
+            \ \"series\",\n    \"fid\" : \"$input.params('fid')\"\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:Content/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "SeriesPostRequest"
+        required: true
+        schema:
+          $ref: "#/definitions/SeriesPostRequest"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/SeriesesDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        405:
+          description: "405 response"
+          headers:
+            405:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        409:
+          description: "409 response"
+          headers:
+            409:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          \[404\].*:
+            statusCode: "404"
+          default:
+            statusCode: "200"
+          \[405\].*:
+            statusCode: "405"
+          \[409\].*:
+            statusCode: "409"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
+        requestTemplates:
+          application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
+            \ : \"create\",\n  \"type\" : \"series\",\n  \"content\" : {\n    \"name\"\
+            \ : \"$inputRoot.name\",\n    \"fid\" : \"$input.params('fid')\"\n  }\n\
+            }"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:Content/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /series/{sid}:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "sid"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/SeriesDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        405:
+          description: "405 response"
+          headers:
+            405:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        409:
+          description: "409 response"
+          headers:
+            409:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          \[404\].*:
+            statusCode: "404"
+          default:
+            statusCode: "200"
+          \[405\].*:
+            statusCode: "405"
+          \[409\].*:
+            statusCode: "409"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
+        requestTemplates:
+          application/json: "{\n    \"operation\" : \"fetch\",\n    \"type\" : \"\
+            series\",\n    \"id\": \"$input.params('sid')\" \n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:Content/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "sid"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /episode:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "sid"
+        in: "query"
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/EpisodesDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        405:
+          description: "405 response"
+          headers:
+            405:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        409:
+          description: "409 response"
+          headers:
+            409:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          \[404\].*:
+            statusCode: "404"
+          default:
+            statusCode: "200"
+          \[405\].*:
+            statusCode: "405"
+          \[409\].*:
+            statusCode: "409"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
+        requestTemplates:
+          application/json: "{\n    \"operation\" : \"fetchAll\",\n    \"type\" :\
+            \ \"episodes\",\n    \"sid\" : \"$input.params('sid')\"\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:Content/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "EpisodePostRequest"
+        required: true
+        schema:
+          $ref: "#/definitions/EpisodePostRequest"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/EpisodeDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        405:
+          description: "405 response"
+          headers:
+            405:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        409:
+          description: "409 response"
+          headers:
+            409:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          \[404\].*:
+            statusCode: "404"
+          default:
+            statusCode: "200"
+          \[405\].*:
+            statusCode: "405"
+          \[409\].*:
+            statusCode: "409"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
+        requestTemplates:
+          application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
+            \ : \"create\",\n  \"type\" : \"episodes\",\n  \"content\" : {\n    \"\
+            name\" : \"$inputRoot.name\",\n    \"sid\" : \"$input.params('sid')\"\n\
+            \  }\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:Content/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /episode/{eid}:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "eid"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/EpisodesDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            500:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            404:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        405:
+          description: "405 response"
+          headers:
+            405:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        409:
+          description: "409 response"
+          headers:
+            409:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          \[404\].*:
+            statusCode: "404"
+          default:
+            statusCode: "200"
+          \[405\].*:
+            statusCode: "405"
+          \[409\].*:
+            statusCode: "409"
+          \[500\].*:
+            statusCode: "500"
+          \[400\].*:
+            statusCode: "400"
+        requestTemplates:
+          application/json: "{\n    \"operation\" : \"fetch\",\n    \"type\" : \"\
+            episodes\",\n    \"id\": \"$input.params('eid')\" \n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:Content/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "eid"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+
 definitions:
   Empty:
     title: "Empty Schema"
@@ -1437,6 +2867,201 @@ definitions:
     title: "Text"
     description: "Text content"
     type: "string"
+
+  ContentCatalogId:
+    title: "cid"
+    description: "Id for the content catalog. Is a UUID"
+    type: "string"
+  ContentCatalogName:
+    title: "Name"
+    description: "Name for any content catalog."
+    type: "string"
+  PropertyId:
+    title: "pid"
+    description: "Id for the property. Is a UUID"
+    type: "string"
+  PropertyName:
+    title: "Name"
+    description: "Name of any property (For e.g. HBO, CBS, ABC, ESPN etc.)"
+    type: "string"
+  FranchiseId:
+    title: "fid"
+    description: "Id for the franchise. Is a UUID"
+    type: "string"
+  FranchiseName:
+    title: "Name"
+    description: "Name of any franchise (For e.g. Game of Thrones, Survivor etc.)"
+    type: "string"
+  SeriesId:
+    title: "sid"
+    description: "Id for the series. Is a UUID"
+    type: "string"
+  SeriesName:
+    title: "Name"
+    description: "Name of any series (For e.g. Season 1, Season 2, Christmas Specials etc.)"
+    type: "string"
+  EpisodeId:
+    title: "eid"
+    description: "Id for the episode. Is a UUID"
+    type: "string"
+  EpisodeName:
+    title: "Name"
+    description: "Name of any episode (For e.g. Episode 1, The one where Ross and Rache take a break etc.)"
+    type: "string"
+
+  ContentCatalogDataResponse:
+    title: "ContentCatalog"
+    type: "object"
+    required:
+    - "id"
+    - "name"
+    properties:
+      id:
+        $ref: "#/definitions/ContentCatalogId"
+      name:
+        $ref: "#/definitions/ContentCatalogName"
+  ContentCatalogsDataResponse:
+    title: "Array of ContentCatalog"
+    type: "array"
+    items: 
+      $ref: "#/definitions/ContentCatalogDataResponse"
+  ContentCatalogPostRequest:
+    title: "New Content Catalog"
+    description: "New Content Catalog"
+    type: "object"
+    required:
+    - "name"
+    properties:
+      name:
+        $ref: "#/definitions/ContentCatalogName"
+
+  PropertyDataResponse:
+    title: "Property"
+    type: "object"
+    required:
+    - "id"
+    - "name"
+    - "cid"
+    properties:
+      id:
+        $ref: "#/definitions/PropertyId"
+      name:
+        $ref: "#/definitions/PropertyName"
+      cid:
+        $ref: "#/definitions/ContentCatalogId"
+  PropertiesDataResponse:
+    title: "Array of Property"
+    type: "array"
+    items: 
+      $ref: "#/definitions/PropertyDataResponse"
+  PropertyPostRequest:
+    title: "New Property"
+    description: "New Property"
+    type: "object"
+    required:
+    - "name"
+    - "cid"
+    properties:
+      name:
+        $ref: "#/definitions/PropertyName"
+      cid:
+        $ref: "#/definitions/ContentCatalogId"
+
+  FranchiseDataResponse:
+    title: "Franchise"
+    type: "object"
+    required:
+    - "id"
+    - "name"
+    - "pid"
+    properties:
+      id:
+        $ref: "#/definitions/FranchiseId"
+      name:
+        $ref: "#/definitions/FranchiseName"
+      pid:
+        $ref: "#/definitions/PropertyId"
+  FranchisesDataResponse:
+    title: "Array of Franchise"
+    type: "array"
+    items: 
+      $ref: "#/definitions/FranchiseDataResponse"
+  FranchisePostRequest:
+    title: "New Franchise"
+    description: "New Franchise"
+    type: "object"
+    required:
+    - "name"
+    - "pid"
+    properties:
+      name:
+        $ref: "#/definitions/FranchiseName"
+      pid:
+        $ref: "#/definitions/PropertyId"
+
+  SeriesDataResponse:
+    title: "Series"
+    type: "object"
+    required:
+    - "id"
+    - "name"
+    - "fid"
+    properties:
+      id:
+        $ref: "#/definitions/SeriesId"
+      name:
+        $ref: "#/definitions/SeriesName"
+      fid:
+        $ref: "#/definitions/FranchiseId"
+  SeriesesDataResponse:
+    title: "Array of Series"
+    type: "array"
+    items: 
+      $ref: "#/definitions/SeriesDataResponse"
+  SeriesPostRequest:
+    title: "New Series"
+    description: "New Series"
+    type: "object"
+    required:
+    - "name"
+    - "fid"
+    properties:
+      name:
+        $ref: "#/definitions/SeriesName"
+      fid:
+        $ref: "#/definitions/FranchiseId"
+
+  EpisodeDataResponse:
+    title: "Episode"
+    type: "object"
+    required:
+    - "id"
+    - "name"
+    - "sid"
+    properties:
+      id:
+        $ref: "#/definitions/EpisodeId"
+      name:
+        $ref: "#/definitions/EpisodeName"
+      sid:
+        $ref: "#/definitions/SeriesId"
+  EpisodesDataResponse:
+    title: "Array of Episode"
+    type: "array"
+    items: 
+      $ref: "#/definitions/EpisodeDataResponse"
+  EpisodePostRequest:
+    title: "New Episode"
+    description: "New Episode"
+    type: "object"
+    required:
+    - "name"
+    - "sid"
+    properties:
+      name:
+        $ref: "#/definitions/EpisodeName"
+      sid:
+        $ref: "#/definitions/SeriesId"
 
   AddressDataResponse:
     title: "Address"
