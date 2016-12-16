@@ -995,7 +995,7 @@ paths:
           application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
             \ : \"fetch\",\n  \"comment\" : {\n    \"content_ref\" : \"$input.params('content')\"\
             \n  }\n}"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:commentsControllerTestAlpha/invocations"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:commentsController/invocations"
         passthroughBehavior: "when_no_templates"
         httpMethod: "POST"
         type: "aws"
@@ -1070,7 +1070,7 @@ paths:
             \ : \"create\",\n  \"comment\" : {\n    \"text\" : \"$inputRoot.text\"\
             ,\n    \"customer_ref\" : \"$inputRoot.customer\",\n    \"content_ref\"\
             \ : \"$inputRoot.content\"\n  }\n}"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:commentsControllerTestAlpha/invocations"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:commentsController/invocations"
         passthroughBehavior: "when_no_templates"
         httpMethod: "POST"
         type: "aws"
@@ -1173,7 +1173,7 @@ paths:
         requestTemplates:
           application/json: "{\n    \"operation\" : \"fetch\",\n    \"id\": \"$input.params('id')\"\
             \ \n}"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:commentsControllerTestAlpha/invocations"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:commentsController/invocations"
         passthroughBehavior: "when_no_match"
         httpMethod: "POST"
         type: "aws"
@@ -1241,7 +1241,7 @@ paths:
             \ : \"update\",\n  \"id\" : \"$input.params('id')\",\n  \"comment\" :\
             \ {\n    \"text\" : \"$inputRoot.text\",\n    \"customer_ref\" : \"$inputRoot.customer\"\
             ,\n    \"content_ref\" : \"$inputRoot.content\"\n  }\n}"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:commentsControllerTestAlpha/invocations"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:commentsController/invocations"
         passthroughBehavior: "when_no_match"
         httpMethod: "POST"
         type: "aws"
@@ -1310,7 +1310,7 @@ paths:
         requestTemplates:
           application/json: "{\n    \"operation\" : \"delete\",\n    \"id\": \"$input.params('id')\"\
             \ \n}"
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:commentsControllerTestAlpha/invocations"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:commentsController/invocations"
         passthroughBehavior: "when_no_match"
         httpMethod: "POST"
         type: "aws"
