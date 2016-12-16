@@ -1,0 +1,96 @@
+<!--
+Author: DesignMaz
+Author URL: https://www.designmaz.net
+License URL: https://www.designmaz.net/licence/
+-->
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Cloud Cruisers- Barq Tv</title>
+<!-- Custom Theme files -->
+<link href="css/style2.css" rel="stylesheet" type="text/css" media="all"/>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+
+
+<link href='http://fonts.googleapis.com/css?family=Roboto:500,900italic,900,400italic,100,700italic,300,700,500italic,100italic,300italic,400' rel='stylesheet' type='text/css'>
+
+</head>
+<body>
+<script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '1197867396915792',
+      xfbml      : true,
+      version    : 'v2.8'
+    });
+    FB.AppEvents.logPageView();
+    
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "//connect.facebook.net/en_US/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+
+    function login(){
+      FB.login(function (response){
+      if(response.status === 'connected'){
+        document.getElementById('status').innerHTML = "We re connected";
+        window.location.href="http://www.lambdacheck.com.s3-website-us-west-2.amazonaws.com/ConnectedPage.html";
+      }
+      else if(response.status === 'not_authorized'){
+        document.getElementById('status').innerHTML = "Not logged in";
+      }
+      else {
+        document.getElementById('status').innerHTML = "Not connected to facebook";
+      }
+      },{scope: 'email,user_friends'});
+    }
+    function getInfo(){
+      FB.api('/me','GET',{fields: 'first_name,last_name,name,id'},function(response){
+        document.getElementById ('Information').innerHTML=response.name;
+      })
+    }
+</script>
+<!--subscribe start here-->
+ <h1>Cloud Cruisers</h1>
+<div class="login-main">
+	<div class="login">
+		<div class="social">
+		<ul>
+	   	<li><a class="face" onclick="login()" href="#" >Join with Facebook</a></li>
+	   	<li class="last-mar"><a class="twit" href="#">Join with Twitter</a></li>
+	   	 </ul>
+	   	</div>
+	   <input type="text" class="email" value="User Name" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'User Name';}">
+	   <input type="password" value="Password" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'Password';}">
+	   	<form>
+	   <ul class="button">
+	    	<li><input type="submit" value="Submit" ></li>
+	   	    <li><input class="clear" type="submit" value="Clear"></li>
+	   </ul>
+	   	</form>
+	   <div class="forgot">
+	   	  <label class="checkbox"><input type="checkbox" name="checkbox" checked><i> </i> Keep me signed in</label>
+	   	  <div class="forgot-para">
+	   	  	<a href="#"> <p>Forgot Your Password?</p></a>
+	   	  </div>
+	   	<div class="clear"> </div>
+	   </div>
+	</div>
+	<div class="login-password">
+	    <p> New User <a href="http://www.lambdacheck.com.s3-website-us-west-2.amazonaws.com/test1.html">Sign Up</a> </p>
+	</div>
+	<div id="status"></div>
+</div>
+
+
+<!--subscribe end here-->	
+</body>
+</html>

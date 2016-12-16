@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>BarQtv</title>
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,100,700,900' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="css/style4.css">
+  
+  <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+  <script type="text/javascript" src="http://code.jquery.com/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+
+  
+  
+  <script src="ContentControl.js"></script>
+  
+</head>
+<body>
+
+  <header></header>
+<div id="response">
+<center>
+    <div id="status"></div>
+    <pre></pre>
+</center>
+</div> 
+
+  <div class="textintro">
+    <center>
+      <h1>Welcome to BarQtv</h1>
+      <br>
+      <p> Please click on any of the shows below<br>
+</p>
+      <input type="hidden" id="contentID" name="contentID">
+    </center>
+  </div>
+  
+<center>
+<div id="content1">
+  <ul id="list" data-role="listview">
+    </ul>
+</div>
+<div id="content2">
+  <ul id="serieslist" data-role="listview">
+    </ul>
+</div>
+<div id="content3">
+  <ul id="episodelist" data-role="listview">
+    </ul>
+</div>
+</center>
+
+<p>
+<p>
+<center>Comment:<br /><textarea name='comment' id='comment'></textarea><input type='submit' value="Post" onclick="postComment()" /><br />
+<input type='submit' value="Refresh" onclick="refreshPage()" />
+
+</center>
+<center>
+<div id="comments">
+Comments : <br/>
+  <ul id="commentlist" data-role="listview">
+    </ul>
+</div></center>
+</body>
+</html>

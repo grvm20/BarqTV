@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>BarQtv</title>
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,100,700,900' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="css/style3.css">
+  
+  <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+  <script src="https://d79i1fxsrar4t.cloudfront.net/jquery.liveaddress/3.2/jquery.liveaddress.min.js"></script>
+  <script src="testcontrol3.js"></script>
+  <script src="Fbformcontrol.js"></script>
+  
+</head>
+<body>
+
+  <header></header>
+
+  <div class="textintro">
+    <center>
+      <h1>Welcome to BarQtv</h1>
+      <br>
+      <p> Please enter your address and phone number below<br>
+Fill in the details below for some exciting early bird offers!</p>
+    </center>
+  </div>
+  
+<div id="response">
+<center>
+    <div id="status"></div>
+    <pre></pre>
+</center>
+</div> 
+
+<section class ="card register"> 
+  <form id="firstForm">
+    <label>First Name</label>
+    <br>
+    <input type="text" id="firstname" name="firstname" placeholder="Sherlock" class="form-control" pattern="[a-zA-Z]{2,64}" oninvalid="setCustomValidity('Plz enter Valid name')" required>
+    <br>
+    <label>Last Name</label>
+    <br>
+    <input type="text" id="lastname" name="lastname" placeholder="Holmes" class="form-control" pattern="[a-zA-Z]{2,64}" oninvalid="setCustomValidity('Plz enter Valid name')"  required>
+    <br>
+    <label>Email</label>
+    <br>
+    <input type="email" id="email" name="email" placeholder="sholmes@elementary.com" class="form-control" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" oninvalid="setCustomValidity('Plz enter Valid email')" required >
+    <br>
+    <label>Phone Number</label>
+    <br>
+    <input type="text" id="phonenumber" name="phonenumber" placeholder="1234567890" required >
+    <br>
+    <label>Enter Address - Start typing to get suggestions</label>
+    <br>
+    <input type="text" id="street-address" name="street-address" class="form-control" onblur="populateAddress()">
+    <br>
+    <label>Apartment Number</label>
+    <br>
+    <input type="text" id="apt" name="Apartment No" placeholder="2C" class="form-control">
+    <br>
+    <label>Building Number</label>
+    <br>
+    <input type="text" id="number" name="number" placeholder="221B" class="form-control">
+    <br>
+    <label>Street Name</label>
+    <br>
+    <input type="text" id="streetname" name="streetname" placeholder="Baker Street" class="form-control">
+    <br>
+    <label>City</label>
+    <br>
+    <input type="text" id="city" name="city" placeholder="London" class="form-control">
+    <br>
+    <label>State</label>
+    <br>
+    <input type="text" id="state" name="state" placeholder="London" class="form-control">
+    <br>
+    <label>Zip</label>
+    <br>
+    <input type="text" id="zip" name="zip" placeholder="WC2N" class="form-control">
+    <input type="button" name="submit" value="Submit" onclick="getFriends();PostTest();" class="btn">
+
+  </form>
+</section>
+
+</body>
+</html>
