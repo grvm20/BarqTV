@@ -200,8 +200,8 @@ describe('CommentService', () => {
         done();
       });
     });
-    it('should return an InvalidInputException if no Comment id is given', (done) => {
-      commentService.fetch(null, null, (err, comment) => {
+    it('should return an InvalidInputException if an invalid Comment id is given', (done) => {
+      commentService.fetch('hola', null, (err, comment) => {
         expect(err).to.exist;
         expect(err).to.be.an.instanceof(InvalidInputException);
         done();
