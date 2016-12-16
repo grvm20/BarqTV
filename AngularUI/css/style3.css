@@ -86,13 +86,14 @@ body  {
   color: #555459;
   line-height: 1.5rem;
     *zoom: 1;
-  background: #43cea2; /* fallback for old browsers */
-  background: -webkit-linear-gradient(to left, #43cea2 , #185a9d); /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to left, #43cea2 , #185a9d);
+  background: #8e9eab; /* fallback for old browsers */
+  background: -webkit-linear-gradient(to left, #8e9eab , #eef2f3); /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to left, #00c3ff , #ffff1c); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
 
 .card {
-  background: white;
+  
+  background: -webkit-linear-gradient(to left, #8e9eab , #eef2f3); /* Chrome 10-25, Safari 5.1-6 */
   width: 100%;
   max-width: 850px;
   margin-left: auto;
@@ -102,7 +103,7 @@ body  {
   position: relative;
   opacity: .95;
   border-radius: 4px;
-  border: 1px solid #e8e8e8;
+  border: 0px solid #e8e8e8;
   box-shadow: 0 1px 0 rgba(0,0,0,.25);
 }
 
@@ -163,7 +164,7 @@ a.small {
 /* Form Styles */
 
 input {
-  width: 100%;
+  width: 50%;
   display: inline-block;
   font-weight: 100;
   padding: 15px;
@@ -171,9 +172,11 @@ input {
   font-size: 1rem;
   font-weight: 100;
   color: #475B62;
-  border: 1px solid #C5C5C5;
-  border-radius: 4px;
-  outline: 0;
+  border: 20px solid #C5C5C5;
+  border-radius: 5px;
+  outline: 4;
+  background-color: #ffffcc;
+  background: #ffffcc;
 }
 
 input[type=radio] {
