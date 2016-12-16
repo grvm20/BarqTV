@@ -4,9 +4,9 @@ var liveaddress = $.LiveAddress({
   target: "US",
   addresses: [{
     address1: '#street-address',
-    address1: '#street-address2',
     locality: '#city',
     administrative_area: '#state',
+    postal_code: '#zip'
     }]
    });
 
@@ -15,7 +15,7 @@ function PostTest() {
     url: 'https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/customers',
     type: 'POST',
     data: JSON.stringify({
-     /* last_name : $('#lastname').val(),
+      last_name : $('#lastname').val(),
       first_name : $('#firstname').val(),
       email : $('#email').val(),
       phone_number : $('#phonenumber').val(),
@@ -26,8 +26,8 @@ function PostTest() {
         number : $('#number').val(),
         street : $('#streetname').val(),        
         zip_code : $('#zip').val()
-      }*/
-      last_name : "uitest",
+      }
+      /*last_name : "uitest",
       first_name : "test",
       email : "nope@gmail.com",
       phone_number : "1234567890",
@@ -37,8 +37,8 @@ function PostTest() {
         apt : "14",
         street : "Claremont Ave",
         number : "188",
-        zip_code : "10027"
-      }
+        zip_code : "10027"*/
+      
     }),
     dataType: 'json',
     contentType: 'application/json',
@@ -51,10 +51,12 @@ function PostTest() {
       //alert("Success");
     },
     error: function (xhr, ajaxOptions, thrownError) {
-              $('#response pre').html("error");
-              console.log(xhr);
-              console.log(ajaxOptions);
-              console.log(thrownError);
+
+      errtext=xhr.responseJSON.errorMessage;
+      $('#response pre').html(errtext);
+      console.log(xhr);
+      //console.log(ajaxOptions);
+      //console.log(thrownError);
               //alert(thrownError);
             },
     crossDomain: true
