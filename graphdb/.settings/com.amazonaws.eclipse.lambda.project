@@ -1,0 +1,7 @@
+#Lambda Function Project Metadata
+#Wed Dec 14 18:04:54 EST 2016
+lastInvokeShowLiveLog=true
+lastDeploymentFunctionName=MyFunction
+lastDeploymentBucketName=uicheck1
+lastDeploymentEndpoint=https\://lambda.us-west-2.amazonaws.com/
+lastInvokeInput={\n"operation" \: "fetchAll",\n"type" \: "episode",\n"franchise_title" \:"Game of Thrones"\n}
