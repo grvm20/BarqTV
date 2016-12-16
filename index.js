@@ -1,27 +1,38 @@
 'use strict';
 
+const APP_PATH = './app';
+
 // Vendor imports.
-const _ = require('underscore');
 const AWS = require('aws-sdk');
 const HTTPS = require('https');
 
 // Internal imports.
-const Dao = require('./app/services/dao/dao');
-const AddressSao = require('./app/services/address-sao');
+const Utils = require(`${APP_PATH}/utilities/utils`);
+const InvalidInputException = require(`${APP_PATH}/exceptions/` +
+  `invalid-input-exception`);
 
-const CustomerService = require('./app/services/customer-service');
-const CustomerSerializer = require('./app/views/customer-serializer');
-const CustomersController = require('./app/controllers/customers-controller');
+const Dao = require(`${APP_PATH}/services/dao/dao`);
+const AddressSao = require(`${APP_PATH}/services/address-sao`);
 
-const AddressesController = require('./app/controllers/addresses-controller');
-const AddressService = require('./app/services/address-service');
-const AddressSerializer = require('./app/views/address-serializer');
-const AddressNormalizer = require('./app/normalizers/address-normalizer');
-const AddressNormalizerSao = require('./app/services/sao/address-normalizer-sao');
+const CustomerService = require(`${APP_PATH}/services/customer-service`);
+const CustomerSerializer = require(`${APP_PATH}/views/customer-serializer`);
+const CustomersController = require(`${APP_PATH}/controllers/customers-controller`);
+
+const AddressesController = require(`${APP_PATH}/controllers/addresses-controller`);
+const AddressService = require(`${APP_PATH}/services/address-service`);
+const AddressSerializer = require(`${APP_PATH}/views/address-serializer`);
+const AddressNormalizer = require(`${APP_PATH}/normalizers/address-normalizer`);
+const AddressNormalizerSao = require(`${APP_PATH}/services/sao/address-normalizer-sao`);
+
+const CommentService = require(`${APP_PATH}/services/comment-service`);
+const CommentSerializer = require(`${APP_PATH}/views/comment-serializer`);
+const CommentsController = require(`${APP_PATH}/controllers/comments-controller`);
 
 // Constants.
 const CUSTOMERS_TABLE_NAME = 'customers';
 const ADDRESSES_TABLE_NAME = 'addresses';
+const COMMENTS_TABLE_NAME = 'comments';
+const COMMENTS_INDEX_NAME = 'content_ref-index';
 const ADDRESS_SAO_HOST = 'us-street.api.smartystreets.com';
 const ADDRESS_SAO_AUTH_ID = '10d3d858-072e-fdf3-0c44-a669f2cca11e';
 const ADDRESS_SAO_AUTH_ID_TOKEN = '0gaJxoGO4b3btMZf7X3v';
@@ -42,35 +53,46 @@ var addressSerializer;
 var addressesController;
 var addressSao;
 
+var commentDao;
+var commentService;
+var commentSerializer;
+var commentsController;
+
 
 // Mapping to Error codes
 var mapping = require('./error-mapping');
 
-const injectDependencies = (customCustomerDao, customAddressDao, customAddressNormalizeSao) => {
+const injectDependencies = (customObjects) => {
   console.log('Injecting dependencies.');
+  if (!customObjects) customObjects = {};
   dynamoDocClient = new AWS.DynamoDB.DocumentClient();
-  addressSao = new AddressSao({});
 
-  if (typeof customCustomerDao !== 'undefined') {
-    customerDao = customCustomerDao
-  } else {
-    customerDao = new Dao(dynamoDocClient, CUSTOMERS_TABLE_NAME);
-  }
+  // DAOs
+  customerDao = customObjects.customerDao ? customObjects.customerDao :
+    new Dao(dynamoDocClient, CUSTOMERS_TABLE_NAME);
 
-  if (typeof customAddressDao !== 'undefined') {
-    addressDao = customAddressDao
-  } else {
-    addressDao = new Dao(dynamoDocClient, ADDRESSES_TABLE_NAME);
-  }
+  addressDao = customObjects.addressDao ? customObjects.addressDao :
+    new Dao(dynamoDocClient, ADDRESSES_TABLE_NAME);
 
-  if( typeof customAddressNormalizeSao !== 'undefined') {
-    addressNormalizerSao = customAddressNormalizeSao;
-  }else{
-    addressNormalizerSao = new AddressNormalizerSao(ADDRESS_SAO_HOST, ADDRESS_SAO_AUTH_ID, ADDRESS_SAO_AUTH_ID_TOKEN, HTTPS);
-  }
+  addressNormalizerSao = customObjects.addressNormalizerSao ?
+    customObjects.addressNormalizerSao : new AddressNormalizerSao(
+    ADDRESS_SAO_HOST, ADDRESS_SAO_AUTH_ID, ADDRESS_SAO_AUTH_ID_TOKEN, HTTPS);
 
+  commentDao = customObjects.commentDao ? customObjects.commentDao :
+    new Dao(dynamoDocClient, COMMENTS_TABLE_NAME, COMMENTS_INDEX_NAME);
+
+  // Serializers and normalizers.
   addressSerializer = new AddressSerializer();
   addressNormalizer = new AddressNormalizer(addressNormalizerSao);
+
+  customerSerializer = new CustomerSerializer(
+    addressSerializer
+  );
+
+  commentSerializer = new CommentSerializer();
+
+  // SAOs and other services.
+  addressSao = new AddressSao({});
 
   addressService = new AddressService(
     addressDao,
@@ -78,16 +100,16 @@ const injectDependencies = (customCustomerDao, customAddressDao, customAddressNo
     addressSerializer
   );
 
-  addressSerializer = new AddressSerializer();
-  customerSerializer = new CustomerSerializer(
-    addressSerializer
-  );
   customerService = new CustomerService(
     customerDao,
     addressSao
   );
 
-  // CustomersController receives a serializer class as a sort of interface.
+  commentService = new CommentService(
+    commentDao
+  );
+
+  // Controllers.
   customersController = new CustomersController(
     customerService,
     customerSerializer
@@ -99,79 +121,80 @@ const injectDependencies = (customCustomerDao, customAddressDao, customAddressNo
     customersController
   );
 
+  commentsController = new CommentsController(
+    commentService,
+    commentSerializer
+  );
+
   // Add real values to the SAOs at the end, to overcome circular dependencies.
   addressSao.addressesController = addressesController;
   addressSao.addressSerializer = addressSerializer;
 
   console.log('Dependencies injected.');
-  return {addressDao, addressesController, addressSao, addressSerializer,
-    addressSerializer, addressService, customerDao, customersController,
-    customerSerializer, customerService}
+  return {
+    addressDao,
+    addressesController,
+    addressSao,
+    addressSerializer,
+    addressService,
+
+    customerDao,
+    customersController,
+    customerSerializer,
+    customerService,
+
+    commentDao,
+    commentsController,
+    commentSerializer,
+    commentService
+  }
 }
 exports.injectDependencies = injectDependencies;
 
+function extractOperationAndParams(event, callback) {
+  console.log('Received event:`', JSON.stringify(event, null, 2));
+  if (event.operation) {
+    var operation = event.operation;
+    var params = Utils.omit(event, 'operation');
+    callback(null, operation, params);
+  } else {
+    callback(new InvalidInputException('An operation has to be specified.'));
+  }
+}
+
+function callController(event, controllerName, callback) {
+  var objectsGraph = injectDependencies();
+  var controller = objectsGraph[controllerName];
+  extractOperationAndParams(event, (err, operation, params) => {
+    switch (operation) {
+      case 'fetchAll':
+      case 'fetch':
+        controller.show(params, mapping.sendHttpResponse(callback));
+        break;
+      case 'create':
+        controller.create(params, mapping.sendHttpResponse(callback));
+        break;
+      case 'update':
+        controller.update(params, mapping.sendHttpResponse(callback));
+        break;
+      case 'delete':
+        controller.delete(params, mapping.sendHttpResponse(callback));
+        break;
+      default:
+        mapping.sendHttpResponse(callback)(new InvalidInputException(
+          'Invalid operation "${operation}" given.'));
+    }
+  });
+}
 
 exports.customersControllerHandler = (event, context, callback) => {
-  injectDependencies();
-  console.log('Received event:', JSON.stringify(event, null, 2));
-
-  if (event.operation) {
-    var operation = event.operation;
-  } else {
-    // Raise error and return.
-  }
-
-  var params = _.omit(event, 'operation');
-  if (params.customer) {
-    params = params.customer;
-  }
-
-  switch (operation) {
-    case 'fetchAll':
-    case 'fetch':
-      customersController.show(params, mapping.sendHttpResponse(callback))
-      break;
-    case 'create':
-      customersController.create(params, mapping.sendHttpResponse(callback))
-      break;
-    case 'update':
-      customersController.update(params, mapping.sendHttpResponse(callback))
-      break;
-    case 'delete':
-      customersController.delete(params, mapping.sendHttpResponse(callback))
-      break;
-    default:
-      // Unsupported operation.
-  }
+  callController(event, 'customersController', callback);
 };
 
-
 exports.addressesControllerHandler = (event, context, callback) => {
-  injectDependencies();
-  console.log('Received event:', JSON.stringify(event, null, 2));
+  callController(event, 'addressesController', callback);
+};
 
-  if (event.operation) {
-    var operation = event.operation;
-  } else {
-    // Raise error and return.
-  }
-
-  var params = _.omit(event, 'operation');
-
-   switch (operation) {
-    case 'fetch':
-      addressesController.show(params, mapping.sendHttpResponse(callback))
-      break;
-    case 'create':
-      addressesController.create(params, mapping.sendHttpResponse(callback))
-      break;
-    case 'update':
-      addressesController.update(params, mapping.sendHttpResponse(callback))
-      break;
-    case 'delete':
-      addressesController.delete(params, mapping.sendHttpResponse(callback))
-      break;
-    default:
-      // Unsupported operation.
-  }
+exports.commentsControllerHandler = (event, context, callback) => {
+  callController(event, 'commentsController', callback);
 };

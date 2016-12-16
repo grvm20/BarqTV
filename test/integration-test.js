@@ -1,9 +1,12 @@
-const _ = require('underscore');
 const expect = require('chai').expect;
 
+const APP_PATH = '../app';
+
 // Internal imports.
-const ObjectNotFoundException = require("../app/exceptions/object-not-found-exception");
-const injectDependencies = require('../index').injectDependencies;
+const injectDependencies = require(`${APP_PATH}/../index`).injectDependencies;
+const ObjectNotFoundException = require(`${APP_PATH}/exceptions/object-not-found-exception`);
+const ObjectExistsException = require(`${APP_PATH}/exceptions/object-exists-exception`);
+
 
 describe('Smoke test:', () => {
   describe('Dependency injection', () => {
@@ -51,7 +54,7 @@ describe('Customer Use Cases:', () => {
         }
       };
 
-      var graphNodes = injectDependencies(mockCustomerDao, null);
+      var graphNodes = injectDependencies({customerDao: mockCustomerDao});
       var customersController = graphNodes.customersController;
       customersController.show(params, (err, customersData) => {
         expect(err).to.not.exist;
@@ -136,7 +139,11 @@ describe('Customer Use Cases:', () => {
             callback(null, address);
           }
         }
-        var graphNodes = injectDependencies(mockCustomerDao, mockAddressDao, mockAddressNormalizerSao);
+        var graphNodes = injectDependencies({
+          customerDao: mockCustomerDao,
+          addressDao: mockAddressDao,
+          addressNormalizerSao: mockAddressNormalizerSao
+        });
         var customersController = graphNodes.customersController;
         customersController.create(params, (err, customer) => {
           // Assert staff.
@@ -173,6 +180,10 @@ describe('Customer Use Cases:', () => {
               address_ref: "ed7888cd-30d0-4208-8491-6aa5f416c12f",
               deleted: false
             });
+          },
+          persist: (key, newItem, callback) => {
+            expect(key.id).to.equal(params.email);
+            callback(new ObjectExistsException('Item already exists'));
           }
         };
         var mockAddressDao = {
@@ -202,7 +213,17 @@ describe('Customer Use Cases:', () => {
           }
         };
 
-        var graphNodes = injectDependencies(mockCustomerDao, mockAddressDao);
+        var mockAddressNormalizerSao = {
+          fetch: (address, callback) => {
+            callback(null, address);
+          }
+        }
+
+        var graphNodes = injectDependencies({
+          customerDao: mockCustomerDao,
+          addressDao: mockAddressDao,
+          addressNormalizerSao: mockAddressNormalizerSao
+        });
         var customersController = graphNodes.customersController;
         customersController.create(params, (err, customer) => {
           expect(err).to.exist;
@@ -285,7 +306,11 @@ describe('Customer Use Cases:', () => {
           }
         }
 
-        var graphNodes = injectDependencies(mockCustomerDao, mockAddressDao, mockAddressNormalizerSao);
+        var graphNodes = injectDependencies({
+          customerDao: mockCustomerDao,
+          addressDao: mockAddressDao,
+          addressNormalizeSao: mockAddressNormalizerSao
+        });
         var customersController = graphNodes.customersController;
         customersController.update(params, (err, customer) => {
           done(err);
@@ -334,7 +359,10 @@ describe('Address Use Cases:', () => {
           }
         }
 
-        var graphNodes = injectDependencies(null, mockAddressDao, mockAddressNormalizerSao);
+        var graphNodes = injectDependencies({
+          addressDao: mockAddressDao,
+          addressNormalizerSao: mockAddressNormalizerSao
+        });
         var addressesController = graphNodes.addressesController;
         addressesController.create(params, (err, address) => {
           done(err);
@@ -390,7 +418,10 @@ describe('Address Use Cases:', () => {
           }
         }
 
-        var graphNodes = injectDependencies(null, mockAddressDao, mockAddressNormalizerSao);
+        var graphNodes = injectDependencies({
+          addressDao: mockAddressDao, 
+          addressNormalizerSao: mockAddressNormalizerSao
+        });
         var addressesController = graphNodes.addressesController;
         addressesController.update(params, (err, address) => {
           done(err);
@@ -444,7 +475,10 @@ describe('Address Use Cases:', () => {
         }
       }
 
-      var graphNodes = injectDependencies(null, mockAddressDao, mockAddressNormalizerSao);
+      var graphNodes = injectDependencies({
+        addressDao: mockAddressDao,
+        addressNormalizeSao: mockAddressNormalizerSao
+      });
       var addressesController = graphNodes.addressesController;
       addressesController.show(params, (err, addressesData) => {
         expect(err).to.not.exist;
@@ -495,7 +529,10 @@ describe('Address Use Cases:', () => {
         }
       }
 
-      var graphNodes = injectDependencies(null, mockAddressDao, mockAddressNormalizerSao);
+      var graphNodes = injectDependencies({
+        addressDao: mockAddressDao,
+        addressNormalizeSao: mockAddressNormalizerSao
+      });
       var addressesController = graphNodes.addressesController;
       addressesController.show(params, (err, addressData) => {
         expect(err).to.not.exist;
@@ -557,7 +594,11 @@ describe('Address Use Cases:', () => {
         }
       }
 
-      var graphNodes = injectDependencies(mockCustomerDao, mockAddressDao, mockAddressNormalizerSao);
+      var graphNodes = injectDependencies({
+        customerDao: mockCustomerDao,
+        addressDao: mockAddressDao,
+        addressNormalizeSao: mockAddressNormalizerSao
+      });
       var addressesController = graphNodes.addressesController;
       addressesController.show(params, (err, addressData) => {
         expect(err).to.not.exist;
@@ -571,5 +612,134 @@ describe('Address Use Cases:', () => {
         done();
       });
     });
+  });
+});
+
+describe('Comment Use Cases:', () => {
+  describe('Get Comment by id', () => {
+    it('should return a Comment information given its id', (done) => {
+      var commentDataObject = {
+        id: "ec257390-06e3-4df9-9328-47fd9c21e3f2",
+        customer_ref: "fulanito@gmail.com",
+        content_ref: "00ccdcb5-f168-4436-9076-7f1f916d054c",
+        text: "Wow. This episode of Game of Thrones was absolutely amazing! " +
+          "Only 341,753 characters were killed. They are getting soft!",
+        deleted: false
+      };
+
+      var params = {
+        id: commentDataObject.id
+      }
+
+      var mockCommentDao = {
+        fetch: (key, callback) => {
+          expect(key.id).to.equal(commentDataObject.id);
+          callback(null, commentDataObject);
+        }
+      };
+
+      var graphNodes = injectDependencies({
+        commentDao: mockCommentDao
+      });
+      var commentsController = graphNodes.commentsController;
+      commentsController.show(params, (err, commentData) => {
+        expect(err).to.not.exist;
+        expect(commentData.id).to.equal(commentDataObject.id);
+        expect(commentData.customer_ref).to.equal(commentDataObject.customer_ref);
+        expect(commentData.content_ref).to.equal(commentDataObject.content_ref);
+        expect(commentData.text).to.equal(commentDataObject.text);
+        done();
+      });
+    });
+  });
+
+  describe('Save Comment', () => {
+    it('should save the Comment',
+      (done) => {
+        var params = {
+          customer_ref: "fulanito@gmail.com",
+          content_ref: "00ccdcb5-f168-4436-9076-7f1f916d054c",
+          text: "Wow. This episode of Game of Thrones was absolutely amazing! " +
+            "Only 341,753 characters were killed. They are getting softer!"
+        }
+
+        var mockCommentDao = {
+          persist: (key, newItem, callback) => {
+            callback(null, {
+              id: "ec257390-06e3-4df9-9328-47fd9c21e3f2",
+              customer_ref: "fulanito@gmail.com",
+              content_ref: "00ccdcb5-f168-4436-9076-7f1f916d054c",
+              text: "Wow. This episode of Game of Thrones was absolutely amazing! " +
+                "Only 341,753 characters were killed. They are getting soft!"
+            });
+          }
+        };
+
+        var graphNodes = injectDependencies({
+          commentDao: mockCommentDao
+        });
+        var commentsController = graphNodes.commentsController;
+        commentsController.create(params, (err, commentData) => {
+          expect(err).to.not.exist;
+          expect(commentData.customer_ref).to.equal(params.customer_ref);
+          expect(commentData.content_ref).to.equal(params.content_ref);
+          expect(commentData.text).to.equal(params.text);
+          done();
+        });
+      }
+    );
+  });
+
+  describe('Update Comment', () => {
+    it('should update an existing Comment',
+      (done) => {
+        var params = {
+          id: "ec257390-06e3-4df9-9328-47fd9c21e3f2",
+          text: "I hate it! It's the worst show ever!"
+        }
+
+        var initialCommentObject = {
+          id: "ec257390-06e3-4df9-9328-47fd9c21e3f2",
+          customer_ref: "fulanito@gmail.com",
+          content_ref: "00ccdcb5-f168-4436-9076-7f1f916d054c",
+          text: "Wow. This episode of Game of Thrones was absolutely amazing! " +
+            "Only 341,753 characters were killed. They are getting softer!"
+        };
+
+        var newCommentObject = {
+          id: initialCommentObject.id,
+          customer_ref: initialCommentObject.customer_ref,
+          content_ref: initialCommentObject.content_ref,
+          text: params.text
+        }
+
+        var mockCommentDao = {
+          fetch: (key, callback) => {
+            expect(key.id).to.equal(params.id);
+            callback(null, initialCommentObject);
+          },
+          update: (key, newItem, callback) => {
+            expect(key.id).to.equal(params.id);
+            callback(null, newCommentObject);
+          }
+          // persist : (key, item, callback) => {
+          //   callback(null, item);
+          // }
+        };
+
+        var graphNodes = injectDependencies({
+          commentDao: mockCommentDao
+        });
+        var commentsController = graphNodes.commentsController;
+        commentsController.update(params, (err, commentData) => {
+          expect(err).to.not.exist;
+          expect(commentData.id).to.equal(newCommentObject.id);
+          expect(commentData.customer_ref).to.equal(newCommentObject.customer_ref);
+          expect(commentData.content_ref).to.equal(newCommentObject.content_ref);
+          expect(commentData.text).to.equal(newCommentObject.text);
+          done();
+        });
+      }
+    );
   });
 });

@@ -187,7 +187,7 @@ paths:
         200:
           description: "200 response"
           schema:
-            $ref: "#/definitions/Empty"
+            $ref: "#/definitions/AddressDataResponse"
           headers:
             Access-Control-Allow-Origin:
               type: "string"
@@ -946,6 +946,409 @@ paths:
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         type: "mock"
+  /comments:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "content"
+        in: "query"
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/CommentsDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            500:
+              type: "string"
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n[\n#foreach($comment\
+                \ in $inputRoot)\n    {\n        \"id\" : \"$comment.id\",\n     \
+                \   \"text\" : \"$comment.text\",\n        \"customer\" : {\n    \
+                \        \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/customers/$comment.customer_ref\"\
+                \n        },\n        \"content\" : {\n            \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/contents/$comment.content_ref\"\
+                \n        },\n        \"self\" : {\n            \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/comments/$comment.id\"\
+                \n        }\n    }#if($foreach.hasNext),#end\n\n#end\n]"
+          \[500\].*:
+            statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
+            \ : \"fetch\",\n  \"comment\" : {\n    \"content_ref\" : \"$input.params('content')\"\
+            \n  }\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:commentsControllerTestAlpha/invocations"
+        passthroughBehavior: "when_no_templates"
+        httpMethod: "POST"
+        type: "aws"
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "CommentPostRequest"
+        required: true
+        schema:
+          $ref: "#/definitions/CommentPostRequest"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/CommentDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            500:
+              type: "string"
+        409:
+          description: "409 response"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            404:
+              type: "string"
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"id\"\
+                \ : \"$inputRoot.id\",\n  \"text\" : \"$inputRoot.text\",\n  \"customer\"\
+                \ : {\n    \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/customers/$inputRoot.customer\"\
+                \n  },\n  \"content\" : {\n    \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/contents/$inputRoot.content\"\
+                \n  },\n  \"self\" : {\n    \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/comments/$inputRoot.id\"\
+                \n  }\n}"
+          \[409\].*:
+            statusCode: "409"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+          \[500\].*:
+            statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+          \[400\].*:
+            statusCode: "400"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
+            \ : \"create\",\n  \"comment\" : {\n    \"text\" : \"$inputRoot.text\"\
+            ,\n    \"customer_ref\" : \"$inputRoot.customer\",\n    \"content_ref\"\
+            \ : \"$inputRoot.content\"\n  }\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:commentsControllerTestAlpha/invocations"
+        passthroughBehavior: "when_no_templates"
+        httpMethod: "POST"
+        type: "aws"
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'POST,GET,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /comments/{id}:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/CommentDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            500:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            404:
+              type: "string"
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
+        responses:
+          \[404\].*:
+            statusCode: "404"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"id\"\
+                \ : \"$inputRoot.id\",\n  \"text\" : \"$inputRoot.text\",\n  \"customer\"\
+                \ : {\n    \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/customers/$inputRoot.customer\"\
+                \n  },\n  \"content\" : {\n    \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/contents/$inputRoot.content\"\
+                \n  },\n  \"self\" : {\n    \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/comments/$inputRoot.id\"\
+                \n  }\n}"
+          \[500\].*:
+            statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+          \[400\].*:
+            statusCode: "400"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\n    \"operation\" : \"fetch\",\n    \"id\": \"$input.params('id')\"\
+            \ \n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:commentsControllerTestAlpha/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        type: "aws"
+    put:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "CommentPutRequest"
+        required: true
+        schema:
+          $ref: "#/definitions/CommentPutRequest"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/CommentDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            500:
+              type: "string"
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"id\"\
+                \ : \"$inputRoot.id\",\n  \"text\" : \"$inputRoot.text\",\n  \"customer\"\
+                \ : {\n    \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/customers/$inputRoot.customer\"\
+                \n  },\n  \"content\" : {\n    \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/contents/$inputRoot.content\"\
+                \n  },\n  \"self\" : {\n    \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/comments/$inputRoot.id\"\
+                \n  }\n}"
+          \[500\].*:
+            statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+          \[400\].*:
+            statusCode: "400"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
+            \ : \"update\",\n  \"id\" : \"$input.params('id')\",\n  \"comment\" :\
+            \ {\n    \"text\" : \"$inputRoot.text\",\n    \"customer_ref\" : \"$inputRoot.customer\"\
+            ,\n    \"content_ref\" : \"$inputRoot.content\"\n  }\n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:commentsControllerTestAlpha/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        type: "aws"
+    delete:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/CommentDataResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        400:
+          description: "400 response"
+          headers:
+            400:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        500:
+          description: "500 response"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            500:
+              type: "string"
+        404:
+          description: "404 response"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            404:
+              type: "string"
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
+        responses:
+          \[404\].*:
+            statusCode: "404"
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"id\"\
+                \ : \"$inputRoot.id\",\n  \"text\" : \"$inputRoot.text\",\n  \"customer\"\
+                \ : {\n    \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/customers/$inputRoot.customer\"\
+                \n  },\n  \"content\" : {\n    \"href\" : \"https://j3z4xwt1ch.execute-api.us-west-2.amazonaws.com/prod/contents/$inputRoot.content\"\
+                \n  }\n}"
+          \[500\].*:
+            statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+          \[400\].*:
+            statusCode: "400"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\n    \"operation\" : \"delete\",\n    \"id\": \"$input.params('id')\"\
+            \ \n}"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:commentsControllerTestAlpha/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        type: "aws"
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::837747084991:role/apiGatewayToLambda"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,OPTIONS,PUT'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
 definitions:
   Empty:
     title: "Empty Schema"
@@ -1004,6 +1407,35 @@ definitions:
   AddressState:
     title: "State"
     description: "State abbreviated to two letters (for example, NY, CA, IL...)"
+    type: "string"
+
+  CommentId:
+    title: "Id"
+    description: "UUID"
+    type: "string"
+  CommentCustomer:
+    title: "Customer"
+    type: "object"
+    properties:
+      href:
+        description: "Absolute URL pointing to this comments's customer"
+        type: "string"
+  CommentCustomerRef:
+    title: "Customer email"
+    type: "string"
+  CommentContent:
+    title: "Content"
+    type: "object"
+    properties:
+      href:
+        description: "Absolute URL pointing to this comments's content"
+        type: "string"
+  CommentContentRef:
+    title: "Content id"
+    type: "string"
+  CommentText:
+    title: "Text"
+    description: "Text content"
     type: "string"
 
   AddressDataResponse:
@@ -1142,3 +1574,50 @@ definitions:
         $ref: "#/definitions/CustomerLastName"
       phone_number:
         $ref: "#/definitions/CustomerPhoneNumber"
+
+  CommentDataResponse:
+    title: "Comment"
+    type: "object"
+    required:
+    - "id"
+    - "customer"
+    - "content"
+    - "text"
+    properties:
+      id:
+        $ref: "#/definitions/CommentId"
+      customer:
+        $ref: "#/definitions/CommentCustomer"
+      content:
+        $ref: "#/definitions/CommentContent"
+      text:
+        $ref: "#/definitions/CommentText"
+      self:
+        $ref: "#/definitions/Self"
+  CommentsDataResponse:
+    title: "Array of Comments"
+    type: "array"
+    items: 
+      $ref: "#/definitions/CommentDataResponse"
+  CommentPostRequest:
+    title: "New Comment information"
+    description: "All information about a comment"
+    type: "object"
+    required:
+    - "customer"
+    - "content"
+    - "text"
+    properties:
+      customer:
+        $ref: "#/definitions/CommentCustomerRef"
+      content:
+        $ref: "#/definitions/CommentContentRef"
+      text:
+        $ref: "#/definitions/CommentText"
+  CommentPutRequest:
+    title: "Comment information to update"
+    description: "Comment information that wants to be updated"
+    type: "object"
+    properties:
+      text:
+        $ref: "#/definitions/CommentText"

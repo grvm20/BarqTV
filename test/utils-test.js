@@ -44,4 +44,122 @@ describe('Utils', () => {
       expect(Utils.isAlphabeticString("")).to.be.false;
     });
   });
+
+  describe ('#isUuidString()', () => {
+    it('should return true when the string is an UUID (RFC4122)', () => {
+      expect(Utils.isUuidString(
+        "48b579e3-f101-4b5e-806a-48e9b7caea6e")).to.be.true;
+      expect(Utils.isUuidString(
+        "48B579E3-F101-4B5E-806A-48E9B7CAEA6E")).to.be.true;
+      expect(Utils.isUuidString(
+        "8b6d7391-abc6-4641-8692-a5d74658c2f9")).to.be.true;
+      expect(Utils.isUuidString(
+        "9672bfcd-8adb-42d9-b7d4-3e1d6ccd8796")).to.be.true;
+      expect(Utils.isUuidString(
+        "454F24AC-F7C6-499D-96AC-A2F7A4862A33")).to.be.true;
+      expect(Utils.isUuidString(
+        "FF288D55-5F01-48BF-A18C-6154B87AB68C")).to.be.true;
+    });
+
+    it('should return false otherwise', () => {
+      expect(Utils.isUuidString(
+        "email@domain.com")).to.be.false;
+      expect(Utils.isUuidString(
+        "this is simply a normal string")).to.be.false;
+      expect(Utils.isUuidString(
+        "8b6d7391-abc6-4641-8692-a5d74658c2f")).to.be.false;
+      expect(Utils.isUuidString(
+        "9672bfcd-8adb-42d9-b7d4-3e1d6ccg8796")).to.be.false;
+      expect(Utils.isUuidString(
+        "")).to.be.false;
+      expect(Utils.isUuidString(
+        "¢¢®œå∫ƒß#¢å∑")).to.be.false;
+    });
+  });
+
+  describe ('#isEmailString()', () => {
+    it('should return true when the string is an email', () => {
+      expect(Utils.isEmailString(
+        "test@domain.com")).to.be.true;
+      expect(Utils.isEmailString(
+        "this.is.still.an.email@mydomain.es")).to.be.true;
+      expect(Utils.isEmailString(
+        "plus+symbols+count@yeap.com")).to.be.true;
+      expect(Utils.isEmailString(
+        "domains-with-hypens@count.yes")).to.be.true;
+      expect(Utils.isEmailString(
+        "CASEdoesntMATTER@yahoo.es")).to.be.true;
+      expect(Utils.isEmailString(
+        "multiletter@domain.bigstuffhere")).to.be.true;
+    });
+
+    it('should return false otherwise', () => {
+      expect(Utils.isEmailString(
+        "email@@domain.com")).to.be.false;
+      expect(Utils.isEmailString(
+        "this is simply a normal string")).to.be.false;
+      expect(Utils.isEmailString(
+        "email(e@domain.com")).to.be.false;
+      expect(Utils.isEmailString(
+        "09987987@8129391.12312")).to.be.false;
+      expect(Utils.isEmailString(
+        "")).to.be.false;
+      expect(Utils.isEmailString(
+        "¢¢®œå∫ƒß#¢å∑")).to.be.false;
+    });
+  });
+
+  describe ('#generateUuid()', () => {
+    it('should return an UUID (RFC4122) string', () => {
+      expect(Utils.isUuidString(Utils.generateUuid())).to.be.true;
+      expect(Utils.isUuidString(Utils.generateUuid())).to.be.true;
+      expect(Utils.isUuidString(Utils.generateUuid())).to.be.true;
+      expect(Utils.isUuidString(Utils.generateUuid())).to.be.true;
+      expect(Utils.isUuidString(Utils.generateUuid())).to.be.true;
+      expect(Utils.isUuidString(Utils.generateUuid())).to.be.true;
+    });
+  });
+
+  describe ('#omit()', () => {
+    it('should return a copy of the object without the filtered key', () => {
+      var someObject = {
+        a: 0,
+        b: 1,
+        c: 2
+      }
+      expect(Utils.omit(someObject, 'a')['a']).to.not.exist;
+      expect(Utils.omit(someObject, 'a')['b']).to.equal(1);
+      expect(Utils.omit(someObject, 'a')['c']).to.equal(2);
+    });
+
+    it('should return a copy of the object without the filtered keys', () => {
+      var someObject = {
+        a: 0,
+        b: 1,
+        c: 2
+      }
+      expect(Utils.omit(someObject, ['a', 'c'])['a']).to.not.exist;
+      expect(Utils.omit(someObject, ['a', 'c'])['b']).to.equal(1);
+      expect(Utils.omit(someObject, ['a', 'c'])['c']).to.not.exist;
+    });
+  });
+
+  describe ('#isArray()', () => {
+    it('should return a return true when the object is an array', () => {
+      expect(Utils.isArray([])).to.be.true;
+      expect(Utils.isArray([1,2,3,4])).to.be.true;
+      expect(Utils.isArray([null])).to.be.true;
+      expect(Utils.isArray([undefined])).to.be.true;
+      expect(Utils.isArray([1,,1])).to.be.true;
+      expect(Utils.isArray(["aasd",,"olda",""])).to.be.true;
+    });
+
+    it('should return false otherwise', () => {
+      expect(Utils.isArray("hi")).to.be.false;
+      expect(Utils.isArray({a: 1, b: 2})).to.be.false;
+      expect(Utils.isArray({})).to.be.false;
+      expect(Utils.isArray(15)).to.be.false;
+      expect(Utils.isArray(0.4)).to.be.false;
+    });
+  });
 });

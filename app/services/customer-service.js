@@ -148,7 +148,7 @@ module.exports = class CustomerService {
         return callback(err);
       }
 
-      console.log("Successfully fetched Customer with id: " + customer.id);
+      console.log("Successfully deleted Customer with id: " + customer.id);
       callback(null, customer);
     });
   }

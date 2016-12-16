@@ -71,6 +71,33 @@ class Utils {
     var doesNotContainInvalidChars = !/[\{\}\(\)_\$#"'@\|!\?\+\*%<>/]/.test(string);
     return isNotEmpty && doesNotContainDigits && doesNotContainInvalidChars;
   }
+
+  static isUuidString(string) {
+    return Utils.VALID_UUID_REGEX.test(string);
+  }
+
+  static isEmailString(string) {
+    return Utils.VALID_EMAIL_REGEX.test(string);
+  }
+
+  static generateUuid() {
+    // This is pseudo UUID. No clean way of getting UUID in JS
+    var id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      var r = Math.random() * 16 | 0,
+          v = (c == 'x') ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+
+    return id;
+  }
+
+  static omit() {
+    return _.omit.apply(_, arguments);
+  }
+
+  static isArray() {
+    return _.isArray.apply(_, arguments);
+  }
 }
 // Class constants.
 Utils.CONTAINS_DIGIT_REGEX = /.*[0-9].*/;
