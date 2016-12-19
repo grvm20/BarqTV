@@ -109,6 +109,7 @@ module.exports = class CustomersController {
   }
 
   buildCustomerFromParams(params, callback) {
+    if (params.customer) params = params.customer;
     var customerAttributes = this.customerSerializer.deserialize(params);
     console.log(sprintf("Customer attributes received %s.",
       JSON.stringify(customerAttributes)));

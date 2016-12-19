@@ -157,6 +157,15 @@ function extractOperationAndParams(event, callback) {
     var operation = event.operation;
     var params = Utils.omit(event, 'operation');
     callback(null, operation, params);
+  } else if (event.Records) {
+    var records = event.Records;
+    for (let record of event.Records) {
+      if (record.Sns) {
+        console.log("Received SNS event", record.Sns.Message);
+        var message = JSON.parse(record.Sns.Message);
+        extractOperationAndParams(message, callback);
+      }
+    }
   } else {
     callback(new InvalidInputException('An operation has to be specified.'));
   }
