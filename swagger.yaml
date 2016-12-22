@@ -1710,6 +1710,10 @@ paths:
       produces:
       - "application/json"
       parameters:
+      - name: "cid"
+        in: "query"
+        required: true
+        type: "string"
       - in: "body"
         name: "PropertyPostRequest"
         required: true
@@ -1981,6 +1985,10 @@ paths:
       produces:
       - "application/json"
       parameters:
+      - name: "pid"
+        in: "query"
+        required: true
+        type: "string"
       - in: "body"
         name: "FranchisePostRequest"
         required: true
@@ -2274,6 +2282,10 @@ paths:
       produces:
       - "application/json"
       parameters:
+      - name: "fid"
+        in: "query"
+        required: true
+        type: "string"
       - in: "body"
         name: "SeriesPostRequest"
         required: true
@@ -2567,6 +2579,10 @@ paths:
       produces:
       - "application/json"
       parameters:
+      - name: "eid"
+        in: "query"
+        required: true
+        type: "string"
       - in: "body"
         name: "EpisodePostRequest"
         required: true
@@ -2632,8 +2648,8 @@ paths:
         requestTemplates:
           application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"operation\"\
             \ : \"create\",\n  \"type\" : \"episodes\",\n  \"content\" : {\n    \"\
-            name\" : \"$inputRoot.name\",\n    \"sid\" : \"$input.params('sid')\"\n\
-            \  }\n}"
+            name\" : \"$inputRoot.name\",\n    \"url\" : \"$inputRoot.url\",\n   \
+            \ \"sid\" : \"$input.params('sid')\"\n  }\n}"
         uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:837747084991:function:Content/invocations"
         passthroughBehavior: "when_no_match"
         httpMethod: "POST"
