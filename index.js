@@ -8,6 +8,7 @@ const HTTPS = require('https');
 
 // Internal imports.
 const Utils = require(`${APP_PATH}/utilities/utils`);
+const Logger = require(`${APP_PATH}/utilities/logger`);
 const InvalidInputException = require(`${APP_PATH}/exceptions/` +
   `invalid-input-exception`);
 
@@ -28,7 +29,10 @@ const CommentService = require(`${APP_PATH}/services/comment-service`);
 const CommentSerializer = require(`${APP_PATH}/views/comment-serializer`);
 const CommentsController = require(`${APP_PATH}/controllers/comments-controller`);
 
+const ObjectNotFoundException = require(`${APP_PATH}/exceptions/object-not-found-exception`);
+
 // Constants.
+const RESPONSES_TABLE_NAME = 'responses';
 const CUSTOMERS_TABLE_NAME = 'customers';
 const ADDRESSES_TABLE_NAME = 'addresses';
 const COMMENTS_TABLE_NAME = 'comments';
@@ -39,6 +43,7 @@ const ADDRESS_SAO_AUTH_ID_TOKEN = '0gaJxoGO4b3btMZf7X3v';
 
 // Singleton variables.
 var dynamoDocClient;
+var responsesDao;
 
 var customerDao;
 var customerService;
@@ -68,6 +73,9 @@ const injectDependencies = (customObjects) => {
   dynamoDocClient = new AWS.DynamoDB.DocumentClient();
 
   // DAOs
+  responsesDao = customObjects.responsesDao ? customObjects.responsesDao :
+    new Dao(dynamoDocClient, RESPONSES_TABLE_NAME);
+
   customerDao = customObjects.customerDao ? customObjects.customerDao :
     new Dao(dynamoDocClient, CUSTOMERS_TABLE_NAME);
 
@@ -132,6 +140,8 @@ const injectDependencies = (customObjects) => {
 
   console.log('Dependencies injected.');
   return {
+    responsesDao,
+
     addressDao,
     addressesController,
     addressSao,
@@ -151,12 +161,39 @@ const injectDependencies = (customObjects) => {
 }
 exports.injectDependencies = injectDependencies;
 
+function storeResponse (dao, responseId, callback) {
+  return (responseErr, responseBody) => {
+    var key = {id: responseId};
+    var responseFields = {
+      id: responseId,
+      status: 'COMPLETED',
+      response: responseErr ? responseErr : responseBody
+    };
+    var finalCallback = (err, item) => {
+      if (err) Logger.error(err);
+      else Logger.log(`Succesfully persisted result ${responseId}: ${item}`);
+      return callback(responseErr, responseBody);
+    };
+
+    dao.fetch(key, (err, item) => {
+      if (err instanceof ObjectNotFoundException) {
+        // Response has not been created yet.
+        dao.persist(key, responseFields, finalCallback);
+      } else {
+        // Response has been created already, so update it.
+        dao.update(key, responseFields, finalCallback);
+      }
+    })
+  };
+}
+
 function extractOperationAndParams(event, callback) {
   console.log('Received event:`', JSON.stringify(event, null, 2));
   if (event.operation) {
     var operation = event.operation;
-    var params = Utils.omit(event, 'operation');
-    callback(null, operation, params);
+    var responseId = event.response_id;
+    var params = Utils.omit(event, ['operation', 'response_id']);
+    callback(null, operation, params, responseId);
   } else if (event.Records) {
     var records = event.Records;
     for (let record of event.Records) {
@@ -174,7 +211,9 @@ function extractOperationAndParams(event, callback) {
 function callController(event, controllerName, callback) {
   var objectsGraph = injectDependencies();
   var controller = objectsGraph[controllerName];
-  extractOperationAndParams(event, (err, operation, params) => {
+  var responsesDao = objectsGraph.responsesDao;
+  extractOperationAndParams(event, (err, operation, params, responseId) => {
+    if (responseId) callback = storeResponse(responsesDao, responseId, callback);
     switch (operation) {
       case 'fetchAll':
       case 'fetch':
@@ -191,7 +230,7 @@ function callController(event, controllerName, callback) {
         break;
       default:
         mapping.sendHttpResponse(callback)(new InvalidInputException(
-          'Invalid operation "${operation}" given.'));
+          `Invalid operation "${operation}" given.`));
     }
   });
 }
