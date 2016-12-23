@@ -55,8 +55,9 @@ module.exports = {
         }
 
         callback(errorMessage);
+      } else {
+        callback(null, body);
       }
-      callback(null, body);
     };
   }
 };

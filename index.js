@@ -9,8 +9,7 @@ const HTTPS = require('https');
 // Internal imports.
 const Utils = require(`${APP_PATH}/utilities/utils`);
 const Logger = require(`${APP_PATH}/utilities/logger`);
-const InvalidInputException = require(`${APP_PATH}/exceptions/` +
-  `invalid-input-exception`);
+const SnsNotifier = require(`${APP_PATH}/services/sns-notifier`);
 
 const Dao = require(`${APP_PATH}/services/dao/dao`);
 const AddressSao = require(`${APP_PATH}/services/address-sao`);
@@ -29,6 +28,8 @@ const CommentService = require(`${APP_PATH}/services/comment-service`);
 const CommentSerializer = require(`${APP_PATH}/views/comment-serializer`);
 const CommentsController = require(`${APP_PATH}/controllers/comments-controller`);
 
+const InvalidInputException = require(`${APP_PATH}/exceptions/` +
+  `invalid-input-exception`);
 const ObjectNotFoundException = require(`${APP_PATH}/exceptions/object-not-found-exception`);
 
 // Constants.
@@ -161,13 +162,40 @@ const injectDependencies = (customObjects) => {
 }
 exports.injectDependencies = injectDependencies;
 
-function storeResponse (dao, responseId, callback) {
+// TODO: decide if the notifications parts should be managed by the controllers.
+function sendNotification(controllerName, operation, callback) {
+  return (err, result) => {
+    if (err) {
+      SnsNotifier.sendError();
+    } else {
+      switch(controllerName) {
+        case 'customersController':
+          if (operation === 'create') {
+            SnsNotifier.sendCustomerCreated();
+          } else if (operation === 'delete') {
+            SnsNotifier.sendCustomerDeleted();
+          } 
+          break;
+        case 'commentsController':
+          if (operation === 'create') {
+            SnsNotifier.sendCommentCreated();
+          }
+          break;
+        default:
+          Logger.log(`Unknown controller ${controllerName}`);
+      }
+    }
+    callback(err, result);
+  };
+}
+
+function storeResponse(dao, responseId, callback) {
   return (responseErr, responseBody) => {
     var key = {id: responseId};
     var responseFields = {
       id: responseId,
       status: 'COMPLETED',
-      response: responseErr ? responseErr : responseBody
+      response_content: responseErr ? responseErr : responseBody
     };
     var finalCallback = (err, item) => {
       if (err) Logger.error(err);
@@ -213,6 +241,7 @@ function callController(event, controllerName, callback) {
   var controller = objectsGraph[controllerName];
   var responsesDao = objectsGraph.responsesDao;
   extractOperationAndParams(event, (err, operation, params, responseId) => {
+    callback = sendNotification(controllerName, operation, callback);
     if (responseId) callback = storeResponse(responsesDao, responseId, callback);
     switch (operation) {
       case 'fetchAll':
